@@ -17,44 +17,44 @@
 			<!-- Navigation Menu -->
 			<nav class="p-4">
 				<RouterLink to="/dashboard" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-green-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Principal
 				</RouterLink>
 
 				<RouterLink to="/dashboard/areas" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-green-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Áreas
 				</RouterLink>
 				<RouterLink to="/dashboard/bienes" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-red-900 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Bienes
 				</RouterLink>
 				<RouterLink to="/dashboard/auditorias" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-red-900 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Auditorías
 				</RouterLink>
 				<RouterLink to="/dashboard/gestores" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-orange-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Gestores
 				</RouterLink>
 				<RouterLink to="/dashboard/resguardantes" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-orange-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Resguardantes
 				</RouterLink>
 				<RouterLink to="/dashboard/roles" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-900 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Roles
 				</RouterLink>
 				<RouterLink to="/dashboard/solicitudes" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Solicitudes
 				</RouterLink>
 				<RouterLink to="/dashboard/workcenter" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-red-900 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Centro de Trabajo
 				</RouterLink>
 				<RouterLink to="/dashboard/mantenimiento" @click="closeSidebar"
-					class="block px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					class="block px-4 py-3 mb-2 text-blue-900 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					Mantenimiento
 				</RouterLink>
 			</nav>

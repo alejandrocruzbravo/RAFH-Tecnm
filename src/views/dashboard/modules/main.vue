@@ -39,6 +39,8 @@
 								<img src="/icons/bien.png" alt="Bien" class="w-4 h-4">
 								<h2 class="ml-3 font-semibold">{{ dashboardData.ultimo_bien_registrado.nombre }}</h2>
 							</a>
+							<label class="text-gray-600 dark:text-gray-400 text-xs">Cantidad: {{
+								dashboardData.ultimo_bien_registrado.cantidad }}</label>
 						</div>
 					</div>
 
