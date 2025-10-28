@@ -62,7 +62,7 @@
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Gestor</h2>
 					<button @click="showNewGestorModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-				<div class="p-6 space-y-4">
+				<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
 						<input v-model="newGestorData.nombre" type="text" placeholder="Nombre" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -72,12 +72,30 @@
 						<input v-model="newGestorData.apellidos" type="text" placeholder="Apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo Electrónico</label>
+						<input v-model="newGestorData.correo" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+						<input v-model="newGestorData.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto/Cargo</label>
 						<select v-model="newGestorData.puesto" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option>Seleccione puesto/cargo</option>
 							<option>Gestor Superior</option>
 							<option>Gestor Junior</option>
 							<option>Coordinador</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
+						<select v-model="newGestorData.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option value="">Seleccionar Rol</option>
+							<option>Administrador</option>
+							<option>Gestor Superior</option>
+							<option>Gestor</option>
+							<option>Jefe de Departamento</option>
 						</select>
 					</div>
 					<div>
@@ -99,7 +117,7 @@
 
 		<!-- Edit Gestor Modal -->
 		<div v-if="showEditGestorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
+			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Gestor</h2>
 					<button @click="showEditGestorModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
@@ -114,11 +132,28 @@
 						<input v-model="editingGestor.apellidos" type="text" placeholder="Apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo Electrónico</label>
+						<input v-model="editingGestor.correo" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+						<input v-model="editingGestor.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto/Cargo</label>
 						<select v-model="editingGestor.puesto" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option>Gestor Superior</option>
 							<option>Gestor Junior</option>
 							<option>Coordinador</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
+						<select v-model="editingGestor.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option>Administrador</option>
+							<option>Gestor Superior</option>
+							<option>Gestor</option>
+							<option>Jefe de Departamento</option>
 						</select>
 					</div>
 					<div>
@@ -194,27 +229,33 @@ const editingIndex = ref(null)
 const newGestorData = ref({
 	nombre: '',
 	apellidos: '',
+	correo: '',
+	password: '',
 	puesto: '',
+	rol: '',
 	area: '',
 })
 
 const editingGestor = ref({
 	nombre: '',
 	apellidos: '',
+	correo: '',
+	password: '',
 	puesto: '',
+	rol: '',
 	area: '',
 })
 
 const openNewGestorModal = () => {
-	newGestorData.value = { nombre: '', apellidos: '', puesto: '', area: '' }
+	newGestorData.value = { nombre: '', apellidos: '', correo: '', password: '', puesto: '', rol: '', area: '' }
 	showNewGestorModal.value = true
 }
 
 const saveNewGestor = () => {
-	if (newGestorData.value.nombre && newGestorData.value.apellidos && newGestorData.value.puesto && newGestorData.value.area) {
+	if (newGestorData.value.nombre && newGestorData.value.apellidos && newGestorData.value.correo && newGestorData.value.password && newGestorData.value.puesto && newGestorData.value.rol && newGestorData.value.area) {
 		gestores.value.push({ ...newGestorData.value })
 		showNewGestorModal.value = false
-		newGestorData.value = { nombre: '', apellidos: '', puesto: '', area: '' }
+		newGestorData.value = { nombre: '', apellidos: '', correo: '', password: '', puesto: '', rol: '', area: '' }
 	}
 }
 

@@ -62,7 +62,7 @@
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Resguardante</h2>
 					<button @click="showNewResguardanteModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-				<div class="p-6 space-y-4">
+				<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
 						<input v-model="newResguardanteData.nombre" type="text" placeholder="Nombre" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -72,8 +72,26 @@
 						<input v-model="newResguardanteData.apellidos" type="text" placeholder="Apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
-						<input v-model="newResguardanteData.correo" type="email" placeholder="Correo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo Electrónico</label>
+						<input v-model="newResguardanteData.correoElectronico" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+						<input v-model="newResguardanteData.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo (Área)</label>
+						<input v-model="newResguardanteData.correo" type="email" placeholder="Correo de área" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
+						<select v-model="newResguardanteData.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option value="">Seleccionar Rol</option>
+							<option>Administrador</option>
+							<option>Resguardante Senior</option>
+							<option>Resguardante</option>
+							<option>Jefe de Departamento</option>
+						</select>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
@@ -94,7 +112,7 @@
 
 		<!-- Edit Resguardante Modal -->
 		<div v-if="showEditResguardanteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
+			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Resguardante</h2>
 					<button @click="showEditResguardanteModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
@@ -109,8 +127,25 @@
 						<input v-model="editingResguardante.apellidos" type="text" placeholder="Apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
-						<input v-model="editingResguardante.correo" type="email" placeholder="Correo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo Electrónico</label>
+						<input v-model="editingResguardante.correoElectronico" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+						<input v-model="editingResguardante.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo (Área)</label>
+						<input v-model="editingResguardante.correo" type="email" placeholder="Correo de área" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
+						<select v-model="editingResguardante.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option>Administrador</option>
+							<option>Resguardante Senior</option>
+							<option>Resguardante</option>
+							<option>Jefe de Departamento</option>
+						</select>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
@@ -185,27 +220,33 @@ const editingIndex = ref(null)
 const newResguardanteData = ref({
 	nombre: '',
 	apellidos: '',
+	correoElectronico: '',
+	password: '',
 	correo: '',
+	rol: '',
 	area: '',
 })
 
 const editingResguardante = ref({
 	nombre: '',
 	apellidos: '',
+	correoElectronico: '',
+	password: '',
 	correo: '',
+	rol: '',
 	area: '',
 })
 
 const openNewResguardanteModal = () => {
-	newResguardanteData.value = { nombre: '', apellidos: '', correo: '', area: '' }
+	newResguardanteData.value = { nombre: '', apellidos: '', correoElectronico: '', password: '', correo: '', rol: '', area: '' }
 	showNewResguardanteModal.value = true
 }
 
 const saveNewResguardante = () => {
-	if (newResguardanteData.value.nombre && newResguardanteData.value.apellidos && newResguardanteData.value.correo && newResguardanteData.value.area) {
+	if (newResguardanteData.value.nombre && newResguardanteData.value.apellidos && newResguardanteData.value.correoElectronico && newResguardanteData.value.password && newResguardanteData.value.correo && newResguardanteData.value.rol && newResguardanteData.value.area) {
 		resguardantes.value.push({ ...newResguardanteData.value })
 		showNewResguardanteModal.value = false
-		newResguardanteData.value = { nombre: '', apellidos: '', correo: '', area: '' }
+		newResguardanteData.value = { nombre: '', apellidos: '', correoElectronico: '', password: '', correo: '', rol: '', area: '' }
 	}
 }
 
