@@ -55,7 +55,7 @@
 				</div>
 				<div class="space-y-1 mb-4 text-sm">
 					<p class="text-gray-600 dark:text-gray-400">Responsable: {{ area.responsable &&
-						area.responsable.nombre ? area.responsable.nombre : 'No asignado' }}
+						area.responsable.res_nombre ? area.responsable.res_nombre : 'No asignado' }}
 					</p>
 					<p class="text-gray-600 dark:text-gray-400">Edificio: {{ area.edificio && area.edificio.nombre ?
 						area.edificio.nombre : 'No asignado' }}
@@ -120,7 +120,8 @@
 							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
 								<div class="font-medium text-gray-900 dark:text-white">{{ dept.dep_nombre }}</div>
 							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ dept.dep_responsable || 'Sin asignación' }}</td>
+							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ dept.dep_resposable || 
+								'Sin asignación' }}</td>
 							<td class="px-6 py-4 text-gray-600 dark:text-gray-400">{{ getAreaName(dept.id_area) }}</td>
 							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ dept.dep_correo_institucional ||
 								'Sin asignación' }}</td>
@@ -340,17 +341,20 @@
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción
-							(Opcional)</label>
-						<textarea v-model="newDepartmentData.descripcion" placeholder="Descripción del departamento"
-							rows="3"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
-					</div>
-					<div>
 						<label
 							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsable</label>
-						<input v-model="newDepartmentData.responsable" type="text" placeholder="Nombre del responsable"
+
+						<select v-model="newDepartmentData.responsable"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+							<option :value="null">Seleccionar un responsable</option>
+
+							<option v-if="jefesDepartamento.length === 0" disabled>-- No hay responsables --</option>
+
+							<option v-else v-for="r in jefesDepartamento" :key="r.id" :value="r.res_nombre">
+								{{ r.res_nombre }}
+							</option>
+						</select>
 					</div>
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
@@ -427,7 +431,6 @@
 							<option v-if="areasList.length === 0" disabled class="text-gray-400">
 								-- No hay áreas disponibles --
 							</option>
-
 							<option v-for="area in areasList.areas" :key="area.id" :value="area.id">
 								{{ area.area_nombre }}
 							</option>
@@ -435,10 +438,19 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre del
-							Responsable</label>
-						<input v-model="editingDepartment.responsable" type="text"
+						<label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsable</label>
+
+						<select v-model="editingDepartment.responsable"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+							<option :value="null" disabled>Seleccionar un responsable</option>
+							<option v-if="jefesDepartamento.length === 0" disabled>-- No hay responsables --</option>
+
+							<option v-else v-for="r in jefesDepartamento" :key="r.id" :value="r.res_nombre">
+								{{ r.res_nombre }}
+							</option>
+						</select>
 					</div>
 
 					<div>
@@ -447,16 +459,7 @@
 						<input v-model="editingDepartment.correo" type="email"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descripción
-							(Opcional)</label>
-						<textarea v-model="editingDepartment.descripcion" rows="3"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
-					</div>
-
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
 					<button @click="showEditDepartmentModal = false"
 						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
@@ -508,7 +511,7 @@
 							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay
 								responsables disponibles --</option>
 							<option v-else v-for="r in resguardantes" :key="r.id" :value="r.id">
-								{{ r.nombre }}
+								{{ r.res_nombre }}
 							</option>
 						</select>
 					</div>
@@ -577,7 +580,7 @@
 							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay
 								responsables disponibles --</option>
 							<option v-else v-for="r in resguardantes" :key="r.id" :value="r.id">
-								{{ r.nombre }}
+								{{ r.res_nombre }}
 							</option>
 						</select>
 					</div>
@@ -605,7 +608,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Modal de nuevo Edificio-->
 		<div v-if="showNewBuildingModal"
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -644,7 +646,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Modal de editar Edificio-->
 		<div v-if="showEditBuildingModal && editingBuilding"
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -685,7 +686,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Modal de nueva Oficina-->
 		<div v-if="showNewOficinaModal"
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -738,7 +738,6 @@
 				</div>
 			</div>
 		</div>
-
 		<!-- Modal de editar oficina -->
 		<div v-if="showEditOficinaModal && editingOficina"
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -890,11 +889,11 @@ const areasList = ref([])
 
 //Estados para departamentos
 const departments = ref([])
+const jefesDepartamento = ref([])
 const showNewDepartmentModal = ref(false)
 const newDepartmentData = ref({
 	nombre: '',
-	descripcion: '',
-	responsable: '',
+	responsable: null,
 	correo: '',
 	id_area: null
 })
@@ -974,18 +973,17 @@ const fetchAllData = async () => {
 		// Asignamos los datos de las áreas
 		const fetchedAreas = await areasRes.json()
 		areas.value = assignRandomColors(fetchedAreas)
-
 		// Asignamos los datos de los dropdowns (según tu JSON)
 		const optionsData = await optionsRes.json()
-
 		departments.value = await departmentsRes.json()
 		buildingsData.value = await buildingsRes.json()
 		areasList.value = await areasListRes.json()
 		oficinasData.value = await oficinasRes.json()
 
 		resguardantes.value = optionsData.responsables || []
+		jefesDepartamento.value = areasList.value.responsables || []
 		buildings.value = optionsData.edificios || []
-		
+
 	} catch (e) {
 		console.error('Error al cargar datos:', e)
 		error.value = e
@@ -1050,7 +1048,7 @@ const openNewAreaModal = () => {
 const saveNewArea = async () => {
 	newAreaError.value = null
 	if (!newAreaData.value.area_nombre || !newAreaData.value.area_codigo) {
-		newAreaError.value = 'El Nombre y el Código son obligatorios.' 
+		newAreaError.value = 'El Nombre y el Código son obligatorios.'
 		return
 	}
 
@@ -1232,8 +1230,7 @@ const fetchDepartments = async () => {
 const openNewDepartmentModal = () => {
 	newDepartmentData.value = {
 		name: '',
-		descripcion: '',
-		responsable: '',
+		responsable: null,
 		correo: '',
 		id_area: null
 	}
@@ -1256,7 +1253,6 @@ const saveNewDepartment = async () => {
 		// Asumo que tu API espera estos campos
 		const payload = {
 			dep_nombre: newDepartmentData.value.name,
-			dep_descripcion: newDepartmentData.value.descripcion,
 			dep_resposable: newDepartmentData.value.responsable,
 			dep_correo_institucional: newDepartmentData.value.correo,
 			id_area: newDepartmentData.value.id_area
@@ -1290,7 +1286,6 @@ const openEditDepartmentModal = (department) => {
 	editingDepartment.value = {
 		id: department.id, // ¡Muy importante guardar el ID!
 		name: department.dep_nombre,
-		descripcion: department.dep_descripcion,
 		responsable: department.dep_responsable,
 		correo: department.dep_correo_institucional,
 		id_area: department.id_area
@@ -1309,7 +1304,7 @@ const saveEditDepartment = async () => {
 	editDepartmentError.value = null // Limpia error anterior
 
 	// Validación (similar a la de crear)
-	if (!editingDepartment.value.name || !editingDepartment.value.responsable || !editingDepartment.value.correo || !editingDepartment.value.id_area) {
+	if (!editingDepartment.value.name || !editingDepartment.value.correo || !editingDepartment.value.id_area) {
 		editDepartmentError.value = 'Nombre, Responsable, Correo y Área son obligatorios.'
 		return
 	}
@@ -1319,8 +1314,7 @@ const saveEditDepartment = async () => {
 		// Mapeamos los datos del formulario de vuelta al formato de la API
 		const payload = {
 			dep_nombre: editingDepartment.value.name,
-			dep_descripcion: editingDepartment.value.descripcion,
-			dep_responsable: editingDepartment.value.responsable,
+			dep_resposable: editingDepartment.value.responsable,
 			dep_correo_institucional: editingDepartment.value.correo,
 			id_area: editingDepartment.value.id_area
 		}
@@ -1614,7 +1608,6 @@ const fetchFormOptions = async () => {
 		}
 
 		const optionsData = await optionsRes.json();
-
 		// Actualizamos los 'ref's que usan los dropdowns
 		resguardantes.value = optionsData.responsables || [];
 		buildings.value = optionsData.edificios || [];
