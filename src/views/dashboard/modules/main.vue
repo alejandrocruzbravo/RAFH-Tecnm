@@ -101,7 +101,7 @@
 										Resguardante responsable</th>
 									<th class="text-left py-3 px-2 font-semibold text-gray-900 dark:text-white">Bien
 										involucrado</th>
-									<th class="text-left py-3 px-2 font-semibold text-gray-900 dark:text-white">Área
+									<th class="text-left py-3 px-2 font-semibold text-gray-900 dark:text-white">Departamento
 									</th>
 								</tr>
 							</thead>

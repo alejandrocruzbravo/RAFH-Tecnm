@@ -25,7 +25,6 @@ export const getAuthToken = () => {
 // Función para hacer peticiones autenticadas
 export const authenticatedFetch = async (url, options = {}) => {
     const token = getAuthToken()
-    
     const defaultOptions = {
         headers: {
             ...API_CONFIG.DEFAULT_HEADERS,
