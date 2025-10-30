@@ -413,7 +413,7 @@
 							<option :value="null">Seleccionar responsable</option>
 							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay responsables disponibles --</option>
 							<option v-else v-for="r in resguardantes" :key="r.id" :value="r.id">
-								{{ r.res_nombre }}
+								{{ r.res_nombre}}
 							</option>
 						</select>
 					</div>
