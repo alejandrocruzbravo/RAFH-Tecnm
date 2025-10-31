@@ -8,14 +8,11 @@
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 			<div>
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por usuario</label>
-				<div class="flex gap-2">
-					<input v-model="searchUser" type="text" placeholder="Usuario" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button @click="applyFilters" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-				</div>
+				<input v-model="searchUser" type="text" placeholder="Usuario" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 			<div>
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por tipo de usuario</label>
-				<select v-model="filterUserType" @change="applyFilters" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				<select v-model="filterUserType" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					<option value="">Sin filtro</option>
 					<option value="Gestor">Gestor</option>
 					<option value="Resguardante">Resguardante</option>
@@ -23,7 +20,7 @@
 			</div>
 			<div>
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por rol</label>
-				<select v-model="filterRole" @change="applyFilters" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				<select v-model="filterRole" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					<option value="">Sin filtro</option>
 					<option value="Administrador">Administrador</option>
 					<option value="Gestor superior">Gestor superior</option>
@@ -32,7 +29,7 @@
 			</div>
 			<div>
 				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por acción</label>
-				<select v-model="filterAction" @change="applyFilters" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				<select v-model="filterAction" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					<option value="">Sin filtro</option>
 					<option value="Actualizar centro de trabajo">Actualizar centro de trabajo</option>
 					<option value="Crear gestor">Crear gestor</option>
@@ -46,7 +43,10 @@
 		</div>
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-			<table class="w-full text-sm">
+			<div v-if="filteredAuditorias.length === 0" class="flex items-center justify-center h-64">
+				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
+			</div>
+			<table v-else class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Usuario</th>
@@ -117,7 +117,4 @@ const filteredAuditorias = computed(() => {
 	})
 })
 
-const applyFilters = () => {
-	// Filters are automatically applied through computed property
-}
 </script>

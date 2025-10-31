@@ -7,10 +7,7 @@
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row gap-4 items-end">
 			<div class="flex-1">
-				<form class="flex gap-2" @submit.prevent>
-					<input type="text" placeholder="Buscar bien" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-				</form>
+				<input v-model="searchTerm" type="text" placeholder="Buscar bien" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 			<button @click="openNewMantenimientoModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">Nuevo Mantenimiento</button>
 			<button @click="showReportModal = true" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
@@ -22,7 +19,10 @@
 		</div>
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-			<table class="w-full text-sm">
+			<div v-if="filteredMantenimientos.length === 0" class="flex items-center justify-center h-64">
+				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
+			</div>
+			<table v-else class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Bien</th>
@@ -33,7 +33,7 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-					<tr v-for="(mantenimiento, index) in mantenimientos" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+					<tr v-for="(mantenimiento, index) in filteredMantenimientos" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ mantenimiento.bien }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ mantenimiento.tipo }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ mantenimiento.fecha }}</td>
@@ -213,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const mantenimientos = ref([
 	{ bien: 'COMPUTADORA DELL', tipo: 'Limpieza', fecha: '2024-02-15', estado: 'Completado', observaciones: 'Limpieza general realizada' },
@@ -226,6 +226,15 @@ const showEditMantenimientoModal = ref(false)
 const showReportModal = ref(false)
 const showDeleteConfirm = ref(false)
 const editingIndex = ref(null)
+const searchTerm = ref('')
+
+const filteredMantenimientos = computed(() => {
+	return mantenimientos.value.filter(mantenimiento => {
+		return !searchTerm.value ||
+			mantenimiento.bien.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			mantenimiento.tipo.toLowerCase().includes(searchTerm.value.toLowerCase())
+	})
+})
 
 const newMantenimientoData = ref({
 	bien: '',

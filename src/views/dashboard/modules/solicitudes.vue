@@ -8,10 +8,7 @@
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
-					<form class="flex gap-2" @submit.prevent>
-						<input type="text" placeholder="Buscar solicitud" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-					</form>
+					<input v-model="searchTerm" type="text" placeholder="Buscar solicitud" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 				</div>
 				<select v-model="filterEstado" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					<option value="">Todos los estados</option>
@@ -23,7 +20,10 @@
 		</div>
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-			<table class="w-full text-sm">
+			<div v-if="filteredSolicitudes.length === 0" class="flex items-center justify-center h-64">
+				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
+			</div>
+			<table v-else class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Tipo</th>
@@ -305,14 +305,19 @@ const solicitudes = ref([
 ])
 
 const filterEstado = ref('')
+const searchTerm = ref('')
 const showDetailsSolicitudModal = ref(false)
 const selectedSolicitudDetails = ref(null)
 
 const filteredSolicitudes = computed(() => {
-	if (!filterEstado.value) {
-		return solicitudes.value
-	}
-	return solicitudes.value.filter(solicitud => solicitud.estado === filterEstado.value)
+	return solicitudes.value.filter(solicitud => {
+		const matchEstado = !filterEstado.value || solicitud.estado === filterEstado.value
+		const matchSearch = !searchTerm.value ||
+			solicitud.tipo.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			solicitud.solicitante.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			solicitud.descripcion.toLowerCase().includes(searchTerm.value.toLowerCase())
+		return matchEstado && matchSearch
+	})
 })
 
 const viewSolicitudDetails = (index) => {

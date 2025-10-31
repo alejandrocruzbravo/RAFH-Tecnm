@@ -12,30 +12,27 @@
 				<!-- Search -->
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre del bien</label>
-					<div class="flex gap-2">
-						<input type="text" placeholder="Bien" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-					</div>
+					<input v-model="searchTerm" type="text" placeholder="Bien" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 				</div>
 
 				<!-- Filter by Area -->
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por área</label>
-					<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<option>Sin filtro</option>
-						<option>Laboratorio de sistemas</option>
-						<option>RR.HH</option>
+					<select v-model="filterArea" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option value="">Sin filtro</option>
+						<option value="Sistemas">Laboratorio de sistemas</option>
+						<option value="RR.HH">RR.HH</option>
 					</select>
 				</div>
 
 				<!-- Filter by Category -->
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por categoría</label>
-					<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<option>Sin filtro</option>
-						<option>Electrónicos</option>
-						<option>Oficina</option>
-						<option>Jardinería</option>
+					<select v-model="filterCategory" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option value="">Sin filtro</option>
+						<option value="Equipo de computo">Electrónicos</option>
+						<option value="Oficina">Oficina</option>
+						<option value="Jardinería">Jardinería</option>
 					</select>
 				</div>
 
@@ -54,7 +51,10 @@
 
 		<!-- Table -->
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-			<table class="w-full text-sm">
+			<div v-if="filteredBienes.length === 0" class="flex items-center justify-center h-64">
+				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
+			</div>
+			<table v-else class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Número de serie</th>
@@ -67,7 +67,7 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-					<tr v-for="(bien, index) in bienes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+					<tr v-for="(bien, index) in filteredBienes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.serie }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.modelo }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.marca }}</td>
@@ -434,7 +434,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const showNewBienModal = ref(false)
 const showEditBienModal = ref(false)
@@ -443,6 +443,9 @@ const showDetailsBienModal = ref(false)
 const showDetailsBienReportModal = ref(false)
 const editingIndex = ref(null)
 const selectedBienDetails = ref(null)
+const searchTerm = ref('')
+const filterArea = ref('')
+const filterCategory = ref('')
 const assetInfoSettings = ref({
 	imagen: true,
 	marca: true,
@@ -516,6 +519,21 @@ const bienes = ref([
 
 const editingBien = ref({
 	serie: '', modelo: '', marca: '', area: '', resguardante: '', estado: ''
+})
+
+const filteredBienes = computed(() => {
+	return bienes.value.filter(bien => {
+		const matchSearch = !searchTerm.value ||
+			bien.serie.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			bien.modelo.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			bien.marca.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			bien.area.toLowerCase().includes(searchTerm.value.toLowerCase())
+
+		const matchArea = !filterArea.value || bien.area === filterArea.value
+		const matchCategory = !filterCategory.value || bien.categoria === filterCategory.value
+
+		return matchSearch && matchArea && matchCategory
+	})
 })
 
 const viewBienDetails = (index) => {

@@ -2,15 +2,12 @@
 	<div class="space-y-6">
 		<!-- Institution Header with Logo -->
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-			<div class="flex items-center gap-6">
+			<div class="flex items-center justify-center gap-6">
 				<img src="/images/logoEscuela.png" alt="Institution Logo" class="w-20 h-20 rounded-lg object-cover">
-				<div class="flex-1">
+				<div class="text-center flex-1">
 					<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Instituto Tecnológico de Chetumal</h1>
 					<p class="text-gray-600 dark:text-gray-400 mt-1">Centro de Trabajo Principal</p>
 				</div>
-				<button class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold">
-					Editar
-				</button>
 			</div>
 		</div>
 

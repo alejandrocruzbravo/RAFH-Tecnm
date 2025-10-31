@@ -7,10 +7,7 @@
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row gap-4 items-end">
 			<div class="flex-1">
-				<form class="flex gap-2" @submit.prevent>
-					<input type="text" placeholder="Buscar usuario" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-				</form>
+				<input v-model="searchTerm" type="text" placeholder="Buscar usuario" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 			<button @click="openNewResguardanteModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">Nuevo Resguardante</button>
 			<button @click="showReportModal = true" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
@@ -22,7 +19,10 @@
 		</div>
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-			<table class="w-full text-sm">
+			<div v-if="filteredResguardantes.length === 0" class="flex items-center justify-center h-64">
+				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
+			</div>
+			<table v-else class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Nombre</th>
@@ -33,24 +33,24 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-					<tr v-for="(resguardante, index) in resguardantes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+					<tr v-for="(resguardante, index) in filteredResguardantes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.nombre }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.apellido1 }} {{ resguardante.apellido2 }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.correo }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.departamento }}</td>
 						<td class="px-4 py-3 flex gap-2">
-							<button @click="viewResguardanteDetails(index)" class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors" title="Ver detalles">
+							<button @click="viewResguardanteDetails(resguardante)" class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors" title="Ver detalles">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
 								</svg>
 							</button>
-							<button @click="editResguardante(index)" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
+							<button @click="editResguardante(resguardante)" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
 								</svg>
 							</button>
-							<button @click="deleteResguardante(index)" class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
+							<button @click="deleteResguardante(resguardante)" class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
 								</svg>
@@ -246,14 +246,11 @@
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 							<div>
 								<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar bien</label>
-								<div class="flex gap-2">
-									<input v-model="assetSearchQuery" type="text" placeholder="Buscar por código o nombre" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-									<button @click="filterAssignedAssets" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-								</div>
+								<input v-model="assetSearchQuery" type="text" placeholder="Buscar por código o nombre" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							</div>
 							<div>
 								<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por estado</label>
-								<select v-model="assetStatusFilter" @change="filterAssignedAssets" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+								<select v-model="assetStatusFilter" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 									<option value="">Todos los estados</option>
 									<option value="Activo">Activo</option>
 									<option value="En Mantenimiento">En Mantenimiento</option>
@@ -426,6 +423,7 @@ const editingIndex = ref(null)
 const selectedResguardante = ref(null)
 const assetSearchQuery = ref('')
 const assetStatusFilter = ref('')
+const searchTerm = ref('')
 
 const newResguardanteData = ref({
 	nombre: '',
@@ -451,6 +449,17 @@ const editingResguardante = ref({
 	oficina: '',
 	password: '',
 	rol: '',
+})
+
+const filteredResguardantes = computed(() => {
+	return resguardantes.value.filter(resguardante => {
+		return !searchTerm.value ||
+			resguardante.nombre.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			resguardante.apellido1.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			resguardante.apellido2.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			resguardante.correo.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+			resguardante.departamento.toLowerCase().includes(searchTerm.value.toLowerCase())
+	})
 })
 
 const filteredAssignedAssets = computed(() => {
@@ -488,9 +497,9 @@ const saveNewResguardante = () => {
 	}
 }
 
-const editResguardante = (index) => {
-	editingIndex.value = index
-	editingResguardante.value = { ...resguardantes.value[index] }
+const editResguardante = (resguardante) => {
+	editingIndex.value = resguardantes.value.findIndex(r => r === resguardante)
+	editingResguardante.value = { ...resguardante }
 	showEditResguardanteModal.value = true
 }
 
@@ -499,8 +508,8 @@ const saveEditResguardante = () => {
 	showEditResguardanteModal.value = false
 }
 
-const deleteResguardante = (index) => {
-	editingIndex.value = index
+const deleteResguardante = (resguardante) => {
+	editingIndex.value = resguardantes.value.findIndex(r => r === resguardante)
 	showDeleteConfirm.value = true
 }
 
@@ -514,8 +523,8 @@ const getOficinaNombre = (id) => {
 	return oficina ? `${oficina.nombre} (${oficina.edificio})` : 'Sin asignar'
 }
 
-const viewResguardanteDetails = (index) => {
-	selectedResguardante.value = resguardantes.value[index]
+const viewResguardanteDetails = (resguardante) => {
+	selectedResguardante.value = resguardante
 	assetSearchQuery.value = ''
 	assetStatusFilter.value = ''
 	showDetailsModal.value = true

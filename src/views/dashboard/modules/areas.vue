@@ -14,25 +14,45 @@
 
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Control de Áreas</label>
+			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Control de ��reas</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row gap-4 items-end">
-			<div class="flex-1">
-				<form @submit.prevent="searchAreas" class="flex gap-2">
-					<input v-model="searchQuery" type="text" placeholder="Buscar área" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-				</form>
+		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 space-y-4">
+			<div class="flex flex-col md:flex-row gap-4 items-end">
+				<div class="flex-1">
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar por nombre o código</label>
+					<input v-model="searchQuery" type="text" placeholder="Escribe para buscar..." class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				</div>
+				<button @click="openNewAreaModal" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">
+					Nueva Área
+				</button>
 			</div>
-			<button @click="openNewAreaModal" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">
-				Nueva Área
-			</button>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por Responsable</label>
+					<select v-model="filterResponsable" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option value="">Todos los responsables</option>
+						<option v-for="responsable in resguardantes" :key="responsable.id" :value="responsable.id">
+							{{ responsable.res_nombre }}
+						</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por Edificio</label>
+					<select v-model="filterEdificio" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option value="">Todos los edificios</option>
+						<option v-for="building in buildings" :key="building.id" :value="building.id">
+							{{ building.nombre }}
+						</option>
+					</select>
+				</div>
+			</div>
 		</div>
 
 		<!-- TARJETAS DE ÁREAS -->
-		<div v-if="areas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			<div v-for="area in areas" :key="area.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+		<div v-if="filteredAreas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div v-for="area in filteredAreas" :key="area.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
 				<div class="flex gap-4 mb-4">
 					<div class="flex-shrink-0">
 						<div :class="['flex items-center justify-center h-12 w-12 rounded-lg', area.iconBg || 'bg-gray-100', area.iconColor || 'text-gray-600']">
@@ -60,8 +80,9 @@
 		</div>
 
 		<div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
-			<h3 class="text-lg font-medium text-gray-900 dark:text-white">No hay áreas</h3>
-			<p class="text-gray-600 dark:text-gray-400">Aún no se ha registrado ninguna área. Haz clic en "Nueva Área" para comenzar.</p>
+			<h3 class="text-lg font-medium text-gray-900 dark:text-white">No existen registros</h3>
+			<p class="text-gray-600 dark:text-gray-400" v-if="areas.length === 0">Aún no se ha registrado ninguna área. Haz clic en "Nueva Área" para comenzar.</p>
+			<p class="text-gray-600 dark:text-gray-400" v-else>No hay áreas que coincidan con tu búsqueda o filtros.</p>
 		</div>
 
 		<!-- TABLA DE DEPARTAMENTOS -->
@@ -74,12 +95,8 @@
 			</div>
 
 			<div class="mb-4">
-				<form @submit.prevent class="flex gap-2">
-					<input type="text" placeholder="Buscar departamento (próximamente...)" disabled class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" disabled class="px-4 py-2 bg-blue-600 text-white rounded-lg opacity-50 cursor-not-allowed">
-						Buscar
-					</button>
-				</form>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar departamento</label>
+				<input v-model="searchDepartment" type="text" placeholder="Escribe para buscar..." class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 
 			<div class="overflow-x-auto">
@@ -94,7 +111,7 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-for="dept in departments.data" :key="dept.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+						<tr v-for="dept in filteredDepartments" :key="dept.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
 							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
 								<div class="font-medium text-gray-900 dark:text-white">{{ dept.dep_nombre }}</div>
 							</td>
@@ -114,9 +131,9 @@
 								</button>
 							</td>
 						</tr>
-						<tr v-if="!departments.data || departments.data.length === 0">
-							<td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No se encontraron departamentos.
+						<tr v-if="filteredDepartments.length === 0">
+							<td colspan="5" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+								No existen registros
 							</td>
 						</tr>
 					</tbody>
@@ -134,12 +151,8 @@
 			</div>
 
 			<div class="mb-4">
-				<form @submit.prevent class="flex gap-2">
-					<input type="text" placeholder="Buscar Edificio (próximamente...)" disabled class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" disabled class="px-4 py-2 bg-blue-600 text-white rounded-lg opacity-50 cursor-not-allowed">
-						Buscar
-					</button>
-				</form>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar edificio</label>
+				<input v-model="searchBuilding" type="text" placeholder="Escribe para buscar..." class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 
 			<div class="overflow-x-auto">
@@ -151,7 +164,7 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-if="buildingsData.data.length > 0" v-for="building in buildingsData.data" :key="building.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+						<tr v-for="building in filteredBuildings" :key="building.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
 							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
 								<div class="font-medium text-gray-900 dark:text-white">{{ building.nombre }}</div>
 							</td>
@@ -169,9 +182,9 @@
 							</td>
 						</tr>
 
-						<tr v-else>
-							<td colspan="3" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No se encontraron edificios.
+						<tr v-if="filteredBuildings.length === 0">
+							<td colspan="2" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+								No existen registros
 							</td>
 						</tr>
 					</tbody>
@@ -188,12 +201,8 @@
 				</button>
 			</div>
 			<div class="mb-4">
-				<form @submit.prevent class="flex gap-2">
-					<input type="text" placeholder="Buscar Oficina (próximamente...)" disabled class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" disabled class="px-4 py-2 bg-blue-600 text-white rounded-lg opacity-50 cursor-not-allowed">
-						Buscar
-					</button>
-				</form>
+				<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar oficina</label>
+				<input v-model="searchOficina" type="text" placeholder="Escribe para buscar..." class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 			<div class="overflow-x-auto">
 				<table class="w-full text-sm">
@@ -219,7 +228,7 @@
 							</td>
 						</tr>
 
-						<tr v-else-if="oficinasData.data && oficinasData.data.length > 0" v-for="oficina in oficinasData.data" :key="oficina.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+						<tr v-else-if="filteredOficinas.length > 0" v-for="oficina in filteredOficinas" :key="oficina.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
 
 							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
 								<div class="font-medium text-gray-900 dark:text-white">
@@ -246,9 +255,9 @@
 							</td>
 						</tr>
 
-						<tr v-else>
+						<tr v-else-if="!isLoading && !fetchOficinasError">
 							<td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No se encontraron oficinas.
+								No existen registros
 							</td>
 						</tr>
 					</tbody>
@@ -348,7 +357,7 @@
 						<select v-model="editingDepartment.id_area" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null">Seleccionar un área</option>
 							<option v-if="areasList.length === 0" disabled class="text-gray-400">
-								-- No hay áreas disponibles --
+								-- No hay ��reas disponibles --
 							</option>
 							<option v-for="area in areasList.areas" :key="area.id" :value="area.id">
 								{{ area.area_nombre }}
@@ -692,6 +701,11 @@ const isLoading = ref(true)
 const error = ref(null)
 const isSubmitting = ref(false)
 const searchQuery = ref('')
+const filterResponsable = ref('')
+const filterEdificio = ref('')
+const searchDepartment = ref('')
+const searchBuilding = ref('')
+const searchOficina = ref('')
 
 const showNewAreaModal = ref(false)
 const newAreaData = ref({
@@ -762,6 +776,56 @@ const showNewOficinaModal = ref(false)
 const showEditOficinaModal = ref(false)
 const editingOficina = ref(null)
 const editOficinaError = ref(null)
+
+const filteredAreas = computed(() => {
+	return areas.value.filter(area => {
+		const matchesSearch = !searchQuery.value ||
+			area.area_nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+			area.area_codigo.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+		const matchesResponsable = !filterResponsable.value ||
+			(area.responsable && area.responsable.id === parseInt(filterResponsable.value))
+
+		const matchesEdificio = !filterEdificio.value ||
+			(area.edificio && area.edificio.id === parseInt(filterEdificio.value))
+
+		return matchesSearch && matchesResponsable && matchesEdificio
+	})
+})
+
+const filteredDepartments = computed(() => {
+	if (!departments.value || !Array.isArray(departments.value)) {
+		return []
+	}
+	const deptArray = Array.isArray(departments.value.data) ? departments.value.data : departments.value
+	return deptArray.filter(dept => {
+		return !searchDepartment.value ||
+			dept.dep_nombre.toLowerCase().includes(searchDepartment.value.toLowerCase()) ||
+			(dept.dep_resposable && dept.dep_resposable.toLowerCase().includes(searchDepartment.value.toLowerCase())) ||
+			(dept.dep_correo_institucional && dept.dep_correo_institucional.toLowerCase().includes(searchDepartment.value.toLowerCase()))
+	})
+})
+
+const filteredBuildings = computed(() => {
+	if (!buildingsData.value || !buildingsData.value.data) {
+		return []
+	}
+	return buildingsData.value.data.filter(building => {
+		return !searchBuilding.value ||
+			building.nombre.toLowerCase().includes(searchBuilding.value.toLowerCase())
+	})
+})
+
+const filteredOficinas = computed(() => {
+	if (!oficinasData.value || !oficinasData.value.data) {
+		return []
+	}
+	return oficinasData.value.data.filter(oficina => {
+		return !searchOficina.value ||
+			oficina.nombre.toLowerCase().includes(searchOficina.value.toLowerCase()) ||
+			(oficina.referencia && oficina.referencia.toLowerCase().includes(searchOficina.value.toLowerCase()))
+	})
+})
 
 const fetchAllData = async () => {
 	isLoading.value = true
