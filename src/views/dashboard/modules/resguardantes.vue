@@ -1,21 +1,41 @@
 <template>
-	<div class="space-y-6">
+	<div v-if="isLoading" class="flex items-center justify-center h-64">
+		<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-blue-600"></div>
+		<p class="ml-4 text-gray-600 dark:text-gray-400">Cargando resguardantes...</p>
+	</div>
+	<div v-else-if="error" class="p-6 bg-red-100 dark:bg-red-900 rounded-lg text-red-700 dark:text-red-200">
+		<h3 class="font-bold">Error al cargar los errores</h3>
+		<p>{{ error.message || 'No se pudo conectar con la API.' }}</p>
+		<button @click="fetchAreas" class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+			Reintentar
+		</button>
+	</div>
+
+	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Resguardantes</label>
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</label>
+			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
+				Chetumal</label>
 		</div>
 
 		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col md:flex-row gap-4 items-end">
 			<div class="flex-1">
 				<form class="flex gap-2" @submit.prevent>
-					<input type="text" placeholder="Buscar usuario" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
+					<input type="text" placeholder="Buscar usuario"
+						class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					<button type="submit"
+						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
 				</form>
 			</div>
-			<button @click="openNewResguardanteModal" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">Nuevo Resguardante</button>
-			<button @click="showReportModal = true" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
+			<button @click="openNewResguardanteModal"
+				class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">Nuevo
+				Resguardante</button>
+			<button @click="showReportModal = true"
+				class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z">
+					</path>
 				</svg>
 				Reporte
 			</button>
@@ -25,503 +45,600 @@
 			<table class="w-full text-sm">
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
+						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">RFC</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Nombre</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Apellidos</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Correo</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Área</th>
+						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Departamento</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Acciones</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-					<tr v-for="(resguardante, index) in resguardantes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.nombre }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.apellido1 }} {{ resguardante.apellido2 }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.correo }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ resguardante.departamento }}</td>
-						<td class="px-4 py-3 flex gap-2">
-							<button @click="viewResguardanteDetails(index)" class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors" title="Ver detalles">
+
+					<tr v-if="isLoading">
+						<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+							Cargando resguardantes...
+						</td>
+					</tr>
+
+					<tr v-else-if="fetchError">
+						<td colspan="6" class="px-4 py-6 text-center text-red-500">
+							Error al cargar: {{ fetchError.message }}
+						</td>
+					</tr>
+
+					<tr v-else-if="!resguardantesList.data || resguardantesList.data.length === 0">
+						<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+							No se encontraron resguardantes.
+						</td>
+					</tr>
+
+					<tr v-else v-for="res in resguardantesList.data" :key="res.id"
+						class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ res.res_rfc || 'N/A' }}</td>
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ res.res_nombre }}</td>
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ res.res_apellidos }}</td>
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ res.res_correo }}</td>
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+							{{ getDepartmentName(res.res_departamento) }}
+						</td>
+
+						<td class="px-4 py-3 flex gap-2 justify-end">
+							<button @click="" title="Ver"
+								class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.17.555-.83.555-1 0A13.916 13.916 0 0112 10c-3.25 0-6.108 1.94-7.542 4.97A.62.62 0 002.458 12z">
+									</path>
 								</svg>
 							</button>
-							<button @click="editResguardante(index)" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
+							<button @click="openEditResguardanteModal(res)" title="Editar"
+								class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+									</path>
 								</svg>
 							</button>
-							<button @click="deleteResguardante(index)" class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
+							<button @click="openDeleteResguardanteModal(res)" title="Eliminar"
+								class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors">
 								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+									</path>
 								</svg>
 							</button>
 						</td>
 					</tr>
+
 				</tbody>
 			</table>
 		</div>
 
 		<!-- New Resguardante Modal -->
-		<div v-if="showNewResguardanteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div v-if="showNewResguardanteModal"
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+
 			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Resguardante</h2>
-					<button @click="showNewResguardanteModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+					<button @click="showNewResguardanteModal = false"
+						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
+
+				<div v-if="newResguardanteError"
+					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
+					role="alert">
+					<span class="font-medium text-sm">{{ newResguardanteError }}</span>
+					<button @click="newResguardanteError = null"
+						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+				</div>
+
 				<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
-						<input v-model="newResguardanteData.nombre" type="text" placeholder="Nombre" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre(s)</label>
+							<input v-model="newResguardanteData.res_nombre" type="text" placeholder="Nombre"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
+							<input v-model="newResguardanteData.res_apellidos" type="text" placeholder="Apellidos"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primer Apellido</label>
-						<input v-model="newResguardanteData.apellido1" type="text" placeholder="Primer apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">RFC</label>
+						<input v-model="newResguardanteData.res_rfc" type="text" placeholder="RFC (Opcional)"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Segundo Apellido</label>
-						<input v-model="newResguardanteData.apellido2" type="text" placeholder="Segundo apellido (opcional)" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
+							Electrónico</label>
+						<input v-model="newResguardanteData.res_correo" type="email"
+							placeholder="correo@institucion.com"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
-						<input v-model="newResguardanteData.correo" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
+							<input v-model="newResguardanteData.res_puesto" type="text"
+								placeholder="Ej. Encargado de Lab."
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
+							<input v-model="newResguardanteData.res_telefono" type="tel" placeholder="Ej. 9831234567"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
-						<input v-model="newResguardanteData.teléfono" type="tel" placeholder="987654321" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
-						<input v-model="newResguardanteData.puesto" type="text" placeholder="Ej. Jefe de departamento" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
-						<input v-model="newResguardanteData.departamento" type="text" placeholder="Ej. Sistemas" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
-						<select v-model="newResguardanteData.oficina" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option value="">Seleccionar Oficina</option>
-							<option v-for="oficina in oficinas" :key="oficina.id" :value="oficina.id">
-								{{ oficina.nombre }} ({{ oficina.edificio }})
+						<label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+						<select v-model="newResguardanteData.res_departamento"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="null" disabled>Seleccionar Departamento</option>
+							<option v-if="!departments.data || departments.data.length === 0" disabled>-- Cargando... --
+							</option>
+							<option v-else v-for="dept in departments.data" :key="dept.id" :value="dept.id">
+								{{ dept.dep_nombre }}
 							</option>
 						</select>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
-						<input v-model="newResguardanteData.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
-						<select v-model="newResguardanteData.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option value="">Seleccionar Rol</option>
-							<option>Administrador</option>
-							<option>Resguardante Senior</option>
-							<option>Resguardante</option>
-							<option>Jefe de Departamento</option>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de
+							Usuario</label>
+						<select v-model="newResguardanteData.usuario_id_rol"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="3">Resguardante</option>
+							<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
+							</option>
+							<option v-else v-for="rol in rolesList.roles" :key="rol.id" :value="rol.id">
+								{{ rol.rol_nombre }}
+							</option>
 						</select>
 					</div>
+
+					<div>
+						<label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
+						<input v-model="newResguardanteData.usuario_pass" type="password"
+							placeholder="Contraseña para su cuenta"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+
 				</div>
+
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showNewResguardanteModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="saveNewResguardante" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Guardar</button>
+					<button @click="showNewResguardanteModal = false" :disabled="isSubmitting"
+						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
+					<button @click="saveNewResguardante" :disabled="isSubmitting"
+						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+						{{ isSubmitting ? 'Guardando...' : 'Guardar Resguardante' }}
+					</button>
 				</div>
 			</div>
 		</div>
 
-		<!-- Edit Resguardante Modal -->
-		<div v-if="showEditResguardanteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+		<div v-if="showEditResguardanteModal && editingResguardante"
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+
+			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Resguardante</h2>
-					<button @click="showEditResguardanteModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+					<button @click="showEditResguardanteModal = false"
+						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
+
+				<div v-if="editResguardanteError"
+					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
+					role="alert">
+					<span class="font-medium text-sm">{{ editResguardanteError }}</span>
+					<button @click="editResguardanteError = null"
+						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+				</div>
+
 				<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
-						<input v-model="editingResguardante.nombre" type="text" placeholder="Nombre" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre(s)</label>
+							<input v-model="editingResguardante.res_nombre" type="text"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
+							<input v-model="editingResguardante.res_apellidos" type="text"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primer Apellido</label>
-						<input v-model="editingResguardante.apellido1" type="text" placeholder="Primer apellido" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">RFC</label>
+						<input v-model="editingResguardante.res_rfc" type="text"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Segundo Apellido</label>
-						<input v-model="editingResguardante.apellido2" type="text" placeholder="Segundo apellido (opcional)" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
+							Electrónico</label>
+						<input v-model="editingResguardante.res_correo" type="email"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
-						<input v-model="editingResguardante.correo" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
+							<input v-model="editingResguardante.res_puesto" type="text"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
+						<div>
+							<label
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
+							<input v-model="editingResguardante.res_telefono" type="tel"
+								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						</div>
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
-						<input v-model="editingResguardante.teléfono" type="tel" placeholder="987654321" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
-						<input v-model="editingResguardante.puesto" type="text" placeholder="Ej. Jefe de departamento" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
-						<input v-model="editingResguardante.departamento" type="text" placeholder="Ej. Sistemas" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
-						<select v-model="editingResguardante.oficina" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option value="">Seleccionar Oficina</option>
-							<option v-for="oficina in oficinas" :key="oficina.id" :value="oficina.id">
-								{{ oficina.nombre }} ({{ oficina.edificio }})
+						<label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+						<select v-model="editingResguardante.res_departamento"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="null" disabled>Seleccionar Departamento</option>
+							<option v-if="!departments.data || departments.data.length === 0" disabled>-- Cargando... --
+							</option>
+							<option v-else v-for="dept in departments.data" :key="dept.id" :value="dept.id">
+								{{ dept.dep_nombre }}
 							</option>
 						</select>
 					</div>
+
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
-						<input v-model="editingResguardante.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol</label>
-						<select v-model="editingResguardante.rol" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option>Administrador</option>
-							<option>Resguardante Senior</option>
-							<option>Resguardante</option>
-							<option>Jefe de Departamento</option>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de
+							Usuario</label>
+						<select v-model="editingResguardante.usuario_id_rol"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="null" disabled>Seleccionar un Rol</option>
+							<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
+							</option>
+							<option v-else v-for="rol in rolesList.roles" :key="rol.id" :value="rol.id">
+								{{ rol.rol_nombre }}
+							</option>
 						</select>
 					</div>
+
 				</div>
+
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showEditResguardanteModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="saveEditResguardante" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Guardar</button>
+					<button @click="showEditResguardanteModal = false" :disabled="isSubmitting"
+						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
+					<button @click="saveEditResguardante" :disabled="isSubmitting"
+						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+						{{ isSubmitting ? 'Guardando...' : 'Guardar Cambios' }}
+					</button>
 				</div>
 			</div>
 		</div>
+		<ConfirmModal :show="showDeleteResguardanteModal" :isSubmitting="isSubmitting"
+			:errorMessage="deleteResguardanteError" title="Confirmar Eliminación" :message="deleteResguardanteMessage"
+			confirmText="Sí, Eliminar" confirmClass="bg-red-600 hover:bg-red-700"
+			@confirm="handleConfirmDeleteResguardante" @cancel="cancelDeleteResguardante"
+			@clearError="deleteResguardanteError = null" />
 
-		<!-- Resguardante Details Modal -->
-		<div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-5xl w-full max-h-[95vh] overflow-y-auto">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-gray-800">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Detalles de Resguardante - {{ selectedResguardante?.nombre }} {{ selectedResguardante?.apellido1 }} {{ selectedResguardante?.apellido2 }}</h2>
-					<button @click="showDetailsModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-
-				<div class="p-6 space-y-6">
-					<!-- Información del Resguardante Section -->
-					<div>
-						<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Información del Resguardante</h3>
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre Completo</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.nombre }} {{ selectedResguardante?.apellido1 }} {{ selectedResguardante?.apellido2 }}</p>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Correo Electrónico</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.correo }}</p>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Teléfono</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.teléfono }}</p>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Puesto</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.puesto }}</p>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Departamento</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.departamento }}</p>
-							</div>
-							<div>
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rol</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.rol }}</p>
-							</div>
-							<div class="md:col-span-2">
-								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Oficina Asignada</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ getOficinaNombre(selectedResguardante?.oficina) }}</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- Bienes Asignados Section -->
-					<div>
-						<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Bienes Asignados</h3>
-						
-						<!-- Search and Filter Controls -->
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-							<div>
-								<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar bien</label>
-								<div class="flex gap-2">
-									<input v-model="assetSearchQuery" type="text" placeholder="Buscar por código o nombre" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-									<button @click="filterAssignedAssets" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Buscar</button>
-								</div>
-							</div>
-							<div>
-								<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por estado</label>
-								<select v-model="assetStatusFilter" @change="filterAssignedAssets" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-									<option value="">Todos los estados</option>
-									<option value="Activo">Activo</option>
-									<option value="En Mantenimiento">En Mantenimiento</option>
-									<option value="Perdido">Perdido</option>
-								</select>
-							</div>
-						</div>
-
-						<!-- Assigned Assets Table -->
-						<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
-							<table class="w-full text-sm">
-								<thead class="bg-gray-100 dark:bg-gray-700">
-									<tr>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Código Primario</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Código Secundario</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Nombre</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Estado</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Acciones</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-									<tr v-for="(asset, index) in filteredAssignedAssets" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-600">
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ asset.codigoPrimario }}</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ asset.codigoSecundario }}</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ asset.nombre }}</td>
-										<td class="px-4 py-3">
-											<span :class="['inline-block px-3 py-1 rounded-full text-xs font-semibold', asset.estado === 'Activo' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : asset.estado === 'En Mantenimiento' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200']">{{ asset.estado }}</span>
-										</td>
-										<td class="px-4 py-3">
-											<button class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors" title="Ver detalles">
-												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-												</svg>
-											</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-							<div v-if="filteredAssignedAssets.length === 0" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No se encontraron bienes asignados.
-							</div>
-						</div>
-					</div>
-
-					<!-- Recent Transactions Section -->
-					<div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-						<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Últimos Movimientos</h3>
-						
-						<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
-							<table class="w-full text-sm">
-								<thead class="bg-gray-100 dark:bg-gray-700">
-									<tr>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Tipo</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Gestor encargado</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Bien involucrado</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Área</th>
-										<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Fecha</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-									<tr v-for="(transaction, index) in resguardanteTransactions" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-600">
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-											<span :class="['inline-block px-2 py-1 rounded text-xs font-semibold', transaction.tipo === 'Transferencia' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' : transaction.tipo === 'Registro' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300']">{{ transaction.tipo }}</span>
-										</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ transaction.gestorEncargado }}</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ transaction.bienInvolucrado }}</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ transaction.area }}</td>
-										<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ transaction.fecha }}</td>
-									</tr>
-								</tbody>
-							</table>
-							<div v-if="resguardanteTransactions.length === 0" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No hay movimientos registrados.
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6 sticky bottom-0 bg-white dark:bg-gray-800">
-					<button @click="showDetailsModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
-
-		<!-- Report Modal -->
-		<div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-					<button @click="showReportModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
-					<div class="space-y-2">
-						<button class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar a PDF</button>
-						<button class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar a Excel</button>
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showReportModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
-
-		<!-- Delete Confirmation Modal -->
-		<div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Confirmar Eliminación</h2>
-					<button @click="showDeleteConfirm = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6">
-					<p class="text-gray-600 dark:text-gray-400">¿Está seguro de que desea eliminar este resguardante?</p>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showDeleteConfirm = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="confirmDelete" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium">Eliminar</button>
-				</div>
-			</div>
-		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+// Asumo que tu función de fetch sigue estando en esta ruta
+import { authenticatedFetch } from '../../../config/api.js'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
-const oficinas = ref([
-	{ id: 1, nombre: 'Oficina 101', edificio: 'Edificio A' },
-	{ id: 2, nombre: 'Oficina 102', edificio: 'Edificio A' },
-	{ id: 3, nombre: 'Oficina 201', edificio: 'Edificio B' },
-	{ id: 4, nombre: 'Oficina 301', edificio: 'Edificio C' },
-	{ id: 5, nombre: 'Sala de Sistemas', edificio: 'Edificio A' },
-])
+// --- Estados de Carga ---
+const isLoading = ref(true)
+const fetchError = ref(null)
+const error = ref(null)
+// --- Estados de Datos ---
+const resguardantesList = ref({ data: [] }) // Para la tabla (asume paginación)
+const departments = ref({ data: [] })      // Para mostrar el nombre del depto
 
-const resguardantes = ref([
-	{ nombre: 'Juan', apellido1: 'Pérez', apellido2: '', correo: 'juan@example.com', departamento: 'Sistemas', teléfono: '987654321', puesto: 'Jefe de departamento', oficina: 1, rol: 'Resguardante con privilegios' },
-	{ nombre: 'María', apellido1: 'García', apellido2: '', correo: 'maria@example.com', departamento: 'Administración', teléfono: '987654322', puesto: 'Resguardante Senior', oficina: 2, rol: 'Resguardante' },
-	{ nombre: 'Carlos', apellido1: 'López', apellido2: '', correo: 'carlos@example.com', departamento: 'RR.HH', teléfono: '987654323', puesto: 'Resguardante', oficina: 3, rol: 'Resguardante' },
-])
-
-const assignedAssets = ref([
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-001', nombre: 'Computadora', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-002', nombre: 'Impresora', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-003', nombre: 'Silla de madera', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-004', nombre: 'Laptop HP', estado: 'En Mantenimiento', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-005', nombre: 'Mesa de oficina', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-006', nombre: 'Fichero de metal', estado: 'Perdido', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-007', nombre: 'Computadores portátil', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'XXXX-XXXX-XXX', codigoSecundario: 'SEC-008', nombre: 'Impresora láser', estado: 'Activo', resguardante: 'Juan Pérez' },
-	{ codigoPrimario: 'YYYY-YYYY-YYY', codigoSecundario: 'SEC-009', nombre: 'Monitor LG', estado: 'Activo', resguardante: 'María García' },
-	{ codigoPrimario: 'YYYY-YYYY-YYY', codigoSecundario: 'SEC-010', nombre: 'Teclado inalámbrico', estado: 'Activo', resguardante: 'María García' },
-	{ codigoPrimario: 'ZZZZ-ZZZZ-ZZZ', codigoSecundario: 'SEC-011', nombre: 'Escritorio', estado: 'Activo', resguardante: 'Carlos López' },
-])
-
-const recentTransactions = ref([
-	{ tipo: 'Transferencia', gestorEncargado: 'Juan Pérez', resguardanteResponsable: 'Juan Pérez', bienInvolucrado: 'ESCRITORIO DE MADERA', area: 'Servicios escolares', fecha: '2024-01-15' },
-	{ tipo: 'Registro', gestorEncargado: 'Juan Pérez', resguardanteResponsable: 'Juan Pérez', bienInvolucrado: 'SILLA ESCOLAR', area: 'Sistemas', fecha: '2024-01-14' },
-	{ tipo: 'Mantenimiento', gestorEncargado: 'Tyler Doe', resguardanteResponsable: 'María García', bienInvolucrado: 'COMPUTADORA DELL', area: 'sistemas', fecha: '2024-01-13' },
-	{ tipo: 'Transferencia', gestorEncargado: 'Juan Pérez', resguardanteResponsable: 'Carlos López', bienInvolucrado: 'IMPRESORA HP', area: 'Servicios escolares', fecha: '2024-01-12' },
-])
-
+const isSubmitting = ref(false) // Para los botones de los modales
 const showNewResguardanteModal = ref(false)
+const newResguardanteError = ref(null)
+const rolesList = ref([])
+
 const showEditResguardanteModal = ref(false)
-const showReportModal = ref(false)
-const showDeleteConfirm = ref(false)
-const showDetailsModal = ref(false)
-const editingIndex = ref(null)
+const editResguardanteError = ref(null)
 
-const selectedResguardante = ref(null)
-const assetSearchQuery = ref('')
-const assetStatusFilter = ref('')
+const showDeleteResguardanteModal = ref(false)
+const deletingResguardante = ref(null) // Para guardar el objeto a eliminar
+const deleteResguardanteError = ref(null)
 
+// Ref para el formulario, basado en tu B.D.
 const newResguardanteData = ref({
-	nombre: '',
-	apellido1: '',
-	apellido2: '',
-	correo: '',
-	teléfono: '',
-	puesto: '',
-	departamento: '',
-	oficina: '',
-	password: '',
-	rol: '',
+	res_rfc: '',
+	res_nombre: '',
+	res_apellidos: '',
+	res_correo: '',
+	res_puesto: '',
+	res_telefono: '',
+	res_departamento: null, // Este será el ID del dropdown
+	usuario_id_rol: null,
+	usuario_pass: '' // Asumo que se crea un usuario
 })
-
 const editingResguardante = ref({
-	nombre: '',
-	apellido1: '',
-	apellido2: '',
-	correo: '',
-	teléfono: '',
-	puesto: '',
-	departamento: '',
-	oficina: '',
-	password: '',
-	rol: '',
+	id: null, // <-- Importante para saber a quién editar
+	res_rfc: '',
+	res_nombre: '',
+	res_apellidos: '',
+	res_correo: '',
+	res_puesto: '',
+	res_telefono: '',
+	res_departamento: null,
+	usuario_id_rol: null,
 })
+/**
+ * Carga todos los datos necesarios para la vista
+ */
+const fetchResguardantesData = async () => {
+	isLoading.value = true
+	fetchError.value = null
+	try {
+		// Carga resguardantes y departamentos al mismo tiempo
+		const [resguardantesRes, departmentsRes, rolesRes] = await Promise.all([
+			authenticatedFetch('/resguardantes'),
+			authenticatedFetch('/departamentos'), // Asumo esta ruta de tu módulo anterior
+			authenticatedFetch('/formularios/resguardantes')
+		]);
 
-const filteredAssignedAssets = computed(() => {
-	if (!selectedResguardante.value) return []
-	const fullName = `${selectedResguardante.value.nombre} ${selectedResguardante.value.apellidos}`
-	return assignedAssets.value.filter(asset => {
-		const isBelongsToResguardante = asset.resguardante === fullName
-		const matchesSearch = !assetSearchQuery.value || 
-			asset.codigoPrimario.toLowerCase().includes(assetSearchQuery.value.toLowerCase()) ||
-			asset.codigoSecundario.toLowerCase().includes(assetSearchQuery.value.toLowerCase()) ||
-			asset.nombre.toLowerCase().includes(assetSearchQuery.value.toLowerCase())
-		
-		const matchesStatus = !assetStatusFilter.value || asset.estado === assetStatusFilter.value
-		
-		return isBelongsToResguardante && matchesSearch && matchesStatus
-	})
-})
+		if (!resguardantesRes.ok) throw new Error('Error al cargar resguardantes');
+		if (!departmentsRes.ok) throw new Error('Error al cargar departamentos');
+		if (!rolesRes.ok) throw new Error('Error al cargar roles');
 
-const resguardanteTransactions = computed(() => {
-	if (!selectedResguardante.value) return []
-	const fullName = `${selectedResguardante.value.nombre} ${selectedResguardante.value.apellidos}`
-	return recentTransactions.value.filter(t => t.resguardanteResponsable === fullName)
-})
+		resguardantesList.value = await resguardantesRes.json();
+		departments.value = await departmentsRes.json();
 
-const openNewResguardanteModal = () => {
-	newResguardanteData.value = { nombre: '', apellido1: '', apellido2: '', correo: '', password: '', rol: '', departamento: '', teléfono: '', puesto: '', oficina: '' }
-	showNewResguardanteModal.value = true
-}
+		const rolesData = await rolesRes.json();
+		rolesList.value = rolesData.data || rolesData;
 
-const saveNewResguardante = () => {
-	if (newResguardanteData.value.nombre && newResguardanteData.value.apellido1 && newResguardanteData.value.correo && newResguardanteData.value.password && newResguardanteData.value.rol && newResguardanteData.value.departamento && newResguardanteData.value.teléfono && newResguardanteData.value.puesto && newResguardanteData.value.oficina) {
-		resguardantes.value.push({ ...newResguardanteData.value })
-		showNewResguardanteModal.value = false
-		newResguardanteData.value = { nombre: '', apellido1: '', apellido2: '', correo: '', password: '', rol: '', departamento: '', teléfono: '', puesto: '', oficina: '' }
+	} catch (e) {
+		console.error('Error al cargar datos:', e)
+		fetchError.value = e;
+	} finally {
+		isLoading.value = false;
 	}
 }
 
-const editResguardante = (index) => {
-	editingIndex.value = index
-	editingResguardante.value = { ...resguardantes.value[index] }
+/**
+ * Helper para buscar el nombre de un departamento por su ID
+ */
+const getDepartmentName = (deptId) => {
+	if (!deptId || !departments.value.data) return 'Sin asignar';
+
+	// Asumo que tu lista de departamentos tiene .data (por paginación)
+	const dept = departments.value.data.find(d => d.id === deptId);
+
+	// Asumo que el campo de nombre es 'dep_nombre'
+	return dept ? dept.dep_nombre : `ID (${deptId}) Desconocido`;
+}
+
+// --- Cargar datos al montar el componente ---
+onMounted(() => {
+	fetchResguardantesData();
+});
+const openNewResguardanteModal = () => {
+	newResguardanteData.value = {
+		res_rfc: '',
+		res_nombre: '',
+		res_apellidos: '',
+		res_correo: '',
+		res_puesto: '',
+		res_telefono: '',
+		res_departamento: null,
+		usuario_pass: '',
+		usuario_id_rol: 3
+	}
+	newResguardanteError.value = null
+	showNewResguardanteModal.value = true
+}
+
+/**
+ * Guarda el nuevo resguardante en la API (POST /resguardantes).
+ */
+const saveNewResguardante = async () => {
+	newResguardanteError.value = null
+	console.log(newResguardanteData.value)
+	// Validación simple (puedes hacerla más estricta)
+	if (!newResguardanteData.value.res_nombre ||
+		!newResguardanteData.value.res_apellidos ||
+		!newResguardanteData.value.res_correo ||
+		!newResguardanteData.value.res_departamento ||
+		!newResguardanteData.value.usuario_id_rol ||
+		!newResguardanteData.value.usuario_pass) {
+
+		newResguardanteError.value = 'Nombre, Apellidos, Correo, Departamento y Contraseña son obligatorios.'
+		return
+	}
+
+	isSubmitting.value = true
+	try {
+		// El payload debe coincidir con lo que espera tu API
+		const payload = {
+			res_rfc: newResguardanteData.value.res_rfc,
+			res_nombre: newResguardanteData.value.res_nombre,
+			res_apellidos: newResguardanteData.value.res_apellidos,
+			res_correo: newResguardanteData.value.res_correo,
+			res_puesto: newResguardanteData.value.res_puesto,
+			res_telefono: newResguardanteData.value.res_telefono,
+			res_departamento: newResguardanteData.value.res_departamento,
+			usuario_id_rol: newResguardanteData.value.usuario_id_rol,
+			usuario_pass: newResguardanteData.value.usuario_pass
+		}
+
+		const response = await authenticatedFetch('/resguardantes', {
+			method: 'POST',
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) {
+			const errData = await response.json().catch(() => ({}));
+			// Asumo que el error vendrá en 'message' o 'errors'
+			const message = errData.message || (errData.errors ? Object.values(errData.errors).join(', ') : 'No se pudo crear el resguardante.');
+			throw new Error(message);
+		}
+
+		// ¡Éxito!
+		showNewResguardanteModal.value = false
+		await fetchResguardantesData() // Recarga la tabla
+
+	} catch (err) {
+		console.error('Error al guardar resguardante:', err)
+		newResguardanteError.value = err.message
+	} finally {
+		isSubmitting.value = false
+	}
+}
+
+const openEditResguardanteModal = (resguardante) => {
+	// Mapeamos los datos del resguardante al formulario de edición
+	console.log(resguardante)
+	editingResguardante.value = {
+		id: resguardante.id,
+		res_rfc: resguardante.res_rfc,
+		res_nombre: resguardante.res_nombre,
+		res_apellidos: resguardante.res_apellidos,
+		res_correo: resguardante.res_correo,
+		res_puesto: resguardante.res_puesto,
+		res_telefono: resguardante.res_telefono,
+		res_departamento: resguardante.res_departamento,
+		usuario_id_rol: resguardante.usuario_id_rol
+	}
+
+	editResguardanteError.value = null
 	showEditResguardanteModal.value = true
 }
+const saveEditResguardante = async () => {
+	if (!editingResguardante.value) return;
+	console.log(editingResguardante.value)
+	editResguardanteError.value = null
 
-const saveEditResguardante = () => {
-	resguardantes.value[editingIndex.value] = { ...editingResguardante.value }
-	showEditResguardanteModal.value = false
+	// Validación
+	if (!editingResguardante.value.res_nombre ||
+		!editingResguardante.value.res_apellidos ||
+		!editingResguardante.value.res_correo ||
+		!editingResguardante.value.res_departamento ||
+		!editingResguardante.value.usuario_id_rol) {
+
+		editResguardanteError.value = 'Nombre, Apellidos, Correo, Departamento y Rol son obligatorios.'
+		return
+	}
+
+	isSubmitting.value = true
+	try {
+		// Preparamos el payload (sin la contraseña)
+		const payload = {
+			res_rfc: editingResguardante.value.res_rfc,
+			res_nombre: editingResguardante.value.res_nombre,
+			res_apellidos: editingResguardante.value.res_apellidos,
+			res_correo: editingResguardante.value.res_correo,
+			res_puesto: editingResguardante.value.res_puesto,
+			res_telefono: editingResguardante.value.res_telefono,
+			res_departamento: editingResguardante.value.res_departamento,
+			usuario_id_rol: editingResguardante.value.usuario_id_rol
+		}
+
+		const response = await authenticatedFetch(`/resguardantes/${editingResguardante.value.id}`, {
+			method: 'PUT',
+			body: JSON.stringify(payload)
+		});
+
+		if (!response.ok) {
+			const errData = await response.json().catch(() => ({}));
+			const message = errData.message || (errData.errors ? Object.values(errData.errors).join(', ') : 'No se pudo actualizar.');
+			throw new Error(message);
+		}
+
+		// ¡Éxito!
+		showEditResguardanteModal.value = false
+		await fetchResguardantesData() // Recarga la tabla
+
+	} catch (err) {
+		console.error('Error al actualizar resguardante:', err)
+		editResguardanteError.value = err.message
+	} finally {
+		isSubmitting.value = false
+	}
+}
+const deleteResguardanteMessage = computed(() => {
+	if (!deletingResguardante.value) return ''
+
+	// Genera el nombre completo para el mensaje de confirmación
+	const name = `${deletingResguardante.value.res_nombre} ${deletingResguardante.value.res_apellidos || ''}`.trim()
+
+	return `¿Estás seguro de que deseas eliminar al resguardante:<br><strong class='font-medium text-lg text-gray-900 dark:text-white'>${name}</strong>?`
+})
+const openDeleteResguardanteModal = (resguardante) => {
+	deletingResguardante.value = resguardante
+	deleteResguardanteError.value = null
+	showDeleteResguardanteModal.value = true
 }
 
-const deleteResguardante = (index) => {
-	editingIndex.value = index
-	showDeleteConfirm.value = true
+/**
+ * Cierra el modal de confirmación.
+ */
+const cancelDeleteResguardante = () => {
+	showDeleteResguardanteModal.value = false
+	deletingResguardante.value = null
+	deleteResguardanteError.value = null
 }
 
-const confirmDelete = () => {
-	resguardantes.value.splice(editingIndex.value, 1)
-	showDeleteConfirm.value = false
-}
+/**
+ * Confirma y ejecuta la eliminación (DELETE /resguardantes/{id}).
+ */
+const handleConfirmDeleteResguardante = async () => {
+	if (!deletingResguardante.value) return
 
-const getOficinaNombre = (id) => {
-	const oficina = oficinas.value.find(o => o.id === id)
-	return oficina ? `${oficina.nombre} (${oficina.edificio})` : 'Sin asignar'
-}
+	isSubmitting.value = true
+	deleteResguardanteError.value = null
 
-const viewResguardanteDetails = (index) => {
-	selectedResguardante.value = resguardantes.value[index]
-	assetSearchQuery.value = ''
-	assetStatusFilter.value = ''
-	showDetailsModal.value = true
-}
+	try {
+		const resguardanteId = deletingResguardante.value.id
+		const response = await authenticatedFetch(`/resguardantes/${resguardanteId}`, {
+			method: 'DELETE'
+		});
 
-const filterAssignedAssets = () => {
-	// Filtering is handled by the computed property
+		if (!response.ok) {
+			const errData = await response.json().catch(() => ({}));
+			const message = errData.message || 'No se pudo eliminar el resguardante.';
+			throw new Error(message);
+		}
+
+		// ¡Éxito!
+		showDeleteResguardanteModal.value = false
+		await fetchResguardantesData() // Recarga la tabla
+		deletingResguardante.value = null
+
+	} catch (err) {
+		console.error('Error al eliminar resguardante:', err)
+		deleteResguardanteError.value = err.message
+	} finally {
+		isSubmitting.value = false
+	}
 }
 </script>
