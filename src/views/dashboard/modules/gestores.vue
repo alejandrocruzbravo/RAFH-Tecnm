@@ -136,10 +136,6 @@
 						<input v-model="editingGestor.correo" type="email" placeholder="correo@institucion.com" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña</label>
-						<input v-model="editingGestor.password" type="password" placeholder="Contraseña" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto/Cargo</label>
 						<select v-model="editingGestor.puesto" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option>Gestor Superior</option>

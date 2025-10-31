@@ -1,0 +1,121 @@
+@import url(global.css);
+
+.has-same-height .card {
+    height: 320px;
+    overflow: hidden;
+}
+
+
+.card-content h3 {
+    text-align: center;
+}
+
+.table-profile td,
+th {
+    border: none !important;
+}
+
+.table-profile td:first-of-type {
+    font-weight: bold;
+}
+
+.skills-content .media {
+    margin: 0 !important;
+    padding: 4px !important;
+    border: 0 !important;
+}
+
+.skills-content .progress {
+    height: 4px !important;
+}
+
+.custom-tags {
+    text-align: center !important;
+    display: block;
+}
+
+.portfolio-container .card {
+    margin-bottom: 2em;
+}
+
+.section-heading {
+    text-align: center;
+    margin-top: 1em;
+    margin-bottom: 3em;
+}
+
+.card {
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.box {
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.mt-6 {
+    margin-top: 3rem !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.icon.is-large {
+    height: 3rem;
+    width: 3rem;
+}
+
+.icon.has-text-success {
+    color: #48c774 !important;
+}
+
+.custom-section-first {
+    background-color: var(--background-color);
+    background-image: url('/images/bg-waves.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    width: 100%;
+    height: 100vh;
+    border: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+body {
+    background-color: rgb(20, 22, 26);
+}
+
+.icon img {
+    max-width: 36px;
+    height: auto;
+    vertical-align: middle;
+}
+
+.icon-verify {
+    content: '';
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background-image: url('/icons/verify.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    vertical-align: middle;
+}
+.section-description{
+    background-color: var(--background-color);
+}
