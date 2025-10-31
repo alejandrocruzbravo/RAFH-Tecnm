@@ -236,7 +236,7 @@ const solicitudes = ref([
 	{
 		tipo: 'Eliminación',
 		solicitante: 'María García',
-		descripcion: 'Eliminación de bien da��ado',
+		descripcion: 'Eliminación de bien dañado',
 		estado: 'Aprobada',
 		bien: {
 			nombre: 'Monitor CRT',

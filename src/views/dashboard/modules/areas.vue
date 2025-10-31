@@ -14,7 +14,7 @@
 
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Control de ��reas</label>
+			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Control de Áreas</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</label>
 		</div>
 
@@ -666,7 +666,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed} from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
@@ -794,7 +794,7 @@ const filteredAreas = computed(() => {
 })
 
 const filteredDepartments = computed(() => {
-	if (!departments.value || !Array.isArray(departments.value)) {
+	if (!departments.value.data || !Array.isArray(departments.value.data)) {
 		return []
 	}
 	const deptArray = Array.isArray(departments.value.data) ? departments.value.data : departments.value

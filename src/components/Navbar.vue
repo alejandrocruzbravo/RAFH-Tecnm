@@ -1,5 +1,5 @@
 <template>
-	<nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900 dark:bg-gray-950 text-white shadow-lg transition-colors duration-300">
+	<nav class="fixed top-0 left-0 right-0 z-50 bg-gray-900 dark:bg-[#14161A] text-white shadow-lg transition-colors duration-300">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex justify-between items-center h-16">
 				<!-- Logo -->

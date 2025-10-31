@@ -1,14 +1,12 @@
 <template>
-    <section 
-      class="relative min-h-[calc(100vh-64px)] bg-cover bg-center transition-colors duration-300" 
-      style="background-image: url('/images/bg-waves.png')">
+    <section class="relative min-h-[calc(100vh-64px)] bg-cover bg-center transition-colors duration-300" style="background-image: url('/images/bg-waves.png')">
         
-        <div class="absolute inset-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 opacity-90 transition-colors duration-300"></div>
+        <div class="absolute inset-0 dark:bg-dark-bg opacity-90 transition-colors duration-300"></div>
 
         <div class="relative z-10 flex items-center justify-center min-h-[calc(100vh-64px)] py-12 px-4">
             
             <div class="w-full max-w-md">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 transition-colors duration-300">
+                <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg p-8 transition-colors duration-300">
                     <h1 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-8 font-audiowide">Iniciar Sesión</h1>
                     
                     <div v-if="errorMessage" class="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg flex items-start justify-between">

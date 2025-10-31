@@ -1,5 +1,5 @@
 <template>
-	<footer class="bg-gray-900 dark:bg-gray-950 text-white mt-12 py-12 transition-colors duration-300">
+	<footer class="bg-gray-900 dark:bg-[#14161A] text-white mt-12 py-12 transition-colors duration-300">
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
 				<!-- Company Info -->
