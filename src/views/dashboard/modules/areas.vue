@@ -1244,6 +1244,7 @@ const cancelDelete = () => {
 }
 
 const confirmDeleteArea = async () => {
+	isSubmitting.value = true;
 	try {
 		const response = await authenticatedFetch(`/areas/${deletingArea.value.id}`, {
 			method: 'DELETE'
@@ -1265,9 +1266,8 @@ const confirmDeleteArea = async () => {
 		console.error('Error al eliminar área:', err)
 		deleteError.value = err.message
 	} finally {
-		if (deletingArea.value) {
-			isSubmitting.value = false
-		}
+		isSubmitting.value = false
+
 	}
 }
 
@@ -1707,7 +1707,7 @@ const handleConfirmDeleteOficina = async () => {
 
 		if (!response.ok) {
 			const errData = await response.json().catch(() => ({}))
-			throw new Error(errData.message || 'No se pudo eliminar la oficina.')
+			throw new Error(errData.message || 'No se pudo eliminar la oficina ya que tiene bienes asignados.')
 		}
 
 		showDeleteOficinaModal.value = false

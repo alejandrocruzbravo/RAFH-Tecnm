@@ -57,6 +57,16 @@
 
 					<label class="px-2 text-gray-900" for="">Movimientos</label>
 				</RouterLink>
+				<RouterLink to="/dashboard/catalogoCucop" @click="closeSidebar"
+					class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+					<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
+						xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4" />
+					</svg>
+
+					<label class="px-2">CUCOP/CAMB</label>
+				</RouterLink>
 				<RouterLink to="/dashboard/gestores" @click="closeSidebar"
 					class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
 					<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
@@ -239,6 +249,7 @@ const componentMap = {
 	"user-resg": defineAsyncComponent(() => import('./modules/user-resg.vue')),
 	workcenter: defineAsyncComponent(() => import('./modules/workcenter.vue')),
 	"profile-edit": defineAsyncComponent(() => import('./modules/profile-edit.vue')),
+	catalogoCucop: defineAsyncComponent(() => import('./modules/CatalogoCucopCamba.vue')),
 }
 
 const currentComponent = computed(() => {
@@ -272,6 +283,6 @@ const handleLogout = async () => {
 	isProfileMenuOpen.value = false
 
 	// Redirige al login
-	router.push('/login')
+	router.push('/')
 }
 </script>

@@ -1,612 +1,689 @@
 <template>
-	<div class="space-y-6">
-		<!-- Header -->
-		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Bienes Materiales</label>
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</label>
-		</div>
+    <div v-if="isLoading" class="flex items-center justify-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-blue-600"></div>
+        <p class="ml-4 text-gray-600 dark:text-gray-400">Cargando bienes...</p>
+    </div>
 
-		<!-- Filters and Actions -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4 space-y-4">
-			<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<!-- Search -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre del bien</label>
-					<input v-model="searchTerm" type="text" placeholder="Bien" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-				</div>
+    <div v-else-if="error" class="p-6 bg-red-100 dark:bg-red-900 rounded-lg text-red-700 dark:text-red-200">
+        <h3 class="font-bold">Error al cargar los gestores</h3>
+        <p>{{ error.message || 'No se pudo conectar con la API.' }}</p>
+        <button @click="fetchGestoresData" class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+            Reintentar
+        </button>
+    </div>
+    <div v-else class="space-y-6">
+        <div class="flex justify-between items-center">
+            <label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Bienes Materiales</label>
+            <label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
+                Chetumal</label>
+        </div>
+        <div v-if="error" class="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg">
+            <strong>Error:</strong> {{ error }}
+        </div>
 
-				<!-- Filter by Area -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por área</label>
-					<select v-model="filterArea" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<option value="">Sin filtro</option>
-						<option value="Sistemas">Laboratorio de sistemas</option>
-						<option value="RR.HH">RR.HH</option>
-					</select>
-				</div>
+        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecciona un Área para
+                empezar</label>
+            <select v-model="selectedArea" @change="fetchStructure"
+                class="w-full md:w-1/3 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
+                <option v-if="!isLoading && areasList.length === 0" disabled class="text-gray-400">
+                    No hay áreas registradas.
+                </option>
+                <option :value="null">Selecciona un área</option>
+                <option v-for="area in areasList" :key="area.id" :value="area.id">
+                    {{ area.area_nombre }}
+                </option>
+            </select>
+        </div>
 
-				<!-- Filter by Category -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filtrar por categoría</label>
-					<select v-model="filterCategory" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						<option value="">Sin filtro</option>
-						<option value="Equipo de computo">Electrónicos</option>
-						<option value="Oficina">Oficina</option>
-						<option value="Jardinería">Jardinería</option>
-					</select>
-				</div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-				<!-- Actions -->
-				<div class="flex items-end gap-2">
-					<button @click="showNewBienModal = true" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Nuevo Bien</button>
-					<button @click="showReportModal = true" class="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z"></path>
-						</svg>
-						Reporte
-					</button>
-				</div>
-			</div>
-		</div>
+            <!-- Columna izquierda: Departamentos y Oficinas -->
+            <div
+                class="lg:col-span-1 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white px-2">Departamentos</h3>
 
-		<!-- Table -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  overflow-x-auto">
-			<div v-if="filteredBienes.length === 0" class="flex items-center justify-center h-64">
-				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
-			</div>
-			<table v-else class="w-full text-sm">
-				<thead class="bg-gray-100 dark:bg-gray-700">
-					<tr>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Número de serie</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Modelo</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Marca</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Área</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Resguardante</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Estado</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Acciones</th>
-					</tr>
-				</thead>
-				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-					<tr v-for="(bien, index) in filteredBienes" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.serie }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.modelo }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.marca }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.area }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ bien.resguardante }}</td>
-						<td class="px-4 py-3"><span :class="['inline-block px-3 py-1 rounded-full text-xs font-semibold', bien.estado === 'Bueno' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : bien.estado === 'Regular' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200']">{{ bien.estado }}</span></td>
-						<td class="px-4 py-3 flex gap-2">
-							<button @click="viewBienDetails(index)" class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors" title="Ver detalles">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-								</svg>
-							</button>
-							<button @click="editBien(index)" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors" title="Editar">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-								</svg>
-							</button>
-							<button @click="deleteBien(index)" class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors" title="Eliminar">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-								</svg>
-							</button>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
+                <div v-if="isLoadingStructure" class="flex items-center justify-center p-10">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
+                    <p class="ml-4 text-gray-600 dark:text-gray-400">Cargando Departamentos...</p>
+                </div>
 
-		<!-- New Bien Modal -->
-		<div v-if="showNewBienModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Bien</h2>
-					<button @click="showNewBienModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de serie</label>
-							<input type="text" placeholder="Número de serie" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modelo</label>
-							<input type="text" placeholder="Modelo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Marca</label>
-							<input type="text" placeholder="Marca" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fecha de adquisición</label>
-							<input type="date" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Valor del bien</label>
-							<input type="text" placeholder="Valor" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Documento soporte</label>
-							<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Seleccionar un tipo</option>
-								<option>Factura</option>
-								<option>Proveedor</option>
-								<option>Donación</option>
-								<option>Otros conceptos</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
-							<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Seleccionar categoría</option>
-								<option>Mueble de oficina</option>
-								<option>Equipo de computo</option>
-								<option>Equipo de laboratorio</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
-							<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Seleccionar área</option>
-								<option>RR.HH</option>
-								<option>Sistemas</option>
-								<option>Administración</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resguardante</label>
-							<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Seleccionar resguardante</option>
-								<option>Juan Pérez</option>
-								<option>María García</option>
-								<option>Carlos López</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
-							<select class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Seleccionar estado</option>
-								<option>Bueno</option>
-								<option>Regular</option>
-								<option>Malo</option>
-							</select>
-						</div>
-						<div class="md:col-span-2">
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observaciones</label>
-							<textarea placeholder="Observaciones" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
-						</div>
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showNewBienModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="saveNewBien" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Guardar</button>
-				</div>
-			</div>
-		</div>
+                <div v-else-if="!selectedArea" class="text-center p-4 text-gray-500 dark:text-gray-400 text-sm">
+                    Selecciona un área para ver sus departamentos.
+                </div>
 
-		<!-- Edit Bien Modal -->
-		<div v-if="showEditBienModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Bien</h2>
-					<button @click="showEditBienModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de serie</label>
-							<input v-model="editingBien.serie" type="text" placeholder="Número de serie" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modelo</label>
-							<input v-model="editingBien.modelo" type="text" placeholder="Modelo" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Marca</label>
-							<input v-model="editingBien.marca" type="text" placeholder="Marca" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
-							<select v-model="editingBien.area" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Sistemas</option>
-								<option>RR.HH</option>
-								<option>Administración</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Resguardante</label>
-							<select v-model="editingBien.resguardante" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Juan Pérez</option>
-								<option>María García</option>
-								<option>Carlos López</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
-							<select v-model="editingBien.estado" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option>Bueno</option>
-								<option>Regular</option>
-								<option>Malo</option>
-							</select>
-						</div>
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showEditBienModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="saveEditBien" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Guardar</button>
-				</div>
-			</div>
-		</div>
+                <div v-else-if="structureData.length === 0"
+                    class="text-center p-4 text-gray-500 dark:text-gray-400 text-sm">
+                    Aun no hay departamentos asignados a esta área.
+                </div>
 
-		<!-- Report Modal -->
-		<div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-					<button @click="showReportModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<p class="text-gray-600 dark:text-gray-400">Selecciona el formato del reporte:</p>
-					<div class="space-y-2">
-						<button class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium">📊 Exportar a PDF</button>
-						<button class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium">📋 Exportar a Excel</button>
-						<button class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium">🖨️ Imprimir</button>
-					</div>
-				</div>
-				<div class="border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showReportModal = false" class="w-full px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
+                <div v-for="dept in structureData" :key="dept.id"
+                    class="border border-gray-200 dark:border-gray-700 rounded-lg mb-4">
+                    <button @click="toggleDepartment(dept.id)"
+                        class="w-full flex justify-between items-center text-left font-semibold text-gray-800 dark:text-white p-3 bg-gray-50 dark:bg-gray-700/50 rounded-t-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <span>{{ dept.dep_nombre }}</span>
 
-		<!-- View Details Modal -->
-		<div v-if="showDetailsBienModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Detalles del Bien</h2>
-					<button @click="showDetailsBienModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div v-if="selectedBienDetails" class="p-6 space-y-6">
-					<!-- Asset Information Section -->
-					<div v-if="showLoadingSettings" class="text-center text-gray-600 dark:text-gray-400">Cargando configuración...</div>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<!-- Left Column: Basic Info -->
-						<div class="space-y-4">
-							<div>
-								<h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Información del Bien</h3>
-								<div class="space-y-2 text-sm">
-									<div v-if="assetInfoSettings.imagen" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Clave de bien:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.serie }}</span>
-									</div>
-									<div v-if="assetInfoSettings.area" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Área:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.area }}</span>
-									</div>
-									<div v-if="assetInfoSettings.numeroSerie" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Número de serie:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.serie }}</span>
-									</div>
-									<div v-if="assetInfoSettings.categoria" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Categoría:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.categoria }}</span>
-									</div>
-									<div v-if="assetInfoSettings.modelo" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Modelo:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.modelo }}</span>
-									</div>
-									<div v-if="assetInfoSettings.marca" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Marca:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.marca }}</span>
-									</div>
-									<div v-if="assetInfoSettings.fechaAdquisicion" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Fecha de adquisición:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.fechaAdquisicion }}</span>
-									</div>
-									<div v-if="assetInfoSettings.valor" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Valor del bien:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.valor }}</span>
-									</div>
-									<div v-if="assetInfoSettings.documentoSoporte" class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Documento soporte:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.documentoSoporte }}</span>
-									</div>
-								</div>
-							</div>
-						</div>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200"
+                            :class="{ 'rotate-180': expandedDepartmentId === dept.id }"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
 
-						<!-- Right Column: Status Info -->
-						<div class="space-y-4">
-							<div>
-								<div class="flex items-center justify-between mb-4">
-									<h3 class="text-sm font-semibold text-gray-900 dark:text-white">Estado del Bien</h3>
-									<span :class="['inline-block px-3 py-1 rounded-full text-xs font-semibold', selectedBienDetails.estado === 'Bueno' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : selectedBienDetails.estado === 'Regular' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200']">
-										{{ selectedBienDetails.estado }}
-									</span>
-								</div>
-								<div v-if="assetInfoSettings.resguardante" class="space-y-2 text-sm">
-									<div class="flex justify-between">
-										<span class="text-gray-600 dark:text-gray-400">Resguardante:</span>
-										<span class="text-gray-900 dark:text-white font-medium">{{ selectedBienDetails.resguardante }}</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+                    <div v-if="expandedDepartmentId === dept.id"
+                        class="p-2 space-y-1 border-t border-gray-200 dark:border-gray-700">
+                        <button @click="openLoteQR(dept)"
+                            class="w-full px-3 py-2 border border-green-700 text-green-700 bg-transparent hover:bg-green-50 dark:hover:bg-green-700/20 rounded-md text-sm font-medium transition-colors">
+                            Generar QRs para todo el Depto. ({{ dept.oficinas.length }})
+                        </button>
 
-					<!-- Maintenance History Section -->
-					<div v-if="assetInfoSettings.historialMantenimiento" class="border-t border-gray-200 dark:border-gray-700 pt-6">
-						<h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Historial de Mantenimiento</h3>
-						<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
-							<table class="w-full text-xs">
-								<thead class="bg-gray-100 dark:bg-gray-700">
-									<tr>
-										<th class="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Fecha de mantenimiento</th>
-										<th class="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Responsable del mantenimiento</th>
-										<th class="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Estado del mantenimiento</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-									<tr v-for="(mant, index) in selectedBienDetails.historialMantenimiento" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-600">
-										<td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ mant.fecha }}</td>
-										<td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ mant.responsable }}</td>
-										<td class="px-4 py-2">
-											<span class="inline-block px-2 py-1 rounded text-xs font-semibold" :class="mant.estado === 'Finalizado' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'">
-												{{ mant.estado }}
-											</span>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
+                        <p v-if="dept.oficinas.length === 0" class="px-2 py-1 text-xs text-gray-400 dark:text-gray-500">
+                            Sin oficinas</p>
 
-					<!-- Locations Registry Section -->
-					<div v-if="assetInfoSettings.ubicacionesRegistradas" class="border-t border-gray-200 dark:border-gray-700 pt-6">
-						<h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Ubicaciones Registradas</h3>
-						<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg overflow-x-auto">
-							<table class="w-full text-xs">
-								<thead class="bg-gray-100 dark:bg-gray-700">
-									<tr>
-										<th class="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Fecha de registro</th>
-										<th class="px-4 py-2 text-left text-gray-700 dark:text-gray-300 font-medium">Ubicación</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-									<tr v-for="(ubicacion, index) in selectedBienDetails.ubicacionesRegistradas" :key="index" class="hover:bg-gray-100 dark:hover:bg-gray-600">
-										<td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ ubicacion.fecha }}</td>
-										<td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ ubicacion.ubicacion }}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="generateBienReport" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z"></path>
-						</svg>
-						Reporte
-					</button>
-					<button @click="showDetailsBienModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
+                        <div v-for="oficina in dept.oficinas" :key="oficina.id" class="flex items-center gap-1">
+                            <button @click="selectOficina(oficina)" :class="[
+                                'flex-1 text-left px-2 py-1.5 rounded-md text-sm transition-colors',
+                                selectedOficina?.id === oficina.id ? 'bg-blue-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]">
+                                {{ oficina.nombre }}
+                            </button>
 
-		<!-- Property Details Report Modal -->
-		<div v-if="showDetailsBienReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-					<button @click="showDetailsBienReportModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<p class="text-gray-600 dark:text-gray-400">Selecciona el formato para el reporte del bien:</p>
-					<div class="space-y-2">
-						<button @click="exportBienToPDF" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-							</svg>
-							📊 Exportar a PDF
-						</button>
-						<button @click="exportBienToExcel" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-							</svg>
-							📋 Exportar a Excel
-						</button>
-						<button @click="printBienReport" class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2">
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z"></path>
-							</svg>
-							🖨️ Imprimir
-						</button>
-					</div>
-				</div>
-				<div class="border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showDetailsBienReportModal = false" class="w-full px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
-	</div>
+                            <button @click="openOficinaQR(oficina)" title="Generar QR para esta oficina"
+                                class="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <svg class="w-[18px] h-[18px] text-gray-800 dark:text-white" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4h6v6H4V4Zm10 10h6v6h-6v-6Zm0-10h6v6h-6V4Zm-4 10h.01v.01H10V14Zm0 4h.01v.01H10V18Zm-3 2h.01v.01H7V20Zm0-4h.01v.01H7V16Zm-3 2h.01v.01H4V18Zm0-4h.01v.01H4V14Z" />
+                                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 7h.01v.01H7V7Zm10 10h.01v.01H17V17Z" />
+                                </svg>
+
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Bienes (tabla) -->
+            <div class="lg:col-span-2">
+                <div v-if="!selectedOficina"
+                    class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 flex items-center justify-center h-full">
+                    <p class="text-gray-500 dark:text-gray-400">Selecciona una oficina de la lista para ver los bienes.
+                    </p>
+                </div>
+
+                <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-4 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 max-h-[80vh]">
+                        <div class="xl:col-span-2 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950">
+                            <div
+                                class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{selectedOficina.nombre }}</h3>
+
+                                <div v-if="!isSelectionModeActive" class="flex gap-2">
+                                    <button @click="activateSelectionMode"
+                                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium text-sm">
+                                        Selección de Lote
+                                    </button>
+                                    <button @click="showNewBienModal = true"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm">
+                                        Nuevo Bien
+                                    </button>
+                                    <button
+                                        class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium text-sm">
+                                        Reporte
+                                    </button>
+                                </div>
+
+                                <div v-else class="flex gap-2">
+                                    <button @click="openBienBatchQRModal" :disabled="selectedBienesCount === 0"
+                                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium text-sm disabled:opacity-50">
+                                        Generar QRs ({{ selectedBienesCount }})
+                                    </button>
+                                    <button @click="cancelSelectionMode"
+                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium text-sm">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div v-if="isLoadingBienes" class="flex items-center justify-center h-64">
+                                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600">
+                                </div>
+                                <p class="ml-4 text-gray-600 dark:text-gray-400">Cargando bienes...</p>
+                            </div>
+
+                            <div v-else class="overflow-x-auto overflow-y-auto max-h-[70vh]">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th v-if="isSelectionModeActive" class="px-4 py-3 w-12 text-center">
+                                                <input type="checkbox" v-model="selectAllBienes"
+                                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                                            </th>
+                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                Clave</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                Descripción</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                Estado</th>
+                                            <th
+                                                class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white justify-end">
+                                                Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                        <tr v-if="bienesList.data.length === 0">
+                                            <td colspan="5" class="px-4 py-6 text-center">No se encontraron bienes.</td>
+                                        </tr>
+                                        <tr v-else v-for="bien in bienesList.data" :key="bien.id">
+                                            <td v-if="isSelectionModeActive" class="px-4 py-3 text-center">
+                                                <input type="checkbox" :value="bien.id" v-model="selectedBienes"
+                                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                                            </td>
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
+                                                bien.bien_codigo || 'N/A' }}</small></td>
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
+                                                bien.bien_descripcion || 'N/A' }}</small></td>
+                                            <td class="px-4 py-3">
+                                                <span v-if="bien.bien_estado === 'Activo'"
+                                                    class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-semibold">Activo</span>
+                                                <span v-else-if="bien.bien_estado === 'En tránsito'"
+                                                    class="inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs font-semibold">En
+                                                    tránsito</span>
+                                                <span v-else-if="bien.bien_estado === 'Extravíado'"
+                                                    class="inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">Extravíado</span>
+                                                <span v-else-if="bien.bien_estado === 'Baja'"
+                                                    class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">Baja</span>
+                                                <span v-else
+                                                    class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">{{
+                                                        bien.bien_estado || 'N/A' }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 flex gap-2 justify-end">
+                                                <button @click="openIndividualQR(bien)" title="Generar QR"
+                                                    class="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                                    <svg class="w-[18px] h-[18px] text-gray-800 dark:text-white"
+                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 4h6v6H4V4Zm10 10h6v6h-6v-6Zm0-10h6v6h-6V4Zm-4 10h.01v.01H10V14Zm0 4h.01v.01H10V18Zm-3 2h.01v.01H7V20Zm0-4h.01v.01H7V16Zm-3 2h.01v.01H4V18Zm0-4h.01v.01H4V14Z" />
+                                                        <path stroke="currentColor" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M7 7h.01v.01H7V7Zm10 10h.01v.01H17V17Z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+                                                    title="Ver detalles" @click="openVerModal(bien)">
+                                                    <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-width="1.3"
+                                                            d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+                                                        <path stroke="currentColor" stroke-width="1.3"
+                                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                    </svg>
+                                                </button>
+                                                <button @click="openEditModal(bien)" title="Editar"
+                                                    class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"><svg
+                                                        class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke-width="1.3"
+                                                            d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+                                                    </svg>
+                                                </button>
+                                                <button @click="openDeleteModal(bien)" title="Eliminar"
+                                                    class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"><svg
+                                                        class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke-width="1.3"
+                                                            d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ModalNuevoBien :show="showNewBienModal" :fetch-function="authenticatedFetch"
+        :id-oficina="selectedOficina ? selectedOficina.id : null" @close="showNewBienModal = false"
+        @save="onBienSaved" />
+    <DeleteBienModal :show="showDeleteModal" :bien="deletingBien" :fetch-function="authenticatedFetch"
+        @close="closeDeleteModal" @delete-success="onBienDeleted" />
+    <EditarBienModal :show="showEditModal" :bien="editingBien" :fetch-function="authenticatedFetch"
+        @close="showEditModal = false" @edit-success="onBienEdited" />
+    <ModalVerBien :show="showVerModal" :bien="selectedBien" @close="closeVerModal" @open-baja-modal="openBajaModal"
+        @open-move-modal="openMoveModal" />
+    <ModalConfirmarBaja :show="showBajaModal" :bien="selectedBien" :is-submitting="isSubmittingBaja"
+        :error-message="bajaError" @close="closeBajaModal" @confirm-baja="handleConfirmBaja"
+        @clearError="bajaError = null" />
+    <ModalMoverBien :show="showMoveModal" :bien="selectedBien" :fetch-function="authenticatedFetch"
+        @close="closeMoveModal" @move-success="onBienMoved" />
+    <ModalGeneradorQR :show="showQRModal" :title="qrTitle" :value="qrValue" @close="showQRModal = false" />
+
+    <ModalImpresionLote :show="showLoteModal" :title="loteTitle" :lista="loteList" @close="showLoteModal = false" />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { authenticatedFetch } from '../../../config/api.js'
+import ModalNuevoBien from '../../../components/ModalNuevoBien.vue';
+import DeleteBienModal from '../../../components/DeleteBienModal.vue'
+import EditarBienModal from '../../../components/EditarBienModal.vue'
+import ModalVerBien from '../../../components/ModalVerBien.vue'
+import ModalConfirmarBaja from '../../../components/ModalConfirmarBaja.vue'
+import ModalMoverBien from '../../../components/ModalMoverBien.vue'
+import ModalGeneradorQR from '../../../components/ModalGeneradorQR.vue'
+import ModalImpresionLote from '../../../components/ModalImpresionLote.vue'
 
-const showNewBienModal = ref(false)
-const showEditBienModal = ref(false)
-const showReportModal = ref(false)
-const showDetailsBienModal = ref(false)
-const showDetailsBienReportModal = ref(false)
-const editingIndex = ref(null)
-const selectedBienDetails = ref(null)
-const searchTerm = ref('')
-const filterArea = ref('')
-const filterCategory = ref('')
-const assetInfoSettings = ref({
-	imagen: true,
-	marca: true,
-	modelo: true,
-	numeroSerie: true,
-	categoria: true,
-	area: true,
-	resguardante: true,
-	fechaAdquisicion: true,
-	valor: true,
-	documentoSoporte: true,
-	historialMantenimiento: true,
-	ubicacionesRegistradas: true,
+// --- Estados de Carga ---
+const isLoading = ref(true)
+const isLoadingStructure = ref(false) // Para la columna de Deptos/Oficinas
+const isLoadingBienes = ref(false)
+const error = ref(null)
+
+// --- Listas de Datos ---
+const areasList = ref([])           // Para el dropdown Verde
+const structureData = ref([])       // Para las columnas Roja/Azul/Rosa
+const bienesList = ref({ data: [] }) // Para la tabla Blanca
+
+const selectedArea = ref(null)
+const selectedOficina = ref(null) // Este objeto guardará la info de la oficina (para el cuadro Gris)
+
+const expandedDepartmentId = ref(null) // Rastrea el ID del departamento abierto
+
+const showNewBienModal = ref(false);
+const showEditModal = ref(false)
+const showDeleteModal = ref(false)
+
+const deletingBien = ref(null) // El 'bien' que se va a eliminar
+const editingBien = ref(null) // El 'bien' que se va a editar
+
+const showVerModal = ref(false)
+const showBajaModal = ref(false)
+const selectedBien = ref(null) // Un ref único para el bien seleccionado
+const isSubmittingBaja = ref(false)
+const bajaError = ref(null)
+
+const showMoveModal = ref(false)
+// Previene que el modal 'Ver' se reabra automáticamente después de confirmar acciones
+const preventReopenVer = ref(false)
+const showQRModal = ref(false)      // Para el modal individual
+const showLoteModal = ref(false)    // Para el modal de lote
+const qrTitle = ref('')             // Título para el modal
+const qrValue = ref('')             // Valor (código) para el modal individual
+const loteTitle = ref('')           // Título para el modal de lote
+const loteList = ref([])            // Lista de oficinas para el modal de lote
+
+const isSelectionModeActive = ref(false)  // Controla si los checkboxes son visibles
+const selectedBienes = ref(new Set()) // Guarda los IDs de los bienes seleccionados
+// --- 1. Funciones de Carga (API) ---
+// Carga el primer dropdown al iniciar
+const fetchAreas = async () => {
+    error.value = null
+    try {
+        const response = await authenticatedFetch('/areas') // (O la ruta de tu módulo de Áreas)
+        if (!response.ok) throw new Error('Error al cargar las áreas')
+        const data = await response.json()
+        areasList.value = data.data || data
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        isLoading.value = false
+    }
+}
+
+// Carga la estructura anidada de Departamentos y Oficinas (Cuadros Rojo/Azul/Rosa)
+const fetchStructure = async () => {
+    if (!selectedArea.value) return
+
+    // Resetea todo
+    isLoadingStructure.value = true
+    structureData.value = []
+    bienesList.value = { data: [] }
+    selectedOficina.value = null
+    error.value = null
+
+    try {
+        const response = await authenticatedFetch(`/areas/${selectedArea.value}/structure`)
+        if (!response.ok) throw new Error('Error al cargar la estructura del área')
+        structureData.value = await response.json()
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        isLoadingStructure.value = false
+    }
+}
+
+// Carga los Bienes (Cuadro Blanco)
+const fetchBienes = async () => {
+    if (!selectedOficina.value) return
+
+    isLoadingBienes.value = true
+    bienesList.value = { data: [] }
+    error.value = null
+
+    try {
+        const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes`)
+        if (!response.ok) throw new Error('Error al cargar los bienes')
+        bienesList.value = await response.json()
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        isLoadingBienes.value = false
+    }
+}
+
+// --- 2. Funciones de Interacción ---
+
+// Se llama al hacer clic en una Oficina (Cuadro Rosa)
+const selectOficina = (oficina) => {
+    selectedOficina.value = oficina
+    fetchBienes() // Carga los bienes para esa oficina
+}
+
+// --- 3. Carga Inicial ---
+onMounted(() => {
+    fetchAreas();
 })
-const showLoadingSettings = ref(false)
 
-// Load asset info settings from localStorage
-const loadAssetInfoSettings = () => {
-	const saved = localStorage.getItem('assetInfoFields')
-	if (saved) {
-		assetInfoSettings.value = JSON.parse(saved)
-	}
+// Se llama al hacer clic en el título de un departamento
+const toggleDepartment = (deptId) => {
+    // Si el que se clickeó ya estaba abierto, ciérralo (null).
+    // Si no, ábrelo (asigna el ID).
+    if (expandedDepartmentId.value === deptId) {
+        expandedDepartmentId.value = null;
+    } else {
+        expandedDepartmentId.value = deptId;
+    }
 }
 
-const bienes = ref([
-	{
-		serie: 'ABC123456',
-		modelo: 'OptiPlex 7090',
-		marca: 'Dell',
-		area: 'Sistemas',
-		resguardante: 'Juan Pérez',
-		estado: 'Bueno',
-		categoria: 'Equipo de computo',
-		fechaAdquisicion: '23/01/2025',
-		valor: '$8,500 MXN',
-		documentoSoporte: 'Factura',
-		historialMantenimiento: [
-			{ fecha: '15/02/2025', responsable: 'John Doe', estado: 'Finalizado' },
-			{ fecha: '17/02/2025', responsable: 'John Doe', estado: 'Finalizado' },
-			{ fecha: '22/02/2025', responsable: 'John Doe', estado: 'Finalizado' },
-			{ fecha: '01/04/2025', responsable: 'Juan Doe', estado: 'En Curso' },
-		],
-		ubicacionesRegistradas: [
-			{ fecha: '15/02/2025', ubicacion: 'Edificio P' },
-			{ fecha: '17/02/2025', ubicacion: 'Laboratorio de computo' },
-			{ fecha: '22/02/2025', ubicacion: 'Edificio P' },
-			{ fecha: '01/04/2025', ubicacion: 'Laboratorio de computo', actualmenteLocalizacion: true },
-		]
-	},
-	{
-		serie: 'XYZ789012',
-		modelo: 'ThinkPad E15',
-		marca: 'Lenovo',
-		area: 'RR.HH',
-		resguardante: 'María García',
-		estado: 'Regular',
-		categoria: 'Equipo de computo',
-		fechaAdquisicion: '15/03/2024',
-		valor: '$12,000 MXN',
-		documentoSoporte: 'Factura',
-		historialMantenimiento: [
-			{ fecha: '10/02/2025', responsable: 'John Doe', estado: 'Finalizado' },
-			{ fecha: '25/02/2025', responsable: 'John Doe', estado: 'Finalizado' },
-		],
-		ubicacionesRegistradas: [
-			{ fecha: '10/02/2025', ubicacion: 'Edificio A' },
-			{ fecha: '25/02/2025', ubicacion: 'Edificio B', actualmenteLocalizacion: true },
-		]
-	},
-])
+const onBienSaved = () => {
+    // El modal nos avisó que guardó algo, así que solo
+    // necesitamos recargar la tabla de bienes de la oficina actual.
+    if (selectedOficina.value) {
+        fetchBienes()
+    }
+}
+/**
+ * Abre el modal de eliminación y guarda el 'bien' seleccionado
+ */
+const openDeleteModal = (bien) => {
+    deletingBien.value = bien
+    showDeleteModal.value = true
+}
+/**
+ * Abre el modal de edición y guarda el 'bien' seleccionado
+ */
+const openEditModal = (bien) => {
+    editingBien.value = bien
+    showEditModal.value = true
+}
 
-const editingBien = ref({
-	serie: '', modelo: '', marca: '', area: '', resguardante: '', estado: ''
+/**
+ * Se llama cuando el modal de edición emite 'edit-success'
+ */
+const onBienEdited = () => {
+    showEditModal.value = false;
+    editingBien.value = null;
+    // Recarga la tabla
+    if (selectedOficina.value) {
+        fetchBienes();
+    }
+}
+
+/**
+ * Cierra el modal de eliminación
+ */
+const closeDeleteModal = () => {
+    showDeleteModal.value = false
+    // Retrasamos el reseteo del 'bien' para que el modal se cierre suavemente
+    setTimeout(() => {
+        deletingBien.value = null
+    }, 300);
+}
+const onBienDeleted = () => {
+    closeDeleteModal();
+    // Recarga la tabla de bienes de la oficina actual
+    if (selectedOficina.value) {
+        fetchBienes();
+    }
+}
+
+/**
+ * Abre el modal de "Ver Bien"
+ */
+const openVerModal = (bien) => {
+    selectedBien.value = bien
+    showVerModal.value = true
+}
+
+/**
+ * Abre el modal de "Baja"
+ */
+const openBajaModal = () => {
+    // 'selectedBien' ya está seteado por openVerModal
+    showVerModal.value = false // Cierra el modal de "Ver"
+    showBajaModal.value = true // Abre el modal de "Baja"
+}
+
+/**
+ * Cierra el modal de "Ver" y resetea el 'bien'
+ */
+const closeVerModal = () => {
+    showVerModal.value = false
+    setTimeout(() => {
+        selectedBien.value = null
+    }, 300)
+}
+
+/**
+ * Cierra el modal de "Baja"
+ */
+const closeBajaModal = () => {
+    showBajaModal.value = false
+    bajaError.value = null
+    isSubmittingBaja.value = false
+    // Si la acción que cerró este modal fue una confirmación (mover/baja),
+    // `preventReopenVer` estará en true y evitaremos reabrir el modal 'Ver'.
+    if (selectedBien.value && !preventReopenVer.value) {
+        showVerModal.value = true;
+    }
+    // Resetea el flag para futuras operaciones
+    preventReopenVer.value = false
+}
+/**
+ * Lógica de API para dar de Baja un bien (PUT)
+ */
+const handleConfirmBaja = async () => {
+    if (!selectedBien.value) return;
+
+    isSubmittingBaja.value = true
+    bajaError.value = null
+
+    try {
+        // Asumo una ruta de API para esto:
+        const response = await authenticatedFetch(`/bienes/${selectedBien.value.id}/baja`, {
+            method: 'PUT' // O 'POST', según tu API
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || 'No se pudo dar de baja el bien.');
+        }
+
+        // ¡Éxito!
+        // Evita que el modal 'Ver' se reabra automáticamente al confirmar la baja
+        preventReopenVer.value = true
+        closeBajaModal();
+        fetchBienes(); // Recarga la tabla
+
+    } catch (err) {
+        console.error('Error al dar de baja el bien:', err);
+        bajaError.value = err.message;
+    } finally {
+        isSubmittingBaja.value = false;
+    }
+}
+/**
+ * Cierra "Ver" y abre "Mover"
+ */
+const openMoveModal = () => {
+    // 'selectedBien' ya está seteado por openVerModal
+    showVerModal.value = false // Cierra el modal de "Ver"
+    showMoveModal.value = true // Abre el modal de "Mover"
+}
+
+/**
+ * Cierra el modal "Mover"
+ */
+const closeMoveModal = () => {
+  showMoveModal.value = false
+  
+  // Solo reabre si NO estamos previniendo la reapertura
+  if (selectedBien.value && !preventReopenVer.value) {
+    showVerModal.value = true;
+  }
+
+  // Reseteamos la bandera después de un momento para que 
+  // la próxima vez (si cancela) funcione normal
+  setTimeout(() => {
+    preventReopenVer.value = false;
+    // Si se confirmó el movimiento, también limpiamos el bien seleccionado
+    // para que no quede "colgando" en memoria
+    if (!showVerModal.value) {
+        selectedBien.value = null; 
+    }
+  }, 300);
+}
+
+/**
+ * Se llama cuando el bien se movió exitosamente
+ */
+const onBienMoved = () => {
+    // 1. Activamos la bandera: "No quiero volver atrás"
+    preventReopenVer.value = true;
+    
+    // 2. Cerramos el modal (que ahora respetará la bandera)
+    closeMoveModal();
+    
+    // 3. Recargamos datos
+    fetchStructure();
+    if (selectedOficina.value) {
+        fetchBienes(selectedOficina.value.id);
+    }
+}
+/**
+ * Abre el modal de QR individual para una oficina específica.
+ * (Se llama desde el botón [QR] al lado de una oficina)
+ */
+const openOficinaQR = (oficina) => {
+    qrTitle.value = oficina.nombre;
+    qrValue.value = oficina.ofi_codigo || 'N/A'; // El valor a codificar
+    showQRModal.value = true;
+}
+
+/**
+ * Abre el modal de impresión por lote para un departamento.
+ * (Se llama desde el botón "Generar QRs" del departamento)
+ */
+const openLoteQR = (departamento) => {
+    loteTitle.value = `Oficinas en: ${departamento.dep_nombre}`;
+    loteList.value = departamento.oficinas; // Pasa la lista de oficinas
+    showLoteModal.value = true;
+}
+
+const selectedBienesCount = computed(() => selectedBienes.value.size)
+// Lógica para el checkbox "Seleccionar Todos"
+const selectAllBienes = computed({
+    // 'get' comprueba si todos los bienes visibles están seleccionados
+    get() {
+        const currentBienes = bienesList.value.data || []
+        if (currentBienes.length === 0) return false
+        // Devuelve true SÓLO SI todos los 'bien.id' en la lista están en el 'Set'
+        return currentBienes.every(bien => selectedBienes.value.has(bien.id))
+    },
+    // 'set' se activa cuando el usuario hace clic en "Seleccionar Todos"
+    set(value) {
+        const currentBienesIds = (bienesList.value.data || []).map(bien => bien.id)
+        if (value) {
+            // Si value es 'true', añade todos los IDs visibles al Set
+            currentBienesIds.forEach(id => selectedBienes.value.add(id))
+        } else {
+            // Si value es 'false', quita todos los IDs visibles del Set
+            currentBienesIds.forEach(id => selectedBienes.value.delete(id))
+        }
+    }
 })
+const activateSelectionMode = () => {
+    isSelectionModeActive.value = true
+}
 
-const filteredBienes = computed(() => {
-	return bienes.value.filter(bien => {
-		const matchSearch = !searchTerm.value ||
-			bien.serie.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-			bien.modelo.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-			bien.marca.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-			bien.area.toLowerCase().includes(searchTerm.value.toLowerCase())
+/**
+ * Desactiva la UI de checkboxes y limpia la selección
+ */
+const cancelSelectionMode = () => {
+    isSelectionModeActive.value = false
+    selectedBienes.value.clear()
+}
 
-		const matchArea = !filterArea.value || bien.area === filterArea.value
-		const matchCategory = !filterCategory.value || bien.categoria === filterCategory.value
+/**
+ * Se llama al hacer clic en "Generar QRs (n)"
+ * Prepara los datos y abre el ModalImpresionLote
+ */
+const openBienBatchQRModal = () => {
+    const currentBienes = bienesList.value.data || []
+    // Filtra los objetos 'bien' completos que han sido seleccionados
+    const bienesSeleccionados = currentBienes.filter(bien =>
+        selectedBienes.value.has(bien.id)
+    )
 
-		return matchSearch && matchArea && matchCategory
-	})
+    // Prepara los datos para el 'ModalImpresionLote.vue'
+    loteTitle.value = `Lote de Bienes (${bienesSeleccionados.length} seleccionados)`
+
+    // El modal espera un array de { nombre: '...', ofi_codigo: '...' }
+    // Mapeamos nuestros bienes a ese formato
+    loteList.value = bienesSeleccionados.map(bien => ({
+        id: bien.id,
+        nombre: bien.bien_descripcion, // Usamos la descripción como nombre
+        ofi_codigo: bien.bien_codigo || bien.numero_serie // Usamos el código o N/S
+    }))
+
+    showLoteModal.value = true // Abre el modal de lote
+}
+const openIndividualQR = (bien) => {
+  // qrTitle y qrValue son los 'ref's que ya usas para el modal de QR de oficina
+  qrTitle.value = bien.bien_descripcion; // Usa la descripción del bien como título
+  qrValue.value = bien.bien_codigo || bien.numero_serie; // Usa el código o N/S
+  showQRModal.value = true; // 'showQRModal' es el 'ref' que ya usas
+}
+
+// --- 5. ACTUALIZA TU 'WATCH' DE 'selectedOficina' ---
+watch(selectedOficina, (newOficinaId) => {
+    // 1. Resetea los bienes
+    bienesList.value = { data: [] }
+
+    // --- AÑADIR ESTO ---
+    // 2. Resetea el modo de selección
+    isSelectionModeActive.value = false
+    selectedBienes.value.clear()
+    // --- FIN DE LA ADICIÓN ---
+
+    // 3. Carga los nuevos bienes
+    if (newOficinaId) { // Comprueba que newOficinaId no sea nulo
+        fetchBienes(newOficinaId)
+    }
 })
-
-const viewBienDetails = (index) => {
-	loadAssetInfoSettings()
-	selectedBienDetails.value = { ...bienes.value[index] }
-	showDetailsBienModal.value = true
-}
-
-const generateBienReport = () => {
-	showDetailsBienReportModal.value = true
-}
-
-const exportBienToPDF = () => {
-	if (selectedBienDetails.value) {
-		const reportContent = generateReportContent(selectedBienDetails.value)
-		console.log('Generando PDF:', reportContent)
-		alert('Reporte PDF generado para: ' + selectedBienDetails.value.serie)
-		showDetailsBienReportModal.value = false
-	}
-}
-
-const exportBienToExcel = () => {
-	if (selectedBienDetails.value) {
-		const reportContent = generateReportContent(selectedBienDetails.value)
-		console.log('Generando Excel:', reportContent)
-		alert('Reporte Excel generado para: ' + selectedBienDetails.value.serie)
-		showDetailsBienReportModal.value = false
-	}
-}
-
-const printBienReport = () => {
-	if (selectedBienDetails.value) {
-		const reportContent = generateReportContent(selectedBienDetails.value)
-		console.log('Imprimiendo reporte:', reportContent)
-		window.print()
-		showDetailsBienReportModal.value = false
-	}
-}
-
-const generateReportContent = (bien) => {
-	return {
-		titulo: 'Reporte de Bien',
-		bien: bien,
-		fecha: new Date().toLocaleDateString('es-ES'),
-		incluye: [
-			'Información del bien',
-			'Estado actual',
-			'Historial de mantenimiento',
-			'Ubicaciones registradas'
-		]
-	}
-}
-
-const editBien = (index) => {
-	editingIndex.value = index
-	editingBien.value = { ...bienes.value[index] }
-	showEditBienModal.value = true
-}
-
-const saveEditBien = () => {
-	if (editingIndex.value !== null) {
-		bienes.value[editingIndex.value] = { ...editingBien.value }
-		showEditBienModal.value = false
-	}
-}
-
-const deleteBien = (index) => {
-	if (confirm('¿Estás seguro de que quieres eliminar este bien?')) {
-		bienes.value.splice(index, 1)
-	}
-}
-
-const saveNewBien = () => {
-	showNewBienModal.value = false
-}
 </script>

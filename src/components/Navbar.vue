@@ -48,6 +48,7 @@
 			<div v-if="isOpen" class="md:hidden bg-gray-800 dark:bg-gray-900 border-t border-gray-700">
 				<div class="space-y-2 px-2 pt-2 pb-3">
 					<RouterLink to="/" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition-colors" @click="isOpen = false">Inicio</RouterLink>
+					<RouterLink to="/catalogo-cucop-camba" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition-colors" @click="isOpen = false">Catálogo CUCOP</RouterLink>
 					<RouterLink to="/about" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition-colors" @click="isOpen = false">Acerca de</RouterLink>
 					<RouterLink to="/contact" class="block px-3 py-2 rounded-md hover:bg-gray-700 transition-colors" @click="isOpen = false">Contáctanos</RouterLink>
 				</div>
