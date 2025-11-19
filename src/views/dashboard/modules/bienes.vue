@@ -114,11 +114,13 @@
                 </div>
 
                 <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                    <div class="xl:col-span-4 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 max-h-[80vh]">
+                    <div
+                        class="xl:col-span-4 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 max-h-[80vh]">
                         <div class="xl:col-span-2 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950">
                             <div
                                 class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{selectedOficina.nombre }}</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ selectedOficina.nombre
+                                    }}</h3>
 
                                 <div v-if="!isSelectionModeActive" class="flex gap-2">
                                     <button @click="activateSelectionMode"
@@ -272,8 +274,8 @@
     <ModalMoverBien :show="showMoveModal" :bien="selectedBien" :fetch-function="authenticatedFetch"
         @close="closeMoveModal" @move-success="onBienMoved" />
     <ModalGeneradorQR :show="showQRModal" :title="qrTitle" :value="qrValue" @close="showQRModal = false" />
-
-    <ModalImpresionLote :show="showLoteModal" :title="loteTitle" :lista="loteList" @close="showLoteModal = false" />
+    <ModalImpresionLote :show="showLoteModal" :title="loteTitle" :lista="loteList" :is-bienes="true"
+        @close="showLoteModal = false" />
 </template>
 
 <script setup>
@@ -550,23 +552,23 @@ const openMoveModal = () => {
  * Cierra el modal "Mover"
  */
 const closeMoveModal = () => {
-  showMoveModal.value = false
-  
-  // Solo reabre si NO estamos previniendo la reapertura
-  if (selectedBien.value && !preventReopenVer.value) {
-    showVerModal.value = true;
-  }
+    showMoveModal.value = false
 
-  // Reseteamos la bandera después de un momento para que 
-  // la próxima vez (si cancela) funcione normal
-  setTimeout(() => {
-    preventReopenVer.value = false;
-    // Si se confirmó el movimiento, también limpiamos el bien seleccionado
-    // para que no quede "colgando" en memoria
-    if (!showVerModal.value) {
-        selectedBien.value = null; 
+    // Solo reabre si NO estamos previniendo la reapertura
+    if (selectedBien.value && !preventReopenVer.value) {
+        showVerModal.value = true;
     }
-  }, 300);
+
+    // Reseteamos la bandera después de un momento para que 
+    // la próxima vez (si cancela) funcione normal
+    setTimeout(() => {
+        preventReopenVer.value = false;
+        // Si se confirmó el movimiento, también limpiamos el bien seleccionado
+        // para que no quede "colgando" en memoria
+        if (!showVerModal.value) {
+            selectedBien.value = null;
+        }
+    }, 300);
 }
 
 /**
@@ -575,10 +577,10 @@ const closeMoveModal = () => {
 const onBienMoved = () => {
     // 1. Activamos la bandera: "No quiero volver atrás"
     preventReopenVer.value = true;
-    
+
     // 2. Cerramos el modal (que ahora respetará la bandera)
     closeMoveModal();
-    
+
     // 3. Recargamos datos
     fetchStructure();
     if (selectedOficina.value) {
@@ -643,47 +645,58 @@ const cancelSelectionMode = () => {
  * Se llama al hacer clic en "Generar QRs (n)"
  * Prepara los datos y abre el ModalImpresionLote
  */
+// --- AÑADE ESTA FUNCIÓN HELPER PARA BUSCAR NOMBRES ---
+const getCurrentContextNames = () => {
+    let oficinaNombre = 'N/A';
+    let deptoNombre = 'N/A';
+
+    // 1. Nombre de la Oficina (ya lo tenemos en selectedOficina)
+    if (selectedOficina.value) {
+        oficinaNombre = selectedOficina.value.nombre;
+    }
+
+    // 2. Nombre del Departamento
+    // Opción A: Si estamos en vista de Acordeón (structureData tiene datos)
+    if (structureData.value.length > 0 && selectedOficina.value) {
+        // Buscamos el departamento que contiene esta oficina
+        const parentDept = structureData.value.find(dept =>
+            dept.oficinas.some(ofi => ofi.id === selectedOficina.value.id)
+        );
+        if (parentDept) deptoNombre = parentDept.dep_nombre;
+    }
+
+    // Opción B: Si estamos en vista de Dropdowns y no lo encontramos arriba
+    if (deptoNombre === 'N/A' && selectedDepartment.value) {
+        // Buscamos en departmentsList si existe
+        const dept = departmentsList.value.find(d => d.id === selectedDepartment.value);
+        if (dept) deptoNombre = dept.dep_nombre;
+    }
+
+    return { oficinaNombre, deptoNombre };
+}
+
+// --- ACTUALIZA ESTA FUNCIÓN ---
 const openBienBatchQRModal = () => {
     const currentBienes = bienesList.value.data || []
-    // Filtra los objetos 'bien' completos que han sido seleccionados
     const bienesSeleccionados = currentBienes.filter(bien =>
         selectedBienes.value.has(bien.id)
     )
 
-    // Prepara los datos para el 'ModalImpresionLote.vue'
     loteTitle.value = `Lote de Bienes (${bienesSeleccionados.length} seleccionados)`
 
-    // El modal espera un array de { nombre: '...', ofi_codigo: '...' }
-    // Mapeamos nuestros bienes a ese formato
+    // Obtenemos los nombres del contexto actual
+    const { oficinaNombre, deptoNombre } = getCurrentContextNames();
+
+    // Mapeamos los datos incluyendo la info extra para el CSV
     loteList.value = bienesSeleccionados.map(bien => ({
         id: bien.id,
-        nombre: bien.bien_descripcion, // Usamos la descripción como nombre
-        ofi_codigo: bien.bien_codigo || bien.numero_serie // Usamos el código o N/S
+        nombre: bien.bien_descripcion,
+        ofi_codigo: bien.bien_codigo || bien.numero_serie,
+        // Datos extra para el CSV:
+        oficina_nombre: oficinaNombre,
+        departamento_nombre: deptoNombre
     }))
 
-    showLoteModal.value = true // Abre el modal de lote
+    showLoteModal.value = true
 }
-const openIndividualQR = (bien) => {
-  // qrTitle y qrValue son los 'ref's que ya usas para el modal de QR de oficina
-  qrTitle.value = bien.bien_descripcion; // Usa la descripción del bien como título
-  qrValue.value = bien.bien_codigo || bien.numero_serie; // Usa el código o N/S
-  showQRModal.value = true; // 'showQRModal' es el 'ref' que ya usas
-}
-
-// --- 5. ACTUALIZA TU 'WATCH' DE 'selectedOficina' ---
-watch(selectedOficina, (newOficinaId) => {
-    // 1. Resetea los bienes
-    bienesList.value = { data: [] }
-
-    // --- AÑADIR ESTO ---
-    // 2. Resetea el modo de selección
-    isSelectionModeActive.value = false
-    selectedBienes.value.clear()
-    // --- FIN DE LA ADICIÓN ---
-
-    // 3. Carga los nuevos bienes
-    if (newOficinaId) { // Comprueba que newOficinaId no sea nulo
-        fetchBienes(newOficinaId)
-    }
-})
 </script>

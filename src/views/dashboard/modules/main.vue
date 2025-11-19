@@ -54,6 +54,15 @@
 							<p class="text-sm text-gray-600 dark:text-gray-400">No hay transferencias recientes.</p>
 						</div>
 					</div>
+					<div class="p-4 rounded-lg bg-white dark:bg-dark-bg shadow-md dark:shadow-stone-950">
+						<div class="flex items-center justify-between mb-4">
+							<h5 class="font-medium text-sm text-gray-500 dark:text-gray-400">Estado del Inventario</h5>
+						</div>
+						<EstadoBienesChart 
+        					v-if="dashboardData" 
+        					:api-data="dashboardData.estados_bienes" 
+    					/>
+					</div>
 				</div>
 				<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4">
 					<div class="flex items-center justify-between mb-4">
@@ -288,7 +297,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { authenticatedFetch } from '../../../config/api'
-
+import EstadoBienesChart from '../../../components/EstadosBienesChart.vue'
 // --- Estado Reactivo ---
 const dashboardData = ref(null)
 const isLoading = ref(true)
