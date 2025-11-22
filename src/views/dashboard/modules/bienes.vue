@@ -119,10 +119,18 @@
                         <div class="xl:col-span-2 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950">
                             <div
                                 class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ selectedOficina.nombre
-                                    }}</h3>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ selectedOficina.nombre
+                                        }}</h3>
+                                    <input
+                                        v-model="searchQuery"
+                                        type="text"
+                                        placeholder="Buscar por código, marca, modelo, valor, proveedor, factura..."
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
 
-                                <div v-if="!isSelectionModeActive" class="flex gap-2">
+                                <div v-if="!isSelectionModeActive" class="flex gap-2 ml-4">
                                     <button @click="activateSelectionMode"
                                         class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium text-sm">
                                         Selección de Lote
@@ -175,10 +183,10 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                                        <tr v-if="bienesList.data.length === 0">
-                                            <td colspan="5" class="px-4 py-6 text-center">No se encontraron bienes.</td>
+                                        <tr v-if="paginatedBienes.length === 0">
+                                            <td colspan="5" class="px-4 py-6 text-center">{{ searchQuery ? 'No se encontraron bienes que coincidan con la búsqueda.' : 'No se encontraron bienes.' }}</td>
                                         </tr>
-                                        <tr v-else v-for="bien in bienesList.data" :key="bien.id">
+                                        <tr v-else v-for="bien in paginatedBienes" :key="bien.id">
                                             <td v-if="isSelectionModeActive" class="px-4 py-3 text-center">
                                                 <input type="checkbox" :value="bien.id" v-model="selectedBienes"
                                                     class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
@@ -252,6 +260,36 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- Paginación -->
+                            <div v-if="filteredBienes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+                                <button
+                                    @click="prevPage"
+                                    :disabled="currentPage === 1"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    Atrás
+                                </button>
+
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Página {{ currentPage }} de {{ totalPages }}
+                                    <span v-if="searchQuery" class="text-xs text-gray-500 dark:text-gray-400">({{ filteredBienes.length }} resultados)</span>
+                                </span>
+
+                                <button
+                                    @click="nextPage"
+                                    :disabled="currentPage === totalPages"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+                                >
+                                    Adelante
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -303,6 +341,12 @@ const bienesList = ref({ data: [] }) // Para la tabla Blanca
 
 const selectedArea = ref(null)
 const selectedOficina = ref(null) // Este objeto guardará la info de la oficina (para el cuadro Gris)
+
+// --- Búsqueda y Paginación ---
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 15
+const totalItems = ref(0)
 
 const expandedDepartmentId = ref(null) // Rastrea el ID del departamento abierto
 
@@ -370,7 +414,7 @@ const fetchStructure = async () => {
 }
 
 // Carga los Bienes (Cuadro Blanco)
-const fetchBienes = async () => {
+const fetchBienes = async (page = 1) => {
     if (!selectedOficina.value) return
 
     isLoadingBienes.value = true
@@ -378,9 +422,18 @@ const fetchBienes = async () => {
     error.value = null
 
     try {
-        const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes`)
+        const params = new URLSearchParams()
+        params.append('page', page)
+
+        if (searchQuery.value.trim()) {
+            params.append('search', searchQuery.value.toUpperCase())
+        }
+
+        const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes?${params.toString()}`)
         if (!response.ok) throw new Error('Error al cargar los bienes')
         bienesList.value = await response.json()
+        totalItems.value = bienesList.value.total || 0
+        currentPage.value = page
     } catch (e) {
         error.value = e.message
     } finally {
@@ -393,8 +446,19 @@ const fetchBienes = async () => {
 // Se llama al hacer clic en una Oficina (Cuadro Rosa)
 const selectOficina = (oficina) => {
     selectedOficina.value = oficina
+    searchQuery.value = '' // Resetea la búsqueda
+    currentPage.value = 1 // Resetea la paginación
     fetchBienes() // Carga los bienes para esa oficina
 }
+
+// --- Watchers ---
+// Resetea a la página 1 y refetch cuando cambia la búsqueda
+watch(searchQuery, () => {
+    currentPage.value = 1
+    if (selectedOficina.value) {
+        fetchBienes(1)
+    }
+})
 
 // --- 3. Carga Inicial ---
 onMounted(() => {
@@ -605,6 +669,31 @@ const openLoteQR = (departamento) => {
     loteTitle.value = `Oficinas en: ${departamento.dep_nombre}`;
     loteList.value = departamento.oficinas; // Pasa la lista de oficinas
     showLoteModal.value = true;
+}
+
+// --- Búsqueda y Paginación (Computed Properties) ---
+const filteredBienes = computed(() => {
+    return bienesList.value.data || []
+})
+
+const totalPages = computed(() => {
+    return Math.ceil(totalItems.value / itemsPerPage) || 1
+})
+
+const paginatedBienes = computed(() => {
+    return bienesList.value.data || []
+})
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        fetchBienes(currentPage.value + 1)
+    }
+}
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        fetchBienes(currentPage.value - 1)
+    }
 }
 
 const selectedBienesCount = computed(() => selectedBienes.value.size)

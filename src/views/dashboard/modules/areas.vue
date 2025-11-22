@@ -532,8 +532,61 @@
 						<select v-model="newAreaData.id_resguardante_responsable"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null">Seleccionar responsable</option>
-							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay
-								responsables disponibles --</option>
+							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay responsables disponibles --</option>
+							<option v-else v-for="r in resguardantes" :key="r.id" :value="r.id">
+								{{ r.res_nombre }}
+							</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
+						<select v-model="newAreaData.id_edificio" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="null">Seleccionar edificio</option>
+							<option v-if="buildings.length === 0" disabled class="text-gray-400">-- No hay edificios disponibles --</option>
+							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">
+								{{ b.nombre }}
+							</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+					<button @click="showNewAreaModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
+					<button @click="saveNewArea" :disabled="isSubmitting" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+						{{ isSubmitting ? 'Creando...' : 'Crear Área' }}
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal de editar área -->
+		<div v-if="showEditAreaModal && editingArea" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+			<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
+
+				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Área</h2>
+					<button @click="showEditAreaModal = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+				</div>
+
+				<div v-if="editAreaError" class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center" role="alert">
+					<span class="font-medium text-sm">{{ editAreaError }}</span>
+					<button @click="editAreaError = null" class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+				</div>
+
+				<div class="p-6 space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre del Área</label>
+						<input v-model="editingArea.area_nombre" type="text" placeholder="Nombre del área" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Código del Área</label>
+						<input v-model="editingArea.area_codigo" type="text" placeholder="Código (ej. LAB-SIS-001)" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsable del Área</label>
+						<select v-model="editingArea.id_resguardante_responsable" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+							<option :value="null">Seleccionar responsable</option>
+							<option v-if="resguardantes.length === 0" disabled class="text-gray-400">-- No hay responsables disponibles --</option>
 							<option v-else v-for="r in resguardantes" :key="r.id" :value="r.id">
 								{{ r.res_nombre }}
 							</option>

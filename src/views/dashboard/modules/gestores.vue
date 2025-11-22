@@ -17,7 +17,7 @@
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4 space-y-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar gestor</label>
@@ -35,7 +35,7 @@
 			</div>
 		</div>
 		<!-- TABLA DE GESTORES-->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  overflow-x-auto">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto">
 			<div v-if="filteredGestores.length === 0" class="flex items-center justify-center h-64">
 				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
 			</div>
@@ -271,6 +271,7 @@ const saveNewGestor = async () => {
 			gestor_apellidos: newGestorData.value.apellidos,
 			gestor_correo: newGestorData.value.correo,
 			usuario_pass: newGestorData.value.password,
+			usuario_id_rol: 2,
 		}
 		const response = await authenticatedFetch('/gestores', {
 			method: 'POST',

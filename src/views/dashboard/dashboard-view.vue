@@ -125,7 +125,9 @@
 					</button>
 					<div class="flex-1"></div>
 					<div class="flex items-center gap-2">
+
 						<!-- Theme Toggle Button -->
+            
 						<button @click="toggleTheme" :class="[
 							'p-2 rounded-lg transition-colors',
 							isDark ? 'bg-yellow-100 text-yellow-900 hover:bg-yellow-200' : 'bg-blue-200 text-blue-900 hover:bg-blue-300'
