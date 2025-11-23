@@ -35,7 +35,12 @@
 			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative">
+			<div v-if="isLoadingResguardantes"
+				class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
+				<div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
+				<p class="ml-4 mt-2 text-gray-600 dark:text-gray-400 font-medium">Actualizando resultados...</p>
+			</div>
 			<div v-if="filteredResguardantes.length === 0" class="flex items-center justify-center h-64">
 				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
 			</div>
@@ -357,6 +362,7 @@ import { authenticatedFetch } from '../../../config/api.js'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const isLoading = ref(true)
+const isLoadingResguardantes = ref(false)
 const error = ref(null)
 const isSubmitting = ref(false)
 const showNewResguardanteModal = ref(false)
@@ -453,6 +459,7 @@ const fetchResguardantesData = async (page = 1) => {
 		resguardantesList.value = { data: [] }
 	} finally {
 		isLoading.value = false
+		isLoadingResguardantes.value = false
 	}
 }
 
@@ -470,11 +477,14 @@ const prevPage = () => {
 
 let searchTimeout
 watch(searchTerm, () => {
-	clearTimeout(searchTimeout)
+	if (searchTimeout) clearTimeout(searchTimeout)
+
+	isLoadingResguardantes.value = true
+
 	searchTimeout = setTimeout(() => {
 		currentPage.value = 1
 		fetchResguardantesData(1)
-	}, 300)
+	}, 500)
 })
 
 const getDepartmentName = (deptId) => {

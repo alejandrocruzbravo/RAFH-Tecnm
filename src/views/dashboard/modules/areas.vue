@@ -1209,7 +1209,7 @@ const oficinaPaginatedData = computed(() => {
 })
 
 const filteredAreas = computed(() => {
-	const baseAreas = areas.value.data || []
+	const baseAreas = areas.value.data || areas.value || []
 	return baseAreas.filter(area => {
 		const matchesResponsable = !filterResponsable.value ||
 			(area.responsable && area.responsable.id === parseInt(filterResponsable.value))
@@ -1260,35 +1260,33 @@ const fetchAllData = async () => {
 	error.value = null
 	fetchBuildingsError.value = null
 	try {
-		const [areasRes, optionsRes, departmentsRes, areasListRes, buildingsRes, oficinasRes] = await Promise.all([
+		const [areasRes, optionsRes, areasListRes] = await Promise.all([
 			authenticatedFetch('/areas?page=1'),
 			authenticatedFetch('/area-form-options'),
-			authenticatedFetch('/departamentos'),
-			authenticatedFetch('/formularios/departamentos'),
-			authenticatedFetch('/edificios'),
-			authenticatedFetch('/oficinas')
+			authenticatedFetch('/formularios/departamentos')
 		])
 
 		if (!areasRes.ok) throw new Error('Error al cargar áreas')
 		if (!optionsRes.ok) throw new Error('Error al cargar opciones del formulario')
-		if (!departmentsRes.ok) throw new Error('Error al cargar departamentos')
 		if (!areasListRes.ok) throw new Error('Error al cargar lista de áreas')
-		if (!buildingsRes.ok) throw new Error('Error al cargar edificios')
-		if (!oficinasRes.ok) throw new Error('Error al cargar oficinas')
 
 		const fetchedAreas = await areasRes.json()
 		areas.value = fetchedAreas
 		totalItems.value = fetchedAreas.total || 0
 		currentPage.value = 1
 		const optionsData = await optionsRes.json()
-		departments.value = await departmentsRes.json()
-		buildingsData.value = await buildingsRes.json()
 		areasList.value = await areasListRes.json()
-		oficinasData.value = await oficinasRes.json()
 
 		resguardantes.value = optionsData.responsables || []
 		jefesDepartamento.value = areasList.value.responsables || []
 		buildings.value = optionsData.edificios || []
+
+		// Fetch paginated data for departments, buildings, and offices
+		await Promise.all([
+			fetchAllDepartments(),
+			fetchAllBuildings(),
+			fetchAllOficinas()
+		])
 
 	} catch (e) {
 		console.error('Error al cargar datos:', e)
@@ -1298,6 +1296,81 @@ const fetchAllData = async () => {
 		}
 	} finally {
 		isLoading.value = false
+	}
+}
+
+const fetchAllDepartments = async () => {
+	try {
+		let allDepartments = []
+		let page = 1
+		let hasMore = true
+
+		while (hasMore) {
+			const response = await authenticatedFetch(`/departamentos?page=${page}`)
+			if (!response.ok) throw new Error('Error al cargar departamentos')
+
+			const data = await response.json()
+			const pageData = data.data || [data] || []
+			allDepartments = allDepartments.concat(pageData)
+
+			hasMore = data.next_page_url !== null && data.next_page_url !== undefined
+			page++
+		}
+
+		departments.value = { data: allDepartments }
+	} catch (err) {
+		console.error('Error al cargar departamentos:', err)
+		departments.value = { data: [] }
+	}
+}
+
+const fetchAllBuildings = async () => {
+	try {
+		let allBuildings = []
+		let page = 1
+		let hasMore = true
+
+		while (hasMore) {
+			const response = await authenticatedFetch(`/edificios?page=${page}`)
+			if (!response.ok) throw new Error('Error al cargar edificios')
+
+			const data = await response.json()
+			const pageData = data.data || [data] || []
+			allBuildings = allBuildings.concat(pageData)
+
+			hasMore = data.next_page_url !== null && data.next_page_url !== undefined
+			page++
+		}
+
+		buildingsData.value = { data: allBuildings }
+	} catch (err) {
+		console.error('Error al cargar edificios:', err)
+		buildingsData.value = { data: [] }
+	}
+}
+
+const fetchAllOficinas = async () => {
+	try {
+		let allOficinas = []
+		let page = 1
+		let hasMore = true
+
+		while (hasMore) {
+			const response = await authenticatedFetch(`/oficinas?page=${page}`)
+			if (!response.ok) throw new Error('Error al cargar oficinas')
+
+			const data = await response.json()
+			const pageData = data.data || [data] || []
+			allOficinas = allOficinas.concat(pageData)
+
+			hasMore = data.next_page_url !== null && data.next_page_url !== undefined
+			page++
+		}
+
+		oficinasData.value = { data: allOficinas }
+	} catch (err) {
+		console.error('Error al cargar oficinas:', err)
+		oficinasData.value = { data: [] }
 	}
 }
 
@@ -1338,9 +1411,14 @@ const prevPage = () => {
 	}
 }
 
+let searchTimeout = null
+
 watch(searchQuery, () => {
-	currentPage.value = 1
-	fetchAreas(1)
+	if (searchTimeout) clearTimeout(searchTimeout)
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+		fetchAreas(1)
+	}, 500)
 })
 
 watch(searchDepartment, () => {
@@ -1523,13 +1601,7 @@ const confirmDeleteArea = async () => {
 }
 
 const fetchDepartments = async () => {
-	try {
-		const response = await authenticatedFetch('/departamentos')
-		if (!response.ok) throw new Error('Error al recargar departamentos')
-		departments.value = await response.json()
-	} catch (err) {
-		console.error(err)
-	}
+	await fetchAllDepartments()
 }
 
 const openNewDepartmentModal = () => {
@@ -1683,18 +1755,7 @@ const handleConfirmDelete = async () => {
 }
 
 const fetchBuildings = async () => {
-	fetchBuildingsError.value = null
-	try {
-		const response = await authenticatedFetch('/edificios')
-		if (!response.ok) {
-			throw new Error('Error al recargar los edificios')
-		}
-		buildingsData.value = await response.json()
-
-	} catch (e) {
-		console.error('Error al recargar edificios:', e)
-		fetchBuildingsError.value = e.message
-	}
+	await fetchAllBuildings()
 }
 
 const openNewBuildingModal = () => {
@@ -1859,17 +1920,7 @@ const fetchFormOptions = async () => {
 }
 
 const fetchOficinas = async () => {
-	fetchOficinasError.value = null
-	try {
-		const response = await authenticatedFetch('/oficinas')
-		if (!response.ok) {
-			throw new Error('Error al recargar las oficinas')
-		}
-		oficinasData.value = await response.json()
-	} catch (e) {
-		console.error('Error al recargar oficinas:', e)
-		fetchOficinasError.value = e.message
-	}
+	await fetchAllOficinas()
 }
 
 const openNewOficinaModal = () => {

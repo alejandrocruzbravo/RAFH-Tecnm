@@ -220,6 +220,7 @@ const fetchError = ref(null)
 const catalogoList = ref({ data: [] }) // Asumimos paginación
 const searchTerm = ref('') // Para la barra de búsqueda
 const currentPage = ref(1)
+let searchTimeout = null
 const itemsPerPage = 15
 const totalItems = ref(0)
 const isSubmitting = ref(false)
@@ -274,7 +275,7 @@ const fetchCatalogo = async (page = 1) => {
         // Asumo esta ruta base para tu catálogo
         const response = await authenticatedFetch(`/catalogo-camb-cucop?${params.toString()}`)
         if (!response.ok) {
-            throw new Error('Error al cargar el catálogo CUCOP/CAMB')
+            throw new Error('Error al cargar el cat��logo CUCOP/CAMB')
         }
         const data = await response.json()
         catalogoList.value = data
@@ -302,8 +303,11 @@ const prevPage = () => {
 }
 
 watch(searchTerm, () => {
+    if (searchTimeout) clearTimeout(searchTimeout)
     currentPage.value = 1
-    fetchCatalogo(1)
+    searchTimeout = setTimeout(() => {
+        fetchCatalogo(1)
+    }, 500)
 })
 
 /**

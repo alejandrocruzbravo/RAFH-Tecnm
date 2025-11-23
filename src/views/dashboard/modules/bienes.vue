@@ -131,11 +131,8 @@
                             <div
                                 class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{
-                                        selectedOficina.nombre
-                                    }}</h3>
-                                    <input v-model="searchQuery" type="text"
-                                        placeholder="Buscar por código, marca, modelo, valor, proveedor, factura..."
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ selectedOficina.nombre }}</h3>
+                                    <input v-model="searchQuery" type="text" placeholder="Buscar por código, marca, modelo, valor, proveedor, factura..."
                                         class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
 
@@ -185,23 +182,19 @@
                                                     <input type="checkbox" v-model="selectAllBienes"
                                                         class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
                                                 </th>
-                                                <th
-                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
                                                     Clave</th>
-                                                <th
-                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
                                                     Descripción</th>
-                                                <th
-                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
                                                     Estado</th>
-                                                <th
-                                                    class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white justify-end">
+                                                <th class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white justify-end">
                                                     Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
                                             <tr v-if="paginatedBienes.length === 0">
-                                                <td colspan="5" class="px-4 py-6 text-center">{{ searchQuery ? 'No se encontraron bienes que coincidan con la búsqueda.' : 'No seencontraron bienes.' }}</td>
+                                                <td colspan="5" class="px-4 py-6 text-center">{{ searchQuery ? 'No se encontraron bienes que coincidan con la búsqueda.' : 'No se encontraron bienes.' }}</td>
                                             </tr>
                                             <tr v-else v-for="bien in paginatedBienes" :key="bien.id">
                                                 <td v-if="isSelectionModeActive" class="px-4 py-3 text-center">
@@ -282,29 +275,31 @@
                             </div>
 
                             <!-- Paginación -->
-                            <div v-if="filteredBienes.length > 0"
-                                class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-                                <button @click="prevPage" :disabled="currentPage === 1"
-                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
+                            <div v-if="filteredBienes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+                                <button
+                                    @click="prevPage"
+                                    :disabled="currentPage === 1"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+                                >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 19l-7-7 7-7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                     </svg>
                                     Atrás
                                 </button>
 
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Página {{ currentPage }} de {{ totalPages }}
-                                    <span v-if="searchQuery" class="text-xs text-gray-500 dark:text-gray-400">({{
-                                        filteredBienes.length }} resultados)</span>
+                                    <span v-if="searchQuery" class="text-xs text-gray-500 dark:text-gray-400">({{ filteredBienes.length }} resultados)</span>
                                 </span>
 
-                                <button @click="nextPage" :disabled="currentPage === totalPages"
-                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
+                                <button
+                                    @click="nextPage"
+                                    :disabled="currentPage === totalPages"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+                                >
                                     Adelante
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                 </button>
                             </div>
@@ -412,6 +407,7 @@ const selectedBienToReactivate = ref(null);
 
 const itemSeleccionadoParaQR = ref({});
 let searchTimeout = null;
+
 // --- 1. Funciones de Carga (API) ---
 // Carga el primer dropdown al iniciar
 const fetchAreas = async () => {
@@ -485,13 +481,13 @@ const selectOficina = (oficina) => {
     selectedOficina.value = oficina
     searchQuery.value = '' // Resetea la búsqueda
     currentPage.value = 1 // Resetea la paginación
-    selectedBienesMap.value.clear() // <--- Limpiar al cambiar de oficina
-    isSelectionModeActive.value = false // <--- Salir del modo selección
+    selectedBienesMap.value.clear() // Limpiar al cambiar de oficina
+    isSelectionModeActive.value = false // Salir del modo selección
     fetchBienes() // Carga los bienes para esa oficina
 }
 
 // --- Watchers ---
-// Resetea a la página 1 y refetch cuando cambia la búsqueda
+// Resetea a la página 1 y refetch cuando cambia la búsqueda con debouncing
 watch(searchQuery, (newVal) => {
     // 1. Si el usuario sigue escribiendo, cancelamos la búsqueda anterior
     if (searchTimeout) clearTimeout(searchTimeout);
@@ -747,6 +743,7 @@ const toggleSelection = (bien) => {
         selectedBienesMap.value.set(bien.id, bien);
     }
 }
+
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
         fetchBienes(currentPage.value + 1)
@@ -758,7 +755,6 @@ const prevPage = () => {
         fetchBienes(currentPage.value - 1)
     }
 }
-
 
 // Lógica para el checkbox "Seleccionar Todos"
 const selectAllBienes = computed({
@@ -781,6 +777,7 @@ const selectAllBienes = computed({
         }
     }
 })
+
 const selectedBienesCount = computed(() => selectedBienesMap.value.size)
 
 const activateSelectionMode = () => {
@@ -850,6 +847,7 @@ const openBienBatchQRModal = () => {
     isBienesQR.value = true;
     showLoteModal.value = true
 }
+
 const openIndividualQR = (bien) => {
     const deptoNombre = getCurrentContextNames().deptoNombre;
     const item = {
@@ -865,6 +863,7 @@ const openIndividualQR = (bien) => {
     isBienesQR.value = true;
     showQRModal.value = true;
 }
+
 // Funciones
 const openBajasList = () => {
     showBajasModal.value = true;

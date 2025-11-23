@@ -136,6 +136,7 @@ const filterRole = ref('')
 const filterAction = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 15
+let searchTimeout = null
 
 const allFiltered = computed(() => {
 	return auditorias.value.filter(auditoria => {
@@ -170,7 +171,14 @@ const prevPage = () => {
 	}
 }
 
-watch([searchUser, filterUserType, filterRole, filterAction], () => {
+watch(searchUser, () => {
+	if (searchTimeout) clearTimeout(searchTimeout)
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+	}, 500)
+})
+
+watch([filterUserType, filterRole, filterAction], () => {
 	currentPage.value = 1
 })
 

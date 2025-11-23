@@ -212,6 +212,7 @@ const isSubmitting = ref(false)
 const gestores = ref({ data: [] })
 const searchTerm = ref('')
 const currentPage = ref(1)
+let searchTimeout = null
 const itemsPerPage = 15
 const totalItems = ref(0)
 
@@ -291,8 +292,12 @@ const prevPage = () => {
 }
 
 watch(searchTerm, () => {
-	currentPage.value = 1
-	fetchGestoresData(1)
+	if (searchTimeout) clearTimeout(searchTimeout)
+	isLoading.value = true
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+		fetchGestoresData(1)
+	}, 500)
 })
 
 // --- Cargar datos al montar ---

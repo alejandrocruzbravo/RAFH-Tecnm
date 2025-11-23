@@ -291,6 +291,7 @@ const filterEstado = ref('')
 const searchTerm = ref('')
 const showDetailsSolicitudModal = ref(false)
 const selectedSolicitudDetails = ref(null)
+let searchTimeout = null
 
 // --- FUNCIÓN DE CARGA DE DATOS (NUEVA) ---
 const totalPages = computed(() => {
@@ -338,8 +339,12 @@ const prevPage = () => {
 }
 
 watch(searchTerm, () => {
-	currentPage.value = 1
-	fetchSolicitudes(1)
+	if (searchTimeout) clearTimeout(searchTimeout)
+	isLoading.value = true
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+		fetchSolicitudes(1)
+	}, 500)
 })
 const fetchSolicitudesSocket = async () => {
 	try {
