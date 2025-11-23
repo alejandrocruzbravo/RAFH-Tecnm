@@ -154,7 +154,7 @@ const handleLogout = async () => {
 		if (response.ok) {
 			localStorage.removeItem('auth_token')
 			localStorage.removeItem('user')
-			router.push('/login')
+			router.push('/')
 		}
 	} catch (error) {
 		console.error('Error during logout:', error)

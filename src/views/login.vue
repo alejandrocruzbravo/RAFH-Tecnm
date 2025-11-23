@@ -135,34 +135,20 @@ const handleLogin = async () => {
     try {
         const response = await login(formData.email, formData.password)
         const data = await response.json()
-
+        console.log(data);
         if (response.ok) {
             // 1. Guardar sesión
             if (data.access_token) {
                 localStorage.setItem('auth_token', data.access_token)
                 localStorage.setItem('user', JSON.stringify(data.user))
             }
-
-            // 2. LÓGICA DE REDIRECCIÓN POR ROL
-            // Rol 3 = Resguardante
             if (data.user.usuario_id_rol === 3) {
-                // Redirige al panel específico del resguardante
-                router.beforeEach((to, from, next) => {
-                    const userStr = localStorage.getItem('user');
-                    const user = userStr ? JSON.parse(userStr) : null;
-
-                    // Si intenta ir al Dashboard admin pero es Rol 3
-                    if (to.path === '/dashboard' && user && user.usuario_id_rol === 3) {
-                        next('/resguardante'); // Lo devolvemos a su sitio
-                        return;
-                    }
-
-                    next();
-                });
+                router.push('/resguardante')
             } else {
-                // Redirige al dashboard general (Admin/Root/Gestor)
                 router.push('/dashboard')
             }
+
+           
 
         } else {
             errorMessage.value = data.message || 'Error al iniciar sesión'

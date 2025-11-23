@@ -213,7 +213,7 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+						<label class=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
 							<svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
 								<path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
 							</svg>
@@ -258,7 +258,7 @@
 
 				<div class="space-y-4">
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+						<label class=" text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
 							<svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
 								<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
 							</svg>
