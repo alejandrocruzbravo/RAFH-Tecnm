@@ -74,7 +74,8 @@
 <script setup>
 import { computed } from 'vue';
 import QrcodeVue from 'qrcode.vue';
-import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
+import QRCode from 'qrcode';
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -114,19 +115,153 @@ const itemsProcesados = computed(() => {
 });
 
 // --- Función 1: Descargar PDF ---
-const downloadPDF = () => {
-  const element = document.getElementById('print-area');
-  
-  // Ajustes para que se vea bien según si son muchos o pocos
-  const opt = {
-    margin:       0.5,
-    filename:     props.isBienes ? 'etiquetas_bienes.pdf' : 'etiquetas_oficinas.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, logging: false },
-    jsPDF:        { unit: 'cm', format: 'letter', orientation: 'portrait' }
-  };
-  
-  html2pdf().set(opt).from(element).save();
+const downloadPDF = async () => {
+    // 1. Configuración del Documento en MILÍMETROS
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm', // Cambiado a mm
+        format: 'letter'
+    });
+
+    // 2. Dimensiones Exactas (Etiqueta Horizontal)
+    const labelWidth = 91;
+    const labelHeight = 24;
+    
+    // Márgenes y Espaciado (Ajusta según tu hoja de etiquetas real)
+    const marginX = 10; 
+    const marginY = 10; 
+    const gapX = 3; // Espacio horizontal entre etiquetas
+    const gapY = 0; // Espacio vertical (usualmente pegadas, pon 3 si están separadas)
+
+    let col = 0;
+    let row = 0;
+
+    for (const item of itemsProcesados.value) {
+        
+        // Cálculos de posición en mm
+        let curX = marginX + (col * (labelWidth + gapX));
+        let curY = marginY + (row * (labelHeight + gapY));
+
+        // Check de salto de página (Carta es aprox 279mm de alto)
+        if (curY + labelHeight > 270) {
+            doc.addPage();
+            col = 0;
+            row = 0;
+            curX = marginX;
+            curY = marginY;
+        }
+
+        // --- A. BORDES (Diseño Doble Borde) ---
+        
+        // Borde Exterior
+        doc.setLineWidth(0.3); // Un poco más grueso
+        doc.setDrawColor(0);
+        doc.rect(curX, curY, labelWidth, labelHeight);
+        
+        // Borde Interior (Estético - 1mm hacia adentro)
+        doc.setLineWidth(0.1);
+        doc.rect(curX + 1, curY + 1, labelWidth - 2, labelHeight - 2);
+
+
+        // --- B. CÓDIGO QR (Derecha, centrado verticalmente) ---
+        // Tamaño QR: 18mm x 18mm (para dejar margen de 3mm arriba/abajo en una etiqueta de 24mm)
+        const qrSize = 18; 
+        const qrX = curX + labelWidth - qrSize - 3; // Pegado a la derecha con 3mm de padding
+        const qrY = curY + (labelHeight - qrSize) / 2; // Centrado vertical
+
+        try {
+            const qrDataUrl = await QRCode.toDataURL(item.valor_qr, { margin: 0, width: 100 });
+            doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+        } catch (err) { console.error(err); }
+
+
+        // --- C. TEXTOS (Izquierda, Agrupados) ---
+        
+        // Coordenada X inicial para textos (3mm de padding izquierdo)
+        const textX = curX + 3;
+        // Ancho máximo de texto (ancho etiqueta - ancho QR - padding)
+        const maxTextWidth = labelWidth - qrSize - 7; 
+
+        // Definimos un "Cursor Y" para ir apilando los textos sin huecos
+        let cursorY = curY + 5; // Posición inicial para el Título (baseline)
+
+        if (props.isBienes) {
+            // =========================
+            // DISEÑO BIENES
+            // =========================
+            
+            // 1. Sanitización
+            const txtTitulo = (item.titulo_principal || 'SIN TITULO').toString().toUpperCase();
+            const txtDesc = (item.original.bien_caracteristicas || item.original.descripcion || item.original.bien_descripcion || 'SIN CARACTERÍSTICAS').toString();
+            const txtDepto = (item.original.departamento_nombre || 'SIN DEPARTAMENTO').toString().toUpperCase();
+            const txtCodigo = (item.codigo_visible || item.valor_qr || 'S/N').toString();
+
+            // 2. TÍTULO (Fuente 10, Negrita)
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(10);
+            // splitTextToSize evita que se salga del ancho
+            const titleLines = doc.splitTextToSize(txtTitulo, maxTextWidth);
+            doc.text(titleLines, textX, cursorY);
+            
+            // Mover cursor hacia abajo según cuántas líneas ocupó el título
+            // (aprox 4mm por línea para fuente 10)
+            cursorY += (titleLines.length * 5); 
+
+            // -- AGRUPACIÓN DE DETALLES (Fuente 8) --
+            doc.setFontSize(8);
+            const lineHeight = 4.6; // Espacio entre líneas apretado (mm)
+
+            // 3. DESCRIPCIÓN (Normal)
+            doc.setFont("helvetica", "normal");
+            const descLines = doc.splitTextToSize(txtDesc, maxTextWidth);
+            // Limitamos a 1 línea para que quepa todo, o 2 si el título fue corto
+            const maxDescLines = titleLines.length > 1 ? 1 : 2; 
+            const descLinesLimited = descLines.slice(0, maxDescLines);
+            
+            doc.text(descLinesLimited, textX, cursorY);
+            cursorY += (descLinesLimited.length * lineHeight);
+
+            // 4. DEPARTAMENTO (Negrita)
+            doc.setFont("helvetica", "normal");
+            // Cortamos el texto si es muy largo para que quede en 1 línea
+            const deptoCorto = txtDepto.length > 35 ? txtDepto.substring(0, 35) + '...' : txtDepto;
+            doc.text(deptoCorto, textX, cursorY);
+            cursorY += lineHeight; // Salto simple
+
+            // 5. CÓDIGO (Monospace)
+            doc.setFont("helvetica", "normal"); // Monospace destaca el código
+            doc.text(txtCodigo, textX, cursorY);
+
+        } else {
+            // =========================
+            // DISEÑO OFICINAS
+            // =========================
+            // Mismo concepto: Titulo grande, detalles agrupados abajo
+            
+            const txtNombre = (item.titulo_principal || 'OFICINA').toString().toUpperCase();
+            const txtDepto = (item.original.departamento_nombre || '').toString().toUpperCase();
+            const txtCodigo = (item.codigo_visible || '').toString();
+
+            // Título
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11); // Un pelín más grande para oficinas
+            const nameLines = doc.splitTextToSize(txtNombre, maxTextWidth);
+            doc.text(nameLines, textX, cursorY + 1); // +1 para centrar un poco visualmente
+            
+            cursorY += (nameLines.length * 5); // Salto mayor por fuente 11
+
+        }
+
+        // --- LÓGICA DE GRILLA (2 Columnas) ---
+        col++;
+        if (col > 1) { // 0 = Izq, 1 = Der. Si pasa de 1, baja.
+            col = 0;
+            row++;
+        }
+    }
+
+    const prefix = props.isBienes ? 'etiquetas_bienes' : 'etiquetas_oficinas';
+    doc.save(`${prefix}_${new Date().toISOString().slice(0,10)}.pdf`);
 };
 
 // --- Función 2: Descargar CSV Dinámico ---
