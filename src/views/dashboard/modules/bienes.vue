@@ -21,19 +21,30 @@
             <strong>Error:</strong> {{ error }}
         </div>
 
-        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecciona un Área para
-                empezar</label>
-            <select v-model="selectedArea" @change="fetchStructure"
-                class="w-full md:w-1/3 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
-                <option v-if="!isLoading && areasList.length === 0" disabled class="text-gray-400">
-                    No hay áreas registradas.
-                </option>
-                <option :value="null">Selecciona un área</option>
-                <option v-for="area in areasList" :key="area.id" :value="area.id">
-                    {{ area.area_nombre }}
-                </option>
-            </select>
+        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 flex items-end gap-4">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecciona un Área para
+                    empezar</label>
+                <select v-model="selectedArea" @change="fetchStructure"
+                    class="w-full md:w-1/3 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
+                    <option v-if="!isLoading && areasList.length === 0" disabled class="text-gray-400">
+                        No hay áreas registradas.
+                    </option>
+                    <option :value="null">Selecciona un área</option>
+                    <option v-for="area in areasList" :key="area.id" :value="area.id">
+                        {{ area.area_nombre }}
+                    </option>
+                </select>
+            </div>
+            <button @click="openBajasList"
+                class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium text-sm flex items-center gap-2 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                Papelera
+            </button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -120,14 +131,12 @@
                             <div
                                 class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{ selectedOficina.nombre
-                                        }}</h3>
-                                    <input
-                                        v-model="searchQuery"
-                                        type="text"
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">{{
+                                        selectedOficina.nombre
+                                    }}</h3>
+                                    <input v-model="searchQuery" type="text"
                                         placeholder="Buscar por código, marca, modelo, valor, proveedor, factura..."
-                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
+                                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                 </div>
 
                                 <div v-if="!isSelectionModeActive" class="flex gap-2 ml-4">
@@ -156,137 +165,146 @@
                                     </button>
                                 </div>
                             </div>
-
-                            <div v-if="isLoadingBienes" class="flex items-center justify-center h-64">
-                                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600">
+                            <div class="relative min-h-[300px]">
+                                <div v-if="isLoadingBienes"
+                                    class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
+                                    <div
+                                        class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600">
+                                    </div>
+                                    <p class="ml-4 mt-2 text-gray-600 dark:text-gray-400 font-medium">Actualizando
+                                        resultados...</p>
                                 </div>
-                                <p class="ml-4 text-gray-600 dark:text-gray-400">Cargando bienes...</p>
-                            </div>
 
-                            <div v-else class="overflow-x-auto overflow-y-auto max-h-[70vh]">
-                                <table class="w-full text-sm">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                        <tr>
-                                            <th v-if="isSelectionModeActive" class="px-4 py-3 w-12 text-center">
-                                                <input type="checkbox" v-model="selectAllBienes"
-                                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
-                                            </th>
-                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
-                                                Clave</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
-                                                Descripción</th>
-                                            <th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
-                                                Estado</th>
-                                            <th
-                                                class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white justify-end">
-                                                Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                                        <tr v-if="paginatedBienes.length === 0">
-                                            <td colspan="5" class="px-4 py-6 text-center">{{ searchQuery ? 'No se encontraron bienes que coincidan con la búsqueda.' : 'No se encontraron bienes.' }}</td>
-                                        </tr>
-                                        <tr v-else v-for="bien in paginatedBienes" :key="bien.id">
-                                            <td v-if="isSelectionModeActive" class="px-4 py-3 text-center">
-                                                <input type="checkbox" :value="bien.id" v-model="selectedBienes"
-                                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
-                                            </td>
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
-                                                bien.bien_codigo || 'N/A' }}</small></td>
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
-                                                bien.bien_descripcion || 'N/A' }}</small></td>
-                                            <td class="px-4 py-3">
-                                                <span v-if="bien.bien_estado === 'Activo'"
-                                                    class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-semibold">Activo</span>
-                                                <span v-else-if="bien.bien_estado === 'En tránsito'"
-                                                    class="inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs font-semibold">En
-                                                    tránsito</span>
-                                                <span v-else-if="bien.bien_estado === 'Extravíado'"
-                                                    class="inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">Extravíado</span>
-                                                <span v-else-if="bien.bien_estado === 'Baja'"
-                                                    class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">Baja</span>
-                                                <span v-else
-                                                    class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">{{
-                                                        bien.bien_estado || 'N/A' }}</span>
-                                            </td>
-                                            <td class="px-4 py-3 flex gap-2 justify-end">
-                                                <button @click="openIndividualQR(bien)" title="Generar QR"
-                                                    class="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                                    <svg class="w-[18px] h-[18px] text-gray-800 dark:text-white"
-                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M4 4h6v6H4V4Zm10 10h6v6h-6v-6Zm0-10h6v6h-6V4Zm-4 10h.01v.01H10V14Zm0 4h.01v.01H10V18Zm-3 2h.01v.01H7V20Zm0-4h.01v.01H7V16Zm-3 2h.01v.01H4V18Zm0-4h.01v.01H4V14Z" />
-                                                        <path stroke="currentColor" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M7 7h.01v.01H7V7Zm10 10h.01v.01H17V17Z" />
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
-                                                    title="Ver detalles" @click="openVerModal(bien)">
-                                                    <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white"
-                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-width="1.3"
-                                                            d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
-                                                        <path stroke="currentColor" stroke-width="1.3"
-                                                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                    </svg>
-                                                </button>
-                                                <button @click="openEditModal(bien)" title="Editar"
-                                                    class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"><svg
-                                                        class="w-[16px] h-[16px] text-gray-800 dark:text-white"
-                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-linecap="round"
-                                                            stroke-linejoin="round" stroke-width="1.3"
-                                                            d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
-                                                    </svg>
-                                                </button>
-                                                <button @click="openDeleteModal(bien)" title="Eliminar"
-                                                    class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"><svg
-                                                        class="w-[16px] h-[16px] text-gray-800 dark:text-white"
-                                                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                        height="24" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-linecap="round"
-                                                            stroke-linejoin="round" stroke-width="1.3"
-                                                            d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div v-else
+                                    class="overflow-x-auto overflow-y-auto max-h-[70vh] transition-opacity duration-300"
+                                    :class="{ 'opacity-40 pointer-events-none': isLoadingBienes }">
+                                    <table class="w-full text-sm">
+                                        <thead class="bg-gray-50 dark:bg-gray-700">
+                                            <tr>
+                                                <th v-if="isSelectionModeActive" class="px-4 py-3 w-12 text-center">
+                                                    <input type="checkbox" v-model="selectAllBienes"
+                                                        class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                                                </th>
+                                                <th
+                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                    Clave</th>
+                                                <th
+                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                    Descripción</th>
+                                                <th
+                                                    class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">
+                                                    Estado</th>
+                                                <th
+                                                    class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white justify-end">
+                                                    Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                                            <tr v-if="paginatedBienes.length === 0">
+                                                <td colspan="5" class="px-4 py-6 text-center">{{ searchQuery ? 'No se encontraron bienes que coincidan con la búsqueda.' : 'No seencontraron bienes.' }}</td>
+                                            </tr>
+                                            <tr v-else v-for="bien in paginatedBienes" :key="bien.id">
+                                                <td v-if="isSelectionModeActive" class="px-4 py-3 text-center">
+                                                    <input type="checkbox" :checked="selectedBienesMap.has(bien.id)"
+                                                        @change="toggleSelection(bien)"
+                                                        class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
+                                                </td>
+                                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
+                                                    bien.bien_codigo || 'N/A' }}</small></td>
+                                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
+                                                    bien.bien_descripcion || 'N/A' }}</small></td>
+                                                <td class="px-4 py-3">
+                                                    <span v-if="bien.bien_estado === 'Activo'"
+                                                        class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-semibold">Activo</span>
+                                                    <span v-else-if="bien.bien_estado === 'En tránsito'"
+                                                        class="inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs font-semibold">En
+                                                        tránsito</span>
+                                                    <span v-else-if="bien.bien_estado === 'Extravíado'"
+                                                        class="inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">Extravíado</span>
+                                                    <span v-else-if="bien.bien_estado === 'Baja'"
+                                                        class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">Baja</span>
+                                                    <span v-else
+                                                        class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">{{
+                                                            bien.bien_estado || 'N/A' }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 flex gap-2 justify-end">
+                                                    <button @click="openIndividualQR(bien)" title="Generar QR"
+                                                        class="p-1.5 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                                        <svg class="w-[18px] h-[18px] text-gray-800 dark:text-white"
+                                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                            <path stroke="currentColor" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M4 4h6v6H4V4Zm10 10h6v6h-6v-6Zm0-10h6v6h-6V4Zm-4 10h.01v.01H10V14Zm0 4h.01v.01H10V18Zm-3 2h.01v.01H7V20Zm0-4h.01v.01H7V16Zm-3 2h.01v.01H4V18Zm0-4h.01v.01H4V14Z" />
+                                                            <path stroke="currentColor" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M7 7h.01v.01H7V7Zm10 10h.01v.01H17V17Z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+                                                        title="Ver detalles" @click="openVerModal(bien)">
+                                                        <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                            <path stroke="currentColor" stroke-width="1.3"
+                                                                d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+                                                            <path stroke="currentColor" stroke-width="1.3"
+                                                                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click="openEditModal(bien)" title="Editar"
+                                                        class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"><svg
+                                                            class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                            <path stroke="currentColor" stroke-linecap="round"
+                                                                stroke-linejoin="round" stroke-width="1.3"
+                                                                d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click="openDeleteModal(bien)" title="Eliminar"
+                                                        class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"><svg
+                                                            class="w-[16px] h-[16px] text-gray-800 dark:text-white"
+                                                            aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                            width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                            <path stroke="currentColor" stroke-linecap="round"
+                                                                stroke-linejoin="round" stroke-width="1.3"
+                                                                d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
                             </div>
 
                             <!-- Paginación -->
-                            <div v-if="filteredBienes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-                                <button
-                                    @click="prevPage"
-                                    :disabled="currentPage === 1"
-                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-                                >
+                            <div v-if="filteredBienes.length > 0"
+                                class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+                                <button @click="prevPage" :disabled="currentPage === 1"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 19l-7-7 7-7" />
                                     </svg>
                                     Atrás
                                 </button>
 
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Página {{ currentPage }} de {{ totalPages }}
-                                    <span v-if="searchQuery" class="text-xs text-gray-500 dark:text-gray-400">({{ filteredBienes.length }} resultados)</span>
+                                    <span v-if="searchQuery" class="text-xs text-gray-500 dark:text-gray-400">({{
+                                        filteredBienes.length }} resultados)</span>
                                 </span>
 
-                                <button
-                                    @click="nextPage"
-                                    :disabled="currentPage === totalPages"
-                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-                                >
+                                <button @click="nextPage" :disabled="currentPage === totalPages"
+                                    class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
                                     Adelante
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
                                     </svg>
                                 </button>
                             </div>
@@ -311,9 +329,18 @@
         @clearError="bajaError = null" />
     <ModalMoverBien :show="showMoveModal" :bien="selectedBien" :fetch-function="authenticatedFetch"
         @close="closeMoveModal" @move-success="onBienMoved" />
-    <ModalGeneradorQR :show="showQRModal" :title="qrTitle" :value="qrValue" @close="showQRModal = false" />
-    <ModalImpresionLote :show="showLoteModal" :title="loteTitle" :lista="loteList" :is-bienes="true"
+
+    <ModalGeneradorQR :show="showQRModal" :title="qrTitle" :value="qrValue" :item="itemSeleccionadoParaQR"
+        :is-bienes="isBienesQR" @close="showQRModal = false" />
+
+    <ModalImpresionLote :show="showLoteModal" :title="loteTitle" :lista="loteList" :is-bienes="isBienesQR"
         @close="showLoteModal = false" />
+
+    <ModalBienesBaja :show="showBajasModal" :fetch-function="authenticatedFetch" @close="showBajasModal = false"
+        @reactivar="openReactivarFromBajas" />
+
+    <ModalReactivarBien :show="showReactivarModal" :bien="selectedBienToReactivate" :fetch-function="authenticatedFetch"
+        @close="showReactivarModal = false" @reactivate-success="onBienReactivated" />
 </template>
 
 <script setup>
@@ -327,6 +354,8 @@ import ModalConfirmarBaja from '../../../components/ModalConfirmarBaja.vue'
 import ModalMoverBien from '../../../components/ModalMoverBien.vue'
 import ModalGeneradorQR from '../../../components/ModalGeneradorQR.vue'
 import ModalImpresionLote from '../../../components/ModalImpresionLote.vue'
+import ModalBienesBaja from '../../../components/ModalBienesBaja.vue';
+import ModalReactivarBien from '../../../components/ModalReactivarBien.vue';
 
 // --- Estados de Carga ---
 const isLoading = ref(true)
@@ -372,9 +401,17 @@ const qrTitle = ref('')             // Título para el modal
 const qrValue = ref('')             // Valor (código) para el modal individual
 const loteTitle = ref('')           // Título para el modal de lote
 const loteList = ref([])            // Lista de oficinas para el modal de lote
+const isBienesQR = ref(false);
 
 const isSelectionModeActive = ref(false)  // Controla si los checkboxes son visibles
-const selectedBienes = ref(new Set()) // Guarda los IDs de los bienes seleccionados
+const selectedBienesMap = ref(new Map()) // Guarda los IDs de los bienes seleccionados
+
+const showBajasModal = ref(false);
+const showReactivarModal = ref(false);
+const selectedBienToReactivate = ref(null);
+
+const itemSeleccionadoParaQR = ref({});
+let searchTimeout = null;
 // --- 1. Funciones de Carga (API) ---
 // Carga el primer dropdown al iniciar
 const fetchAreas = async () => {
@@ -448,17 +485,30 @@ const selectOficina = (oficina) => {
     selectedOficina.value = oficina
     searchQuery.value = '' // Resetea la búsqueda
     currentPage.value = 1 // Resetea la paginación
+    selectedBienesMap.value.clear() // <--- Limpiar al cambiar de oficina
+    isSelectionModeActive.value = false // <--- Salir del modo selección
     fetchBienes() // Carga los bienes para esa oficina
 }
 
 // --- Watchers ---
 // Resetea a la página 1 y refetch cuando cambia la búsqueda
-watch(searchQuery, () => {
-    currentPage.value = 1
-    if (selectedOficina.value) {
-        fetchBienes(1)
-    }
-})
+watch(searchQuery, (newVal) => {
+    // 1. Si el usuario sigue escribiendo, cancelamos la búsqueda anterior
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    // 2. Activamos el estado de carga visualmente inmediato para que sepa que algo pasa
+    isLoadingBienes.value = true;
+
+    // 3. Esperamos 500ms antes de llamar a la API
+    searchTimeout = setTimeout(() => {
+        currentPage.value = 1;
+        if (selectedOficina.value) {
+            fetchBienes(1);
+        } else {
+            isLoadingBienes.value = false; // Si no hay oficina, quitamos el loading
+        }
+    }, 500); // 500ms de espera
+});
 
 // --- 3. Carga Inicial ---
 onMounted(() => {
@@ -540,7 +590,6 @@ const openVerModal = (bien) => {
  * Abre el modal de "Baja"
  */
 const openBajaModal = () => {
-    // 'selectedBien' ya está seteado por openVerModal
     showVerModal.value = false // Cierra el modal de "Ver"
     showBajaModal.value = true // Abre el modal de "Baja"
 }
@@ -575,22 +624,21 @@ const closeBajaModal = () => {
  */
 const handleConfirmBaja = async () => {
     if (!selectedBien.value) return;
-
     isSubmittingBaja.value = true
     bajaError.value = null
 
     try {
-        // Asumo una ruta de API para esto:
-        const response = await authenticatedFetch(`/bienes/${selectedBien.value.id}/baja`, {
-            method: 'PUT' // O 'POST', según tu API
+        const response = await authenticatedFetch(`/bienes/${selectedBien.value.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                accion: 'baja',
+            }),
         });
-
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
             throw new Error(errData.message || 'No se pudo dar de baja el bien.');
         }
 
-        // ¡Éxito!
         // Evita que el modal 'Ver' se reabra automáticamente al confirmar la baja
         preventReopenVer.value = true
         closeBajaModal();
@@ -655,9 +703,12 @@ const onBienMoved = () => {
  * Abre el modal de QR individual para una oficina específica.
  * (Se llama desde el botón [QR] al lado de una oficina)
  */
+
+
 const openOficinaQR = (oficina) => {
-    qrTitle.value = oficina.nombre;
-    qrValue.value = oficina.ofi_codigo || 'N/A'; // El valor a codificar
+
+    itemSeleccionadoParaQR.value = oficina; // Guardamos el objeto completo
+    isBienesQR.value = false;
     showQRModal.value = true;
 }
 
@@ -666,8 +717,10 @@ const openOficinaQR = (oficina) => {
  * (Se llama desde el botón "Generar QRs" del departamento)
  */
 const openLoteQR = (departamento) => {
+    console.log(departamento);
     loteTitle.value = `Oficinas en: ${departamento.dep_nombre}`;
     loteList.value = departamento.oficinas; // Pasa la lista de oficinas
+    isBienesQR.value = false;
     showLoteModal.value = true;
 }
 
@@ -684,6 +737,16 @@ const paginatedBienes = computed(() => {
     return bienesList.value.data || []
 })
 
+/**
+ * Agrega o elimina un bien del mapa de selección persistente
+ */
+const toggleSelection = (bien) => {
+    if (selectedBienesMap.value.has(bien.id)) {
+        selectedBienesMap.value.delete(bien.id);
+    } else {
+        selectedBienesMap.value.set(bien.id, bien);
+    }
+}
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
         fetchBienes(currentPage.value + 1)
@@ -696,7 +759,7 @@ const prevPage = () => {
     }
 }
 
-const selectedBienesCount = computed(() => selectedBienes.value.size)
+
 // Lógica para el checkbox "Seleccionar Todos"
 const selectAllBienes = computed({
     // 'get' comprueba si todos los bienes visibles están seleccionados
@@ -704,20 +767,22 @@ const selectAllBienes = computed({
         const currentBienes = bienesList.value.data || []
         if (currentBienes.length === 0) return false
         // Devuelve true SÓLO SI todos los 'bien.id' en la lista están en el 'Set'
-        return currentBienes.every(bien => selectedBienes.value.has(bien.id))
+        return currentBienes.every(bien => selectedBienesMap.value.has(bien.id))
     },
     // 'set' se activa cuando el usuario hace clic en "Seleccionar Todos"
     set(value) {
-        const currentBienesIds = (bienesList.value.data || []).map(bien => bien.id)
+        const currentBienes = bienesList.value.data || []
         if (value) {
-            // Si value es 'true', añade todos los IDs visibles al Set
-            currentBienesIds.forEach(id => selectedBienes.value.add(id))
+            // Seleccionar todos los visibles y guardarlos en el Map
+            currentBienes.forEach(bien => selectedBienesMap.value.set(bien.id, bien))
         } else {
-            // Si value es 'false', quita todos los IDs visibles del Set
-            currentBienesIds.forEach(id => selectedBienes.value.delete(id))
+            // Deseleccionar solo los visibles del Map
+            currentBienes.forEach(bien => selectedBienesMap.value.delete(bien.id))
         }
     }
 })
+const selectedBienesCount = computed(() => selectedBienesMap.value.size)
+
 const activateSelectionMode = () => {
     isSelectionModeActive.value = true
 }
@@ -727,7 +792,7 @@ const activateSelectionMode = () => {
  */
 const cancelSelectionMode = () => {
     isSelectionModeActive.value = false
-    selectedBienes.value.clear()
+    selectedBienesMap.value.clear()
 }
 
 /**
@@ -764,13 +829,10 @@ const getCurrentContextNames = () => {
     return { oficinaNombre, deptoNombre };
 }
 
-// --- ACTUALIZA ESTA FUNCIÓN ---
-const openBienBatchQRModal = () => {
-    const currentBienes = bienesList.value.data || []
-    const bienesSeleccionados = currentBienes.filter(bien =>
-        selectedBienes.value.has(bien.id)
-    )
 
+const openBienBatchQRModal = () => {
+    const bienesSeleccionados = Array.from(selectedBienesMap.value.values());
+    if (bienesSeleccionados.length === 0) return;
     loteTitle.value = `Lote de Bienes (${bienesSeleccionados.length} seleccionados)`
 
     // Obtenemos los nombres del contexto actual
@@ -780,12 +842,50 @@ const openBienBatchQRModal = () => {
     loteList.value = bienesSeleccionados.map(bien => ({
         id: bien.id,
         nombre: bien.bien_descripcion,
-        ofi_codigo: bien.bien_codigo || bien.numero_serie,
-        // Datos extra para el CSV:
+        codigo: bien.bien_codigo || bien.numero_serie,
+        descripcion: bien.bien_caracteristicas,
         oficina_nombre: oficinaNombre,
         departamento_nombre: deptoNombre
     }))
-
+    isBienesQR.value = true;
     showLoteModal.value = true
 }
+const openIndividualQR = (bien) => {
+    const deptoNombre = getCurrentContextNames().deptoNombre;
+    const item = {
+        ...bien, // Copiamos todas las propiedades originales (id, codigo, marca, etc.)
+
+        // Normalizamos campos para que el modal no batalle
+        nombre: bien.bien_descripcion,
+        codigo: bien.bien_codigo,
+        descripcion: bien.bien_caracteristicas,
+        departamento_nombre: deptoNombre
+    };
+    itemSeleccionadoParaQR.value = item; // Guardamos el objeto completo
+    isBienesQR.value = true;
+    showQRModal.value = true;
+}
+// Funciones
+const openBajasList = () => {
+    showBajasModal.value = true;
+};
+
+const openReactivarFromBajas = (bien) => {
+    // Opcional: Cerrar el modal de lista si quieres, o dejarlo abierto detrás (requiere z-index manejo)
+    // showBajasModal.value = false; 
+    selectedBienToReactivate.value = bien;
+    showReactivarModal.value = true;
+};
+
+const onBienReactivated = () => {
+    showReactivarModal.value = false;
+    selectedBienToReactivate.value = null;
+    // Recargar la lista de bajas para que desaparezca el item
+    // (Si dejaste el modal abierto, necesitas una forma de decirle que recargue. 
+    //  Lo más fácil es cerrar y abrir, o usar un key/ref).
+    showBajasModal.value = false; // Cierro todo para volver al inicio limpio
+
+    // Opcional: Si el bien se reactivó en la oficina actual, recargar la tabla principal
+    if (selectedOficina.value) fetchBienes(selectedOficina.value.id);
+};
 </script>

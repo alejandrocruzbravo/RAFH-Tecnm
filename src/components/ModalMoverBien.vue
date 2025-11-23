@@ -187,9 +187,10 @@ const handleMove = async () => {
 
   try {
     // Esta es la nueva ruta que debes crear en tu API
-    const response = await props.fetchFunction(`/bienes/${props.bien.id}/mover`, {
+    const response = await props.fetchFunction(`/bienes/${props.bien.id}`, {
       method: 'PUT',
       body: JSON.stringify({
+        acciones: 'mover',
         id_oficina_nueva: selectedOficina.value
       })
     });

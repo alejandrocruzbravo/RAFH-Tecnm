@@ -52,6 +52,12 @@
                             <InfoBien label="Factura" :value="bien.bien_numero_factura" />
                             <InfoBien label="Adquisición" :value="bien.bien_tipo_adquisicion" />
                         </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Características</h4>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">
+                                {{ bien.bien_caracteristicas || 'N/A' }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
