@@ -1209,7 +1209,7 @@ const oficinaPaginatedData = computed(() => {
 })
 
 const filteredAreas = computed(() => {
-	const baseAreas = areas.value.data || []
+	const baseAreas = areas.value || []
 	return baseAreas.filter(area => {
 		const matchesResponsable = !filterResponsable.value ||
 			(area.responsable && area.responsable.id === parseInt(filterResponsable.value))
@@ -1278,6 +1278,7 @@ const fetchAllData = async () => {
 
 		const fetchedAreas = await areasRes.json()
 		areas.value = fetchedAreas
+		console.log(areas.value	)
 		totalItems.value = fetchedAreas.total || 0
 		currentPage.value = 1
 		const optionsData = await optionsRes.json()
