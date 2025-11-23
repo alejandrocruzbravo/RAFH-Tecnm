@@ -42,7 +42,7 @@
 			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative">
 			<div v-if="isLoadingResguardantes"
 				class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
 				<div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
