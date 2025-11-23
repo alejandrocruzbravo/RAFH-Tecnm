@@ -92,6 +92,7 @@ const users = ref([
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = 15
+let searchTimeout = null
 
 const allFiltered = computed(() => {
 	return users.value.filter(user => {
@@ -125,6 +126,9 @@ const prevPage = () => {
 }
 
 watch(searchQuery, () => {
-	currentPage.value = 1
+	if (searchTimeout) clearTimeout(searchTimeout)
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+	}, 500)
 })
 </script>

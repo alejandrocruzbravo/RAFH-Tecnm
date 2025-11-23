@@ -257,6 +257,7 @@ const showDeleteConfirm = ref(false)
 const editingIndex = ref(null)
 const searchTerm = ref('')
 const currentPage = ref(1)
+let searchTimeout = null
 const itemsPerPage = 15
 
 const allFiltered = computed(() => {
@@ -340,6 +341,9 @@ const prevPage = () => {
 }
 
 watch(searchTerm, () => {
-	currentPage.value = 1
+	if (searchTimeout) clearTimeout(searchTimeout)
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+	}, 500)
 })
 </script>
