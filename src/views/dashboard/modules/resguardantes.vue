@@ -80,6 +80,35 @@
 			</table>
 		</div>
 
+		<!-- Pagination Controls -->
+		<div v-if="filteredResguardantes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button
+				@click="prevPage"
+				:disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+				Atrás
+			</button>
+
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+				Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
+			</span>
+
+			<button
+				@click="nextPage"
+				:disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				Adelante
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+
 		<!-- New Resguardante Modal -->
 		<div v-if="showNewResguardanteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
@@ -121,7 +150,7 @@
 							<input v-model="newResguardanteData.res_puesto" type="text" placeholder="Ej. Encargado de Lab." class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 						</div>
 						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
+							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tel��fono</label>
 							<input v-model="newResguardanteData.res_telefono" type="tel" placeholder="Ej. 9831234567" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 						</div>
 					</div>
@@ -323,7 +352,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
@@ -340,6 +369,9 @@ const showDetailsModal = ref(false)
 const deletingResguardante = ref(null)
 const deleteResguardanteError = ref(null)
 const searchTerm = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 15
+const totalItems = ref(0)
 
 const resguardantesList = ref({ data: [] })
 const departments = ref([])
@@ -370,16 +402,12 @@ const editingResguardante = ref({
 	usuario_id_rol: null
 })
 
+const totalPages = computed(() => {
+	return Math.ceil(totalItems.value / itemsPerPage) || 1
+})
+
 const filteredResguardantes = computed(() => {
-	return resguardantesList.value.data.filter(resguardante => {
-		const departmentName = getDepartmentName(resguardante.res_departamento)
-		return !searchTerm.value ||
-			(resguardante.res_nombre && resguardante.res_nombre.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_apellidos && resguardante.res_apellidos.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_correo && resguardante.res_correo.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_rfc && resguardante.res_rfc.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(departmentName && departmentName.toLowerCase().includes(searchTerm.value.toLowerCase()))
-	})
+	return resguardantesList.value.data || []
 })
 
 const deleteResguardanteMessage = computed(() => {
@@ -388,12 +416,19 @@ const deleteResguardanteMessage = computed(() => {
 	return `¿Estás seguro de que deseas eliminar al resguardante:<br><strong class='font-medium text-lg text-gray-900 dark:text-white'>${name}</strong>?`
 })
 
-const fetchResguardantesData = async () => {
+const fetchResguardantesData = async (page = 1) => {
 	isLoading.value = true
 	error.value = null
 	try {
+		const params = new URLSearchParams()
+		params.append('page', page)
+
+		if (searchTerm.value.trim()) {
+			params.append('search', searchTerm.value.toUpperCase())
+		}
+
 		const [resguardantesRes, departmentsRes, rolesRes] = await Promise.all([
-			authenticatedFetch('/resguardantes'),
+			authenticatedFetch(`/resguardantes?${params.toString()}`),
 			authenticatedFetch('/departamentos'),
 			authenticatedFetch('/formularios/resguardantes')
 		])
@@ -402,7 +437,11 @@ const fetchResguardantesData = async () => {
 		if (!departmentsRes.ok) throw new Error('Error al cargar departamentos')
 		if (!rolesRes.ok) throw new Error('Error al cargar roles')
 
-		resguardantesList.value = await resguardantesRes.json()
+		const resguardantesData = await resguardantesRes.json()
+		resguardantesList.value = resguardantesData
+		totalItems.value = resguardantesData.total || 0
+		currentPage.value = page
+
 		const deptData = await departmentsRes.json()
 		departments.value = deptData.data || deptData
 
@@ -411,10 +450,32 @@ const fetchResguardantesData = async () => {
 	} catch (e) {
 		console.error('Error al cargar datos:', e)
 		error.value = e
+		resguardantesList.value = { data: [] }
 	} finally {
 		isLoading.value = false
 	}
 }
+
+const nextPage = () => {
+	if (currentPage.value < totalPages.value) {
+		fetchResguardantesData(currentPage.value + 1)
+	}
+}
+
+const prevPage = () => {
+	if (currentPage.value > 1) {
+		fetchResguardantesData(currentPage.value - 1)
+	}
+}
+
+let searchTimeout
+watch(searchTerm, () => {
+	clearTimeout(searchTimeout)
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+		fetchResguardantesData(1)
+	}, 300)
+})
 
 const getDepartmentName = (deptId) => {
 	if (!deptId || !departments.value) return 'Sin asignar'
@@ -423,7 +484,7 @@ const getDepartmentName = (deptId) => {
 }
 
 onMounted(() => {
-	fetchResguardantesData()
+	fetchResguardantesData(1)
 })
 
 const openNewResguardanteModal = () => {

@@ -77,6 +77,35 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <div v-if="filteredCatalogo.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+                @click="prevPage"
+                :disabled="currentPage === 1"
+                class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Atrás
+            </button>
+
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
+            </span>
+
+            <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+                class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+            >
+                Adelante
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
     </div>
     <div v-if="showNewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
@@ -182,7 +211,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js' // (Ajusta la ruta si es necesario)
 import ConfirmModal from '@/components/ConfirmModal.vue'
 // --- Estados Reactivos ---
@@ -190,6 +219,9 @@ const isLoading = ref(true)
 const fetchError = ref(null)
 const catalogoList = ref({ data: [] }) // Asumimos paginación
 const searchTerm = ref('') // Para la barra de búsqueda
+const currentPage = ref(1)
+const itemsPerPage = 15
+const totalItems = ref(0)
 const isSubmitting = ref(false)
 
 // --- Estados de Modales ---
@@ -224,23 +256,55 @@ const editingItem = ref({
 /**
  * Carga los datos del catálogo desde la API
  */
-const fetchCatalogo = async () => {
+const totalPages = computed(() => {
+    return Math.ceil(totalItems.value / itemsPerPage) || 1
+})
+
+const fetchCatalogo = async (page = 1) => {
     isLoading.value = true
     fetchError.value = null
     try {
+        const params = new URLSearchParams()
+        params.append('page', page)
+
+        if (searchTerm.value.trim()) {
+            params.append('search', searchTerm.value.toUpperCase())
+        }
+
         // Asumo esta ruta base para tu catálogo
-        const response = await authenticatedFetch('/catalogo-camb-cucop') 
+        const response = await authenticatedFetch(`/catalogo-camb-cucop?${params.toString()}`)
         if (!response.ok) {
             throw new Error('Error al cargar el catálogo CUCOP/CAMB')
         }
-        catalogoList.value = await response.json()
+        const data = await response.json()
+        catalogoList.value = data
+        totalItems.value = data.total || 0
+        currentPage.value = page
     } catch (e) {
         console.error('Error:', e)
         fetchError.value = e
+        catalogoList.value = { data: [] }
     } finally {
         isLoading.value = false
     }
 }
+
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        fetchCatalogo(currentPage.value + 1)
+    }
+}
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        fetchCatalogo(currentPage.value - 1)
+    }
+}
+
+watch(searchTerm, () => {
+    currentPage.value = 1
+    fetchCatalogo(1)
+})
 
 /**
  * Filtra la lista basado en el término de búsqueda
@@ -411,4 +475,3 @@ onMounted(() => {
     fetchCatalogo()
 })
 </script>
-

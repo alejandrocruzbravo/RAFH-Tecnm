@@ -86,11 +86,40 @@
 				</tbody>
 			</table>
 		</div>
+
+		<!-- Pagination Controls -->
+		<div v-if="filteredAuditorias.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button
+				@click="prevPage"
+				:disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+				Atrás
+			</button>
+
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+				Página {{ currentPage }} de {{ totalPages }} | Total: {{ allFiltered.length }} resultados
+			</span>
+
+			<button
+				@click="nextPage"
+				:disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				Adelante
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const auditorias = ref([
 	{ usuario: 'Juan Pérez', tipo: 'Gestor', rol: 'Administrador', accion: 'Modificar', fecha: '2024-01-15 10:30' },
@@ -105,8 +134,10 @@ const searchUser = ref('')
 const filterUserType = ref('')
 const filterRole = ref('')
 const filterAction = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 15
 
-const filteredAuditorias = computed(() => {
+const allFiltered = computed(() => {
 	return auditorias.value.filter(auditoria => {
 		const matchUser = auditoria.usuario.toLowerCase().includes(searchUser.value.toLowerCase())
 		const matchUserType = !filterUserType.value || auditoria.tipo === filterUserType.value
@@ -115,6 +146,32 @@ const filteredAuditorias = computed(() => {
 
 		return matchUser && matchUserType && matchRole && matchAction
 	})
+})
+
+const totalPages = computed(() => {
+	return Math.ceil(allFiltered.value.length / itemsPerPage) || 1
+})
+
+const filteredAuditorias = computed(() => {
+	const start = (currentPage.value - 1) * itemsPerPage
+	const end = start + itemsPerPage
+	return allFiltered.value.slice(start, end)
+})
+
+const nextPage = () => {
+	if (currentPage.value < totalPages.value) {
+		currentPage.value++
+	}
+}
+
+const prevPage = () => {
+	if (currentPage.value > 1) {
+		currentPage.value--
+	}
+}
+
+watch([searchUser, filterUserType, filterRole, filterAction], () => {
+	currentPage.value = 1
 })
 
 </script>

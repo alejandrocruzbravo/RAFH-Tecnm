@@ -74,6 +74,35 @@
 			</table>
 		</div>
 
+		<!-- Pagination Controls -->
+		<div v-if="filteredMantenimientos.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button
+				@click="prevPage"
+				:disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+				Atrás
+			</button>
+
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+				Página {{ currentPage }} de {{ totalPages }} | Total: {{ filteredMantenimientos.length }} resultados
+			</span>
+
+			<button
+				@click="nextPage"
+				:disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				Adelante
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+
 		<!-- New Mantenimiento Modal -->
 		<div v-if="showNewMantenimientoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
@@ -213,7 +242,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const mantenimientos = ref([
 	{ bien: 'COMPUTADORA DELL', tipo: 'Limpieza', fecha: '2024-02-15', estado: 'Completado', observaciones: 'Limpieza general realizada' },
@@ -227,13 +256,25 @@ const showReportModal = ref(false)
 const showDeleteConfirm = ref(false)
 const editingIndex = ref(null)
 const searchTerm = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 15
 
-const filteredMantenimientos = computed(() => {
+const allFiltered = computed(() => {
 	return mantenimientos.value.filter(mantenimiento => {
 		return !searchTerm.value ||
 			mantenimiento.bien.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
 			mantenimiento.tipo.toLowerCase().includes(searchTerm.value.toLowerCase())
 	})
+})
+
+const totalPages = computed(() => {
+	return Math.ceil(allFiltered.value.length / itemsPerPage) || 1
+})
+
+const filteredMantenimientos = computed(() => {
+	const start = (currentPage.value - 1) * itemsPerPage
+	const end = start + itemsPerPage
+	return allFiltered.value.slice(start, end)
 })
 
 const newMantenimientoData = ref({
@@ -285,4 +326,20 @@ const confirmDelete = () => {
 	mantenimientos.value.splice(editingIndex.value, 1)
 	showDeleteConfirm.value = false
 }
+
+const nextPage = () => {
+	if (currentPage.value < totalPages.value) {
+		currentPage.value++
+	}
+}
+
+const prevPage = () => {
+	if (currentPage.value > 1) {
+		currentPage.value--
+	}
+}
+
+watch(searchTerm, () => {
+	currentPage.value = 1
+})
 </script>

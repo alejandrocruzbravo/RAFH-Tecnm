@@ -1,7 +1,23 @@
 <template>
     <section class="relative min-h-[calc(100vh-64px)] bg-cover bg-center transition-colors duration-300" style="background-image: url('/images/bg-waves.png')">
-        
+
         <div class="absolute inset-0 dark:bg-dark-bg opacity-90 transition-colors duration-300"></div>
+
+        <!-- Theme Toggle Button -->
+        <div class="absolute top-4 right-4 z-20">
+            <button
+                @click="toggleTheme"
+                class="p-2 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300 shadow-md"
+                :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+            >
+                <svg v-if="isDark" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm5.657-9.193a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707zM5 8a1 1 0 100-2H4a1 1 0 100 2h1z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
 
         <div class="relative z-10 flex items-center justify-center min-h-[calc(100vh-64px)] py-12 px-4">
             
@@ -90,8 +106,12 @@
 	import { ref, reactive } from 'vue'
 	import { useRouter } from 'vue-router'
 	import { login } from '../config/api.js'
+	import { useTheme } from '../composables/useTheme.js'
 
 	const router = useRouter()
+	const { isDark, toggleTheme, initTheme } = useTheme()
+
+	initTheme()
 
 	const formData = reactive({
 		email: '',
