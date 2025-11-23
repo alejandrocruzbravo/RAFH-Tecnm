@@ -336,6 +336,7 @@ const traspasoData = ref({
 const currentPage = ref(1)
 const itemsPerPage = 15
 const totalPages = ref(1)
+const searchTimeout = ref(null)
 
 const filteredBienes = computed(() => {
 	return bienesList.value.data || []
@@ -457,7 +458,12 @@ const confirmarTraspaso = () => {
 
 watch(searchQuery, () => {
 	currentPage.value = 1
-	fetchBienes()
+	if (searchTimeout.value) {
+		clearTimeout(searchTimeout.value)
+	}
+	searchTimeout.value = setTimeout(() => {
+		fetchBienes()
+	}, 500)
 })
 
 onMounted(() => {

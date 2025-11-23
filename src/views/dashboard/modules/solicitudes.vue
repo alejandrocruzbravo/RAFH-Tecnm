@@ -7,7 +7,7 @@
 	<div v-else-if="error" class="p-6 bg-red-100 dark:bg-red-900 rounded-lg text-red-700 dark:text-red-200">
 		<h3 class="font-bold">Error al cargar los gestores</h3>
 		<p>{{ error.message || 'No se pudo conectar con la API.' }}</p>
-		<button @click="fetchGestoresData" class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+		<button @click="fetchSolicitudes(1)" class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
 			Reintentar
 		</button>
 	</div>
@@ -108,6 +108,35 @@
 					</tr>
 				</tbody>
 			</table>
+		</div>
+
+		<!-- Pagination Controls -->
+		<div v-if="filteredSolicitudes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button
+				@click="prevPage"
+				:disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+				Atrás
+			</button>
+
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+				Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
+			</span>
+
+			<button
+				@click="nextPage"
+				:disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				Adelante
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
 		</div>
 
 		<!-- View Details Modal -->
@@ -241,7 +270,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue' // <-- Se añade onMounted
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue' // <-- Se añade onMounted
 // Asegúrate de que esta ruta sea correcta
 import { authenticatedFetch } from '../../../config/api.js'
 
@@ -253,6 +282,9 @@ const fetchError = ref(null)
 // --- ESTADO DE DATOS (ACTUALIZADO) ---
 // Se inicializa como un objeto de paginación vacío
 const solicitudes = ref({ data: [] })
+const currentPage = ref(1)
+const itemsPerPage = 15
+const totalItems = ref(0)
 
 // --- Estados del formulario (Sin cambios) ---
 const filterEstado = ref('')
@@ -261,22 +293,54 @@ const showDetailsSolicitudModal = ref(false)
 const selectedSolicitudDetails = ref(null)
 
 // --- FUNCIÓN DE CARGA DE DATOS (NUEVA) ---
-const fetchSolicitudes = async () => {
+const totalPages = computed(() => {
+	return Math.ceil(totalItems.value / itemsPerPage) || 1
+})
+
+const fetchSolicitudes = async (page = 1) => {
 	isLoading.value = true
 	fetchError.value = null
 	try {
-		const response = await authenticatedFetch('/traspasos'); // Llama a tu API
+		const params = new URLSearchParams()
+		params.append('page', page)
+
+		if (searchTerm.value.trim()) {
+			params.append('search', searchTerm.value.toUpperCase())
+		}
+
+		const response = await authenticatedFetch(`/traspasos?${params.toString()}`); // Llama a tu API
 		if (!response.ok) {
 			throw new Error('Error al cargar las solicitudes.');
 		}
-		solicitudes.value = await response.json();
+		const data = await response.json();
+		solicitudes.value = data
+		totalItems.value = data.total || 0
+		currentPage.value = page
 	} catch (e) {
 		console.error('Error:', e);
 		fetchError.value = e;
+		solicitudes.value = { data: [] }
 	} finally {
 		isLoading.value = false;
 	}
 }
+
+const nextPage = () => {
+	if (currentPage.value < totalPages.value) {
+		fetchSolicitudes(currentPage.value + 1)
+	}
+}
+
+const prevPage = () => {
+	if (currentPage.value > 1) {
+		fetchSolicitudes(currentPage.value - 1)
+	}
+}
+
+watch(searchTerm, () => {
+	currentPage.value = 1
+	fetchSolicitudes(1)
+})
 const fetchSolicitudesSocket = async () => {
 	try {
 		const response = await authenticatedFetch('/traspasos'); // Llama a tu API
