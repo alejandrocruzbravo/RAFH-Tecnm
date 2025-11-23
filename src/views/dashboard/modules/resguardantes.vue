@@ -43,6 +43,11 @@
 		</div>
 
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto">
+			<div v-if="isLoadingResguardantes"
+				class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
+				<div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
+				<p class="ml-4 mt-2 text-gray-600 dark:text-gray-400 font-medium">Actualizando resultados...</p>
+			</div>
 			<div v-if="filteredResguardantes.length === 0" class="flex items-center justify-center h-64">
 				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
 			</div>
@@ -111,6 +116,36 @@
 				</tbody>
 			</table>
 		</div>
+
+		<!-- Pagination Controls -->
+		<div v-if="filteredResguardantes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button
+				@click="prevPage"
+				:disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+				</svg>
+				Atrás
+			</button>
+
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+				Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
+			</span>
+
+			<button
+				@click="nextPage"
+				:disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
+			>
+				Adelante
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+
 		<!-- New Resguardante Modal -->
 		<div v-if="showNewResguardanteModal"
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -497,6 +532,7 @@ import { authenticatedFetch } from '../../../config/api.js'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
 const isLoading = ref(true)
+const isLoadingResguardantes = ref(false)
 const error = ref(null)
 const isSubmitting = ref(false)
 const showNewResguardanteModal = ref(false)
@@ -509,6 +545,9 @@ const showDetailsModal = ref(false)
 const deletingResguardante = ref(null)
 const deleteResguardanteError = ref(null)
 const searchTerm = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 15
+const totalItems = ref(0)
 
 const resguardantesList = ref({ data: [] })
 const departments = ref({ data: [] })
@@ -553,17 +592,14 @@ const newUserData = ref({
 	password: ''
 })
 
-const filteredResguardantes = computed(() => {
-	return resguardantesList.value.data.filter(resguardante => {
-		const departmentName = getDepartmentName(resguardante.res_departamento)
-		return !searchTerm.value ||
-			(resguardante.res_nombre && resguardante.res_nombre.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_apellidos && resguardante.res_apellidos.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_correo && resguardante.res_correo.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(resguardante.res_rfc && resguardante.res_rfc.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-			(departmentName && departmentName.toLowerCase().includes(searchTerm.value.toLowerCase()))
-	})
+const totalPages = computed(() => {
+	return Math.ceil(totalItems.value / itemsPerPage) || 1
 })
+
+const filteredResguardantes = computed(() => {
+	return resguardantesList.value.data || []
+})
+
 
 const deleteResguardanteMessage = computed(() => {
 	if (!deletingResguardante.value) return ''
@@ -571,33 +607,70 @@ const deleteResguardanteMessage = computed(() => {
 	return `¿Estás seguro de que deseas eliminar al resguardante:<br><strong class='font-medium text-lg text-gray-900 dark:text-white'>${name}</strong>?`
 })
 
-const fetchResguardantesData = async () => {
+const fetchResguardantesData = async (page = 1) => {
 	isLoading.value = true
 	error.value = null
 	try {
-		const [resguardantesRes, formDataRes] = await Promise.all([
-			authenticatedFetch('/resguardantes'),
+		const params = new URLSearchParams()
+		params.append('page', page)
+
+		if (searchTerm.value.trim()) {
+			params.append('search', searchTerm.value.toUpperCase())
+		}
+
+		const [resguardantesRes, departmentsRes, rolesRes] = await Promise.all([
+			authenticatedFetch(`/resguardantes?${params.toString()}`),
+			authenticatedFetch('/departamentos'),
 			authenticatedFetch('/formularios/resguardantes')
 		])
 
 		if (!resguardantesRes.ok) throw new Error('Error al cargar resguardantes')
-		if (!formDataRes.ok) throw new Error('Error al cargar datos del formulario')
+		if (!departmentsRes.ok) throw new Error('Error al cargar departamentos')
+		if (!rolesRes.ok) throw new Error('Error al cargar roles')
 
-		resguardantesList.value = await resguardantesRes.json()
-		const formData = await formDataRes.json();
-		rolesList.value = formData.roles || [];
-		departments.value = formData.departamentos
-		oficinasList.value = formData.oficinas || [];
+		const resguardantesData = await resguardantesRes.json()
+		resguardantesList.value = resguardantesData
+		totalItems.value = resguardantesData.total || 0
+		currentPage.value = page
 
+		const deptData = await departmentsRes.json()
+		departments.value = deptData.data || deptData
 
-
+		const rolesData = await rolesRes.json()
+		rolesList.value = rolesData.data || rolesData
 	} catch (e) {
 		console.error('Error al cargar datos:', e)
 		error.value = e
+		resguardantesList.value = { data: [] }
 	} finally {
 		isLoading.value = false
+		isLoadingResguardantes.value = false
 	}
 }
+
+const nextPage = () => {
+	if (currentPage.value < totalPages.value) {
+		fetchResguardantesData(currentPage.value + 1)
+	}
+}
+
+const prevPage = () => {
+	if (currentPage.value > 1) {
+		fetchResguardantesData(currentPage.value - 1)
+	}
+}
+
+let searchTimeout
+watch(searchTerm, () => {
+	if (searchTimeout) clearTimeout(searchTimeout)
+
+	isLoadingResguardantes.value = true
+
+	searchTimeout = setTimeout(() => {
+		currentPage.value = 1
+		fetchResguardantesData(1)
+	}, 500)
+})
 
 const getDepartmentName = (deptId) => {
 	if (!deptId || !departments.value) return 'Sin asignar'
