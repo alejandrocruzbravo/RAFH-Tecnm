@@ -239,8 +239,6 @@ const downloadPDF = async () => {
             // Mismo concepto: Titulo grande, detalles agrupados abajo
             
             const txtNombre = (item.titulo_principal || 'OFICINA').toString().toUpperCase();
-            const txtDepto = (item.original.departamento_nombre || '').toString().toUpperCase();
-            const txtCodigo = (item.codigo_visible || '').toString();
 
             // Título
             doc.setFont("helvetica", "bold");

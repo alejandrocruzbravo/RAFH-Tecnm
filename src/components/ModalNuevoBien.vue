@@ -160,6 +160,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { generarFormatoBienes } from '../config/useFormatoBienes.js';
 
 // --- Props y Emits ---
 const props = defineProps({
@@ -307,6 +308,15 @@ const handleSave = async () => {
       throw new Error(message);
     }
 
+    const responseData = await response.json();
+    const bienesCreados = responseData; // Recibimos el array del backend
+
+    // 1. Validamos que haya bienes para imprimir
+    if (bienesCreados) {
+        // 2. Llamamos a la función para generar el PDF
+        await imprimirFormato(bienesCreados);
+    }
+
     // 3. ¡Éxito!
     emit('save'); // Notifica al padre que recargue la tabla
     closeModal(); // Cierra este modal
@@ -340,4 +350,29 @@ watch(() => props.show, (newVal) => {
     }, 300);
   }
 });
+const imprimirFormato = (items) => {
+    if (!items || items.length === 0) return;
+    // Tomamos el primer bien como referencia para la ubicación
+    const primerBien = items.data[0];
+    // Preparar datos generales extrayendo las relaciones
+    const datosGenerales = {
+        // Usamos encadenamiento opcional (?.) por seguridad
+        oficina_nombre: primerBien.oficina?.nombre || 'SIN OFICINA',
+        departamento_nombre: primerBien.oficina?.departamento?.dep_nombre || 'SIN DEPARTAMENTO',
+        area_nombre: primerBien.oficina?.departamento?.area?.area_nombre || 'SIN ÁREA',
+        cantidad: items.cantidad,
+        // Datos del formulario (estos siguen viniendo de tus variables reactivas)
+        bien_clave: selectedCatalogoItem.value.camb,
+        bien_descripcion: newBienData.value.bien_descripcion,
+        bien_caracteristicas: newBienData.value.bien_caracteristicas,
+        bien_marca: newBienData.value.bien_marca,
+        bien_modelo: newBienData.value.bien_modelo,
+        bien_valor_monetario: newBienData.value.bien_valor_monetario,
+        bien_numero_factura: newBienData.value.bien_numero_factura,
+        bien_tipo_adquisicion: newBienData.value.bien_tipo_adquisicion,
+        bien_fecha_alta: new Date().toISOString().split('T')[0]
+    };
+    // Generar el PDF
+    generarFormatoBienes(datosGenerales, items);
+};
 </script>

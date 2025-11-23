@@ -190,8 +190,8 @@ const handleMove = async () => {
     const response = await props.fetchFunction(`/bienes/${props.bien.id}`, {
       method: 'PUT',
       body: JSON.stringify({
-        acciones: 'mover',
-        id_oficina_nueva: selectedOficina.value
+        accion: 'mover',
+        nuevo_id_oficina: selectedOficina.value
       })
     });
 
