@@ -118,12 +118,10 @@
 		</div>
 
 		<!-- Pagination Controls -->
-		<div v-if="filteredResguardantes.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-			<button
-				@click="prevPage"
-				:disabled="currentPage === 1"
-				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-			>
+		<div v-if="filteredResguardantes.length > 0"
+			class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+			<button @click="prevPage" :disabled="currentPage === 1"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
@@ -134,11 +132,8 @@
 				Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
 			</span>
 
-			<button
-				@click="nextPage"
-				:disabled="currentPage === totalPages"
-				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-			>
+			<button @click="nextPage" :disabled="currentPage === totalPages"
+				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
 				Adelante
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -392,7 +387,8 @@
 							</div>
 							<div>
 								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">RFC</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.res_rfc|| 'N/A' }}</p>
+								<p class="text-gray-900 dark:text-white font-semibold">{{
+									selectedResguardante?.res_rfc || 'N/A' }}</p>
 							</div>
 							<div>
 								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Correo Electrónico</p>
@@ -401,7 +397,8 @@
 							</div>
 							<div>
 								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">CURP</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.res_curp|| 'N/A' }}</p>
+								<p class="text-gray-900 dark:text-white font-semibold">{{
+									selectedResguardante?.res_curp || 'N/A' }}</p>
 							</div>
 							<div>
 								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Teléfono</p>
@@ -420,116 +417,174 @@
 							</div>
 							<div>
 								<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Oficina</p>
-								<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.oficina.nombre + ' - ' + selectedResguardante?.oficina.referencia || 'N/A' }}</p>
+								<p class="text-gray-900 dark:text-white font-semibold">{{
+									selectedResguardante?.oficina.nombre + ' - ' +
+									selectedResguardante?.oficina.referencia || 'N/A' }}</p>
 							</div>
 						</div>
-					</div>
-				</div>
+						<div class="pt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[300px]">
 
-				<div
-					class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6 sticky bottom-0 bg-white dark:bg-dark-bg">
-					<button @click="showDetailsModal = false"
-						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
+							<div class="flex flex-col bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg">
+								<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+									<h3 class="font-semibold text-gray-800 dark:text-white">Historial de Movimientos</h3>
+								</div>
+								<div
+									class="flex-1 flex items-center justify-center p-8 text-gray-400 dark:text-gray-500 italic">
+									Próximamente: Tabla de historial...
+								</div>
+							</div>
+
+							<div class="flex flex-col bg-white  dark:bg-dark-surface  border border-gray-200 dark:border-gray-700 rounded-lg">
+								<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center">
+									<h3 class="font-semibold text-gray-800 dark:text-white">Bienes en Resguardo</h3>
+									<button @click="showAssignModal = true"
+										class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md flex items-center gap-2 transition-colors">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M12 4v16m8-8H4"></path>
+										</svg>
+										Nuevo Resguardo
+									</button>
+								</div>
+
+								<div class="flex-1 overflow-y-auto p-0 dark:bg-dark-bg ">
+									<table class="w-full text-sm text-left">
+										<thead
+											class="text-xs text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 sticky top-0">
+											<tr>
+												<th class="px-4 py-3">Bien</th>
+												<th class="px-4 py-3">Código</th>
+												<th class="px-4 py-3">Fecha Asignación</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+											<tr v-for="i in 3" :key="i"
+												class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+												<td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
+													Escritorio Ejecutivo {{ i }}</td>
+												<td
+													class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
+													I450-23-00{{ i }}</td>
+												<td class="px-4 py-3 text-gray-500">2024-11-2{{ i }}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+						</div>
+
+					</div>
 				</div>
 			</div>
-		</div>
-		<!-- Crear usuario Modal -->
-		<div v-if="showCreateUserModal && creatingUserFor"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Usuario para {{
-						creatingUserFor.res_nombre }}</h2>
-					<button @click="closeCreateUserModal"
-						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-
-				<div v-if="createUserError"
-					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
-					role="alert">
-					<span class="font-medium text-sm">{{ createUserError }}</span>
-					<button @click="createUserError = null"
-						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
-							Electrónico <span class="text-red-500">*</span></label>
-						<input v-model="newUserData.correo" type="email" placeholder="correo@institucion.com"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800">
-						<span v-if="creatingUserFor.res_correo" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se
-							usará el correo del resguardante.</span>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de Usuario
-							<span class="text-red-500">*</span></label>
-						<select v-model="newUserData.rol_id"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option :value="null" disabled>Seleccionar un Rol</option>
-							<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
-							</option>
-							<option v-else v-for="rol in rolesList" :key="rol.id" :value="rol.id">
-								{{ rol.rol_nombre }}
-							</option>
-						</select>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña <span
-								class="text-red-500">*</span></label>
-						<input v-model="newUserData.password" type="password" placeholder="Contraseña para la cuenta"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="closeCreateUserModal" :disabled="isSubmitting"
-						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
-					<button @click="saveNewUser" :disabled="isSubmitting"
-						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
-						{{ isSubmitting ? 'Creando...' : 'Crear Usuario' }}
-					</button>
-				</div>
+			<div
+				class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6 sticky bottom-0 bg-white dark:bg-dark-bg">
+				<button @click="showDetailsModal = false"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
 			</div>
 		</div>
-		<!-- Report Modal -->
-		<div v-if="showReportModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-					<button @click="showReportModal = false"
-						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
-				<div class="p-6 space-y-4">
-					<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
-					<div class="space-y-2">
-						<button
-							class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar
-							a PDF</button>
-						<button
-							class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar
-							a Excel</button>
-					</div>
-				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showReportModal = false"
-						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-				</div>
-			</div>
-		</div>
-		<!-- Delete Confirmation Modal -->
-		<ConfirmModal :show="showDeleteResguardanteModal" :isSubmitting="isSubmitting"
-			:errorMessage="deleteResguardanteError" title="Confirmar Eliminación" :message="deleteResguardanteMessage"
-			confirmText="Sí, Eliminar" confirmClass="bg-red-600 hover:bg-red-700"
-			@confirm="handleConfirmDeleteResguardante" @cancel="cancelDeleteResguardante"
-			@clearError="deleteResguardanteError = null" />
 	</div>
+	<!-- Crear usuario Modal -->
+	<div v-if="showCreateUserModal && creatingUserFor"
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
+			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Usuario para {{
+					creatingUserFor.res_nombre }}</h2>
+				<button @click="closeCreateUserModal"
+					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+			</div>
+
+			<div v-if="createUserError"
+				class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
+				role="alert">
+				<span class="font-medium text-sm">{{ createUserError }}</span>
+				<button @click="createUserError = null"
+					class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+			</div>
+			<div class="p-6 space-y-4">
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
+						Electrónico <span class="text-red-500">*</span></label>
+					<input v-model="newUserData.correo" type="email" placeholder="correo@institucion.com"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800">
+					<span v-if="creatingUserFor.res_correo" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se
+						usará el correo del resguardante.</span>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de Usuario
+						<span class="text-red-500">*</span></label>
+					<select v-model="newUserData.rol_id"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option :value="null" disabled>Seleccionar un Rol</option>
+						<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
+						</option>
+						<option v-else v-for="rol in rolesList" :key="rol.id" :value="rol.id">
+							{{ rol.rol_nombre }}
+						</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña <span
+							class="text-red-500">*</span></label>
+					<input v-model="newUserData.password" type="password" placeholder="Contraseña para la cuenta"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				</div>
+			</div>
+			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+				<button @click="closeCreateUserModal" :disabled="isSubmitting"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
+				<button @click="saveNewUser" :disabled="isSubmitting"
+					class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+					{{ isSubmitting ? 'Creando...' : 'Crear Usuario' }}
+				</button>
+			</div>
+		</div>
+	</div>
+	<!-- Report Modal -->
+	<div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
+			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
+				<button @click="showReportModal = false"
+					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+			</div>
+			<div class="p-6 space-y-4">
+				<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
+				<div class="space-y-2">
+					<button
+						class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar
+						a PDF</button>
+					<button
+						class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar
+						a Excel</button>
+				</div>
+			</div>
+			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+				<button @click="showReportModal = false"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
+			</div>
+		</div>
+	</div>
+	<!-- Delete Confirmation Modal -->
+	<ConfirmModal :show="showDeleteResguardanteModal" :isSubmitting="isSubmitting"
+		:errorMessage="deleteResguardanteError" title="Confirmar Eliminación" :message="deleteResguardanteMessage"
+		confirmText="Sí, Eliminar" confirmClass="bg-red-600 hover:bg-red-700" @confirm="handleConfirmDeleteResguardante"
+		@cancel="cancelDeleteResguardante" @clearError="deleteResguardanteError = null" />
+	<ModalAsignarResguardo 
+	:show="showAssignModal" 
+	:resguardante="selectedResguardante" @close="showAssignModal = false"
+	@confirm="handleAssignConfirm"
+	/>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import ModalAsignarResguardo from '@/components/ModalAsignarResguardo.vue'
 
 const isLoading = ref(true)
 const isLoadingResguardantes = ref(false)
@@ -559,6 +614,8 @@ const showCreateUserModal = ref(false)
 const createUserError = ref(null)
 const creatingUserFor = ref(null) // Para guardar el resguardante que estamos editando
 
+const showAssignModal = ref(false)
+
 const newResguardanteData = ref({
 	res_nombre: '',
 	res_apellidos: '',
@@ -583,7 +640,7 @@ const editingResguardante = ref({
 	id_oficina: null,
 	res_correo: '',
 	res_id_usuario: null,
-    usuario_id_rol: null
+	usuario_id_rol: null
 })
 
 const newUserData = ref({
@@ -769,7 +826,7 @@ const openEditResguardanteModal = (resguardante) => {
 		id_oficina: resguardante.id_oficina, // Asume que tu API envía el ID
 		res_correo: resguardante.res_correo,
 		res_id_usuario: resguardante.res_id_usuario, // <-- AÑADIR ESTA LÍNEA
-        usuario_id_rol: resguardante.usuario_id_rol  // <-- AÑADIR ESTA LÍNEA
+		usuario_id_rol: resguardante.usuario_id_rol  // <-- AÑADIR ESTA LÍNEA
 	};
 	editResguardanteError.value = null;
 	showEditResguardanteModal.value = true;
@@ -876,6 +933,7 @@ const handleConfirmDeleteResguardante = async () => {
 
 const viewResguardanteDetails = (resguardante) => {
 	selectedResguardante.value = resguardante
+	console.log(selectedResguardante.value)
 	showDetailsModal.value = true
 }
 
@@ -948,5 +1006,18 @@ const saveNewUser = async () => {
 	} finally {
 		isSubmitting.value = false
 	}
+}
+
+const handleAssignConfirm = async (selectedGoods) => {
+    console.log("Bienes seleccionados para asignar:", selectedGoods);
+    
+    // AQUÍ irá la lógica de API POST /resguardos
+    // Por ahora solo simulamos éxito:
+    
+    // 1. Cerrar el modal de asignación
+    showAssignModal.value = false;
+    
+    // 2. (Opcional) Mostrar mensaje de éxito o recargar la tabla de resguardos actual
+    alert(`Se han asignado ${selectedGoods.length} bienes temporalmente (Frontend).`);
 }
 </script>

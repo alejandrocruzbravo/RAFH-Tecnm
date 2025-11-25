@@ -56,7 +56,7 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Proveedor</label>
-          <input v-model="formData.bien_proveedor" type="text" placeholder="Nombre del proveedor" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+          <input v-model="formData.bien_provedor" type="text" placeholder="Nombre del proveedor" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +127,7 @@ const setFormData = (sourceBien) => {
       bien_serie: sourceBien.bien_serie, 
       bien_tipo_adquisicion: sourceBien.bien_tipo_adquisicion,
       bien_valor_monetario: sourceBien.bien_valor_monetario,
-      bien_provedor: sourceBien.bien_proveedor,
+      bien_provedor: sourceBien.bien_provedor,
       bien_numero_factura: sourceBien.bien_numero_factura,
       id_oficina: sourceBien.id_oficina,
       bien_marca: sourceBien.bien_marca, 
@@ -165,14 +165,16 @@ const handleSave = async () => {
 
     // El payload ahora incluye todos los campos del formulario
 
-    const payload = formData.value; 
+    const payload = formData.value;
+    payload.accion = 'editar_info';
     payload.bien_caracteristicas = payload.bien_caracteristicas || "SIN CARACTERÍSTICAS";
     payload.bien_marca = payload.bien_marca || "SIN MARCA";
     payload.bien_modelo = payload.bien_modelo || "SIN MODELO";
     payload.bien_serie = payload.bien_serie || "SIN SERIE";
-    payload.bien_proveedor = payload.bien_provedor || "SIN PROVEEDOR";
+    payload.bien_provedor = payload.bien_provedor || "SIN PROVEEDOR";
     payload.bien_numero_factura = payload.bien_numero_factura || "SIN FACTURA";
-
+    payload.bien_valor_monetario = payload.bien_valor_monetario || 0;
+    
     const response = await props.fetchFunction(`/bienes/${props.bien.id}`, {
       method: 'PUT',
       body: JSON.stringify(payload)

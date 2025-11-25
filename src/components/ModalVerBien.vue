@@ -48,7 +48,7 @@
                             <InfoBien label="Modelo" :value="bien.bien_modelo" />
                             <InfoBien label="N/S" :value="bien.bien_serie" />
                             <InfoBien label="Valor" :value="`$${bien.bien_valor_monetario || 0}`" />
-                            <InfoBien label="Proveedor" :value="bien.bien_proveedor" />
+                            <InfoBien label="Proveedor" :value="bien.bien_provedor" />
                             <InfoBien label="Factura" :value="bien.bien_numero_factura" />
                             <InfoBien label="Adquisición" :value="bien.bien_tipo_adquisicion" />
                         </div>

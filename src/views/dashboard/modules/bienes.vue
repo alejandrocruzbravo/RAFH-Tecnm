@@ -541,6 +541,7 @@ const openDeleteModal = (bien) => {
  */
 const openEditModal = (bien) => {
     editingBien.value = bien
+    console.log(editingBien.value);
     showEditModal.value = true
 }
 
