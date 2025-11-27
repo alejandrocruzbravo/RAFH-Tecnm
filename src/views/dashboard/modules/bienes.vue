@@ -210,8 +210,11 @@
                                                     <span v-if="bien.bien_estado === 'Activo'"
                                                         class="inline-block px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-semibold">Activo</span>
                                                     <span v-else-if="bien.bien_estado === 'En tránsito'"
-                                                        class="inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs font-semibold">En
-                                                        tránsito</span>
+                                                            class="inline-block px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs font-semibold"
+                                                            style="cursor: help;" 
+                                                            :title="'📍 Ubicación Actual: ' + (bien.ubicacion_actual?.nombre || 'Desconocida')">
+                                                            En tránsito
+                                                    </span>
                                                     <span v-else-if="bien.bien_estado === 'Extravíado'"
                                                         class="inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">Extravíado</span>
                                                     <span v-else-if="bien.bien_estado === 'Baja'"
@@ -465,6 +468,7 @@ const fetchBienes = async (page = 1) => {
         const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes?${params.toString()}`)
         if (!response.ok) throw new Error('Error al cargar los bienes')
         bienesList.value = await response.json()
+        console.log(bienesList.value);
         totalItems.value = bienesList.value.total || 0
         currentPage.value = page
     } catch (e) {

@@ -95,12 +95,12 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[400px]">
           
-          <div class="flex flex-col border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 relative">
+          <div class="flex flex-col border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700/30 relative">
              <div v-if="isLoadingLeft" class="absolute inset-0 z-10 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center rounded-lg">
                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
 
-            <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/10 flex justify-between items-center">
               <h3 class="font-semibold text-gray-700 dark:text-gray-200">
                 Disponibles en Oficina
                 <span class="text-xs font-normal text-gray-500">({{ totalItems }} encontrados)</span>

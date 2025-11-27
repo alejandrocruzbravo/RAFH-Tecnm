@@ -42,32 +42,12 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Serie</label>
           <input v-model="formData.bien_serie" type="text" placeholder="Número de serie de fábrica" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Valor Monetario</label>
-            <input v-model.number="formData.bien_valor_monetario" type="number" min="0" placeholder="Ej. 15000" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Número de Factura</label>
-            <input v-model="formData.bien_numero_factura" type="text" placeholder="Factura" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-          </div>
-        </div>
-
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Proveedor</label>
           <input v-model="formData.bien_provedor" type="text" placeholder="Nombre del proveedor" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo Adquisición</label>
-            <select v-model="formData.bien_tipo_adquisicion" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                <option value="1">Compra Directa</option>
-                <option value="2">Donación</option>
-                <option value="3">Entrada por Almacén</option>
-              </select>
-          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
             <select v-model="formData.bien_estado" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -115,7 +95,6 @@ const errorMessage = ref(null);
 // Objeto 'ref' para el formulario
 const formData = ref(null);
 
-// --- FUNCIÓN 'setFormData' (ACTUALIZADA) ---
 // Copia todos los campos de tu validación
 const setFormData = (sourceBien) => {
   if (sourceBien) {
@@ -125,10 +104,7 @@ const setFormData = (sourceBien) => {
       bien_codigo: sourceBien.bien_codigo,
       bien_modelo: sourceBien.bien_modelo, 
       bien_serie: sourceBien.bien_serie, 
-      bien_tipo_adquisicion: sourceBien.bien_tipo_adquisicion,
-      bien_valor_monetario: sourceBien.bien_valor_monetario,
       bien_provedor: sourceBien.bien_provedor,
-      bien_numero_factura: sourceBien.bien_numero_factura,
       id_oficina: sourceBien.id_oficina,
       bien_marca: sourceBien.bien_marca, 
       bien_estado: sourceBien.bien_estado  
@@ -164,7 +140,6 @@ const handleSave = async () => {
     }
 
     // El payload ahora incluye todos los campos del formulario
-
     const payload = formData.value;
     payload.accion = 'editar_info';
     payload.bien_caracteristicas = payload.bien_caracteristicas || "SIN CARACTERÍSTICAS";
@@ -172,8 +147,6 @@ const handleSave = async () => {
     payload.bien_modelo = payload.bien_modelo || "SIN MODELO";
     payload.bien_serie = payload.bien_serie || "SIN SERIE";
     payload.bien_provedor = payload.bien_provedor || "SIN PROVEEDOR";
-    payload.bien_numero_factura = payload.bien_numero_factura || "SIN FACTURA";
-    payload.bien_valor_monetario = payload.bien_valor_monetario || 0;
     
     const response = await props.fetchFunction(`/bienes/${props.bien.id}`, {
       method: 'PUT',
