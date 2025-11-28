@@ -116,7 +116,6 @@ const downloadPDF = async () => {
     let col = 0;
     let row = 0;
 
-    // Iteramos (aunque solo sea 1 vez) para reutilizar la lógica
     for (const item of itemsProcesados.value) {
         
         let curX = marginX + (col * (labelWidth + gapX));
@@ -154,50 +153,49 @@ const downloadPDF = async () => {
         let cursorY = curY + 5; 
 
         if (props.isBienes) {
-            // Diseño Bienes
+            // Diseño Bienes REORGANIZADO
             const txtTitulo = (item.titulo_principal || 'SIN TITULO').toString().toUpperCase();
             const txtDesc = (item.original.bien_caracteristicas || item.original.descripcion || item.original.bien_descripcion || 'SIN CARACTERÍSTICAS').toString();
-            const txtDepto = (item.original.departamento_nombre || 'SIN DEPARTAMENTO').toString().toUpperCase();
+            const txtDepto = (item.original.departamento_nombre || 'SIN DEPARTAMENTO').toString();
             const txtCodigo = (item.codigo_visible || 'S/N').toString();
 
-            // Título (10)
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(10);
+            // 1. CÓDIGO (Ahora va arriba - Fuente 11 Negrita)
+            doc.setFont("helvetica", "bold"); 
+            doc.setFontSize(11);
+            doc.text(txtCodigo, textX, cursorY);
+            cursorY += 5; // Espacio después del código
+
+            // 2. NOMBRE / TÍTULO (Bajó de posición - Fuente 8 Normal)
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
             const titleLines = doc.splitTextToSize(txtTitulo, maxTextWidth);
             doc.text(titleLines, textX, cursorY);
-            cursorY += (titleLines.length * 4); 
+            cursorY += (titleLines.length * 3.5); 
 
-            // Detalles (8)
-            doc.setFontSize(8);
-            const lineHeight = 3.5;
-
-            // Descripción
-            doc.setFont("helvetica", "normal");
+            // 3. DESCRIPCIÓN (Debajo del nombre - Fuente 8 Normal)
+            // doc.setFont("helvetica", "normal"); // Ya está seteada arriba
+            // doc.setFontSize(8);                 // Ya está seteada arriba
             const descLines = doc.splitTextToSize(txtDesc, maxTextWidth);
+            // Calculamos cuánto espacio nos queda antes de chocar con el borde inferior o depto
             const maxDescLines = titleLines.length > 1 ? 1 : 2; 
             const descLinesLimited = descLines.slice(0, maxDescLines);
             doc.text(descLinesLimited, textX, cursorY);
-            cursorY += (descLinesLimited.length * lineHeight);
+            cursorY += (descLinesLimited.length * 3.5);
 
-            // Depto
-            doc.setFont("helvetica", "bold");
-            const deptoCorto = txtDepto.length > 35 ? txtDepto.substring(0, 35) + '...' : txtDepto;
-            doc.text(deptoCorto, textX, cursorY);
-            cursorY += lineHeight; 
-
-            // Código
-            doc.setFont("courier", "bold"); 
-            doc.text(txtCodigo, textX, cursorY);
+            // 4. DEPARTAMENTO (Al final, letras pequeñas o negritas según gusto)
+            doc.setFont("helvetica");
+            doc.setFontSize(8); // Reduje un poco para asegurar que quepa
+            const deptoCorto = txtDepto.length > 40 ? txtDepto.substring(0, 40) + '...' : txtDepto;
+            doc.text(deptoCorto, textX, curY + labelHeight - 2); // Lo anclo al fondo de la etiqueta
 
         } else {
-            // Diseño Oficinas
-            const txtNombre = (item.titulo_principal || 'OFICINA').toString().toUpperCase();
+            // Diseño Oficinas (Se mantiene igual)
+            const txtNombre = (item.titulo_principal || 'OFICINA').toString();
             
             doc.setFont("helvetica", "bold");
             doc.setFontSize(11); 
             const nameLines = doc.splitTextToSize(txtNombre, maxTextWidth);
             
-            // Ajuste visual vertical si es oficina
             const startY = nameLines.length === 1 ? cursorY + 1 : cursorY;
             doc.text(nameLines, textX, startY);
         }
@@ -209,7 +207,6 @@ const downloadPDF = async () => {
     const prefix = props.isBienes ? 'etiqueta_bien' : 'etiqueta_oficina';
     doc.save(`${prefix}_${new Date().toISOString().slice(0,10)}.pdf`);
 };
-
 
 // --- 3. DESCARGA CSV (Corregida) ---
 const downloadCSV = () => {

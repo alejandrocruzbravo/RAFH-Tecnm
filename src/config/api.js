@@ -1,7 +1,13 @@
 // Configuración Global de la API
 export const API_CONFIG = {
     // URL base de tu API de Laravel
+
+    /*
+    * TRABAJO LOCAL (LOCALHOST)
     BASE_URL: 'http://127.0.0.1:8081/api',
+    */
+        //B
+    BASE_URL: 'https://jovan-entozoic-nam.ngrok-free.dev/api',
     // Endpoints
     ENDPOINTS: {
         LOGIN: '/login',
@@ -13,7 +19,8 @@ export const API_CONFIG = {
   // Headers por defecto
     DEFAULT_HEADERS: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
     }
 }
 
