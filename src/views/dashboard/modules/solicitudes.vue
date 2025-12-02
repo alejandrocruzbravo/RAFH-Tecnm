@@ -13,12 +13,12 @@
 	</div>
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Solicitudes</label>
+			<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide0">Solicitudes</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
 				Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 border border-gray-100 dark:border-gray-800">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
 					<input v-model="searchTerm" type="text" placeholder="Buscar solicitud"
@@ -34,7 +34,7 @@
 			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto border border-gray-100 dark:border-gray-800">
 			<div v-if="filteredSolicitudes.length === 0" class="flex items-center justify-center h-64">
 				<p class="text-center text-gray-500 dark:text-gray-400 text-lg font-medium">No existen registros</p>
 			</div>
@@ -54,7 +54,7 @@
 
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">Traspaso</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{
-							solicitud.usuario_origen?.usuario_nombre || 'N/A' }}</td>
+							solicitud.resguardante_origen?.res_nombre || 'N/A' }}</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ solicitud.traspaso_observaciones }}
 						</td>
 						<td class="px-4 py-3">
@@ -158,24 +158,24 @@
 							<div>
 								<span class="text-xs font-medium text-gray-600 dark:text-gray-400">Nombre del
 									Bien:</span>
-								<p class="text-sm text-gray-900 dark:text-white">{{ selectedSolicitudDetails.bien.nombre
+								<p class="text-sm text-gray-900 dark:text-white">{{ selectedSolicitudDetails.bien.bien_descripcion
 								}}</p>
 							</div>
 							<div>
 								<span class="text-xs font-medium text-gray-600 dark:text-gray-400">Descripción:</span>
 								<p class="text-sm text-gray-900 dark:text-white">{{
-									selectedSolicitudDetails.bien.descripcion }}</p>
+									selectedSolicitudDetails.bien.bien_caracteristicas }}</p>
 							</div>
 							<div>
 								<span class="text-xs font-medium text-gray-600 dark:text-gray-400">Estado:</span>
-								<p class="text-sm text-gray-900 dark:text-white">{{ selectedSolicitudDetails.bien.estado
+								<p class="text-sm text-gray-900 dark:text-white">{{ selectedSolicitudDetails.bien.bien_estado
 								}}</p>
 							</div>
 							<div>
 								<span class="text-xs font-medium text-gray-600 dark:text-gray-400">Número de
 									Inventario:</span>
 								<p class="text-sm text-gray-900 dark:text-white">{{
-									selectedSolicitudDetails.bien.numeroInventario }}</p>
+									selectedSolicitudDetails.bien.bien_codigo }}</p>
 							</div>
 						</div>
 
@@ -270,8 +270,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue' // <-- Se añade onMounted
-// Asegúrate de que esta ruta sea correcta
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 
 // --- ESTADOS DE CARGA ---
@@ -291,6 +290,24 @@ const filterEstado = ref('')
 const searchTerm = ref('')
 const showDetailsSolicitudModal = ref(false)
 const selectedSolicitudDetails = ref(null)
+
+const confirmModal = ref({
+    show: false,
+    title: '',
+    message: '',
+    type: 'primary', // 'primary' o 'danger'
+    action: null,    // 'aprobar' o 'rechazar'
+    index: null      // índice en el array de solicitudes
+});
+
+const successModal = ref({
+    show: false,
+    title: '',
+    message: '',
+    type: 'success'
+});
+
+const isLoadingDetails = ref(false); // <--- ¡AÑADIDA AQUÍ!
 let searchTimeout = null
 
 // --- FUNCIÓN DE CARGA DE DATOS (NUEVA) ---
@@ -406,16 +423,109 @@ const filteredSolicitudes = computed(() => {
 })
 
 
-const viewSolicitudDetails = (index) => {
-	selectedSolicitudDetails.value = { ...solicitudes.value[index] }
-	showDetailsSolicitudModal.value = true
+const viewSolicitudDetails = async (index) => {
+    // ... (Código para obtener solicitudCorta y manejar la carga) ...
+    const solicitudCorta = solicitudes.value.data[index];
+    if (!solicitudCorta || !solicitudCorta.id) {
+        console.error("No se encontró ID de la solicitud para mostrar detalles.");
+        return;
+    }
+
+    try {
+        isLoadingDetails.value = true;
+        
+        // 2. Realiza la llamada a la API para obtener los datos completos
+        const response = await authenticatedFetch(`/traspasos/${solicitudCorta.id}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Error al obtener detalles: ${response.status}`);
+        }
+        
+        const solicitudCompleta = await response.json();
+
+        // --- INICIO DE LAS CORRECCIONES DE MAPEO ---
+        
+        // Alias para el Resguardante Origen y Destino para hacer el código más limpio
+        const rOrigen = solicitudCompleta.resguardante_origen;
+        const rDestino = solicitudCompleta.resguardante_destino;
+        const rBien = solicitudCompleta.bien?.resguardante;
+
+        selectedSolicitudDetails.value = { 
+            bien: solicitudCompleta.bien, 
+            origen: {
+                areaActual: rOrigen.departamento?.area?.area_nombre || rBien?.departamento?.dep_nombre || 'N/A',
+                responsable: (rOrigen.res_nombre && rOrigen.res_apellidos) ? `${rOrigen.res_nombre} ${rOrigen.res_apellidos}` : 'N/A',
+                ubicacion: (rOrigen?.oficina?.edificio?.nombre && rOrigen?.oficina?.nombre) ? `${rOrigen.oficina.edificio.nombre} - ${rOrigen.oficina.nombre}` : 'N/A',
+            },
+            destino: {
+                areaDestino: rDestino?.departamento?.area?.area_nombre || rDestino?.departamento?.dep_nombre || 'N/A',
+                responsable: (rDestino?.res_nombre && rDestino?.res_apellidos) ? `${rDestino.res_nombre} ${rDestino.res_apellidos}` : 'N/A',
+                ubicacion: (rDestino?.oficina?.edificio?.nombre && rDestino?.oficina?.nombre) ? `${rDestino.oficina.edificio.nombre} - ${rDestino.oficina.nombre}` : 'N/A',
+            },
+            
+            motivo: solicitudCompleta.traspaso_observaciones,
+            tipo: 'Traspaso',
+            solicitante: (rOrigen?.res_nombre && rOrigen?.res_apellidos) ? `${rOrigen.res_nombre} ${rOrigen.res_apellidos}` : 'N/A',
+            estado: solicitudCompleta.traspaso_estado,
+        };
+        showDetailsSolicitudModal.value = true;
+
+    } catch (e) {
+        console.error("Error al obtener detalles de la solicitud:", e);
+    } finally {
+        isLoadingDetails.value = false;
+    }
+}
+// Función para APROBAR
+const approveSolicitud = async (index) => {
+    // Obtenemos la solicitud real del array data
+    const solicitud = solicitudes.value.data[index];
+    
+    if(!confirm(`¿Autorizar traspaso de "${solicitud.bien?.bien_descripcion}" a ${solicitud.resguardante_destino?.res_nombre}?`)) return;
+
+    try {
+
+        const response = await authenticatedFetch(`/traspasos/${solicitud.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ estado: 'Aprobada' })
+        });
+
+        if (response.ok) {
+            alert('Traspaso autorizado. El inventario ha sido actualizado.');
+            // Recargamos la tabla para ver el cambio de estado
+            fetchSolicitudes(currentPage.value);
+        } else {
+            const err = await response.json();
+            alert('Error: ' + (err.message || 'No se pudo aprobar'));
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error de conexión');
+    }
 }
 
-const approveSolicitud = (index) => {
-	solicitudes.value[index].estado = 'Aprobada'
+// Función para RECHAZAR
+const rejectSolicitud = async (index) => {
+    const solicitud = solicitudes.value.data[index];
+
+    if(!confirm('¿Rechazar esta solicitud?')) return;
+
+    try {
+        const response = await authenticatedFetch(`/traspasos/${solicitud.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ estado: 'Rechazada' })
+        });
+
+        if (response.ok) {
+            fetchSolicitudes(currentPage.value);
+        } else {
+            const err = await response.json();
+            alert('Error: ' + (err.message || 'No se pudo rechazar'));
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
-const rejectSolicitud = (index) => {
-	solicitudes.value[index].estado = 'Rechazada'
-}
+
 </script>

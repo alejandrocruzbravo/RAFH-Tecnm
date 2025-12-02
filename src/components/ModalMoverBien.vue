@@ -113,6 +113,7 @@ watch(() => props.show, (newVal) => {
   if (newVal === true) {
     // Resetea todo al abrir
     resetForm();
+
     fetchAreas();
   }
 });
@@ -129,6 +130,7 @@ const resetForm = () => {
 }
 
 const fetchAreas = async () => {
+
   isLoadingAreas.value = true;
   try {
     const response = await props.fetchFunction('/areas'); // (Ajusta la ruta)

@@ -1,6 +1,6 @@
 <template>
     <div v-if="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
+        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 
             <div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ title }}</h2>
@@ -39,7 +39,7 @@
 
 <script setup>
 
-import { defineProps, defineEmits } from 'vue'
+//import { defineProps, defineEmits } from 'vue'
 
 // Definimos las "props" que el componente padre (Areas.vue) le enviará
 defineProps({

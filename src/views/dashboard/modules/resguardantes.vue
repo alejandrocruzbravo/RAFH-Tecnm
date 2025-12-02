@@ -13,12 +13,12 @@
 
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Resguardantes</label>
+			<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Resguardantes</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
 				Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 border border-gray-100 dark:border-gray-800">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar
@@ -42,7 +42,7 @@
 			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative border border-gray-100 dark:border-gray-800">
 			<div v-if="isLoadingResguardantes"
 				class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
 				<div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
@@ -140,109 +140,101 @@
 				</svg>
 			</button>
 		</div>
-
+	</div>
 	<!-- New Resguardante Modal -->
-		<div v-if="showNewResguardanteModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Resguardante</h2>
-					<button @click="showNewResguardanteModal = false"
-						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-				</div>
+	<div v-if="showNewResguardanteModal"
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
+			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Resguardante</h2>
+				<button @click="showNewResguardanteModal = false"
+					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+			</div>
 
-				<div v-if="newResguardanteError"
-					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
-					role="alert">
-					<span class="font-medium text-sm">{{ newResguardanteError }}</span>
-					<button @click="newResguardanteError = null"
-						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
-				</div>
+			<div v-if="newResguardanteError"
+				class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
+				role="alert">
+				<span class="font-medium text-sm">{{ newResguardanteError }}</span>
+				<button @click="newResguardanteError = null"
+					class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+			</div>
 
-				<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<label
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre(s)</label>
-							<input v-model="newResguardanteData.res_nombre" type="text" placeholder="Nombre"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
-							<input v-model="newResguardanteData.res_apellidos" type="text" placeholder="Apellidos"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-					</div>
+			<div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">RFC</label>
-						<input v-model="newResguardanteData.res_rfc" type="text" placeholder="RFC (Opcional)"
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre(s)</label>
+						<input v-model="newResguardanteData.res_nombre" type="text" placeholder="Nombre"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">CURP</label>
-						<input v-model="newResguardanteData.res_curp" type="text" placeholder="CURP (Opcional)"
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apellidos</label>
+						<input v-model="newResguardanteData.res_apellidos" type="text" placeholder="Apellidos"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
-						<input v-model="newResguardanteData.res_correo" type="email" placeholder="Correo (Opcional)"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-					</div>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<label
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
-							<input v-model="newResguardanteData.res_puesto" type="text"
-								placeholder="Ej. Encargado de Lab."
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-						<div>
-							<label
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
-							<input v-model="newResguardanteData.res_telefono" type="tel" placeholder="Ej. 9831234567"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-					</div>
-					<div>
-						<label
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
-						<select v-model="newResguardanteData.res_departamento"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-							<option :value="null" disabled>Seleccionar Departamento</option>
-							<option v-if="!departments || departments.length === 0" disabled>-- Cargando... --
-							</option>
-							<option v-else v-for="dept in departments" :key="dept.id" :value="dept.id">
-								{{ dept.dep_nombre }}
-							</option>
-						</select>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
-						<select v-model="newResguardanteData.id_oficina"
-							:disabled="!newResguardanteData.res_departamento"
-							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800 disabled:cursor-not-allowed">
-							<option :value="null" disabled>
-								{{ newResguardanteData.res_departamento ? 'Selecciona una Oficina' : 'Selecciona un departamento primero' }}
-							</option>
-							<option v-for="oficina in newModalFilteredOficinas" :key="oficina.id" :value="oficina.id">
-								{{ oficina.nombre }}
-							</option>
-							<option v-if="newResguardanteData.res_departamento && newModalFilteredOficinas.length === 0"
-								disabled>
-								-- No hay oficinas en este departamento --
-							</option>
-						</select>
 					</div>
 				</div>
-				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showNewResguardanteModal = false" :disabled="isSubmitting"
-						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
-					<button @click="saveNewResguardante" :disabled="isSubmitting"
-						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
-						{{ isSubmitting ? 'Guardando...' : 'Guardar Resguardante' }}
-					</button>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">RFC</label>
+					<input v-model="newResguardanteData.res_rfc" type="text" placeholder="RFC (Opcional)"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">CURP</label>
+					<input v-model="newResguardanteData.res_curp" type="text" placeholder="CURP (Opcional)"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo</label>
+					<input v-model="newResguardanteData.res_correo" type="email" placeholder="Correo (Opcional)"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+				</div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Puesto</label>
+						<input v-model="newResguardanteData.res_puesto" type="text" placeholder="Ej. Encargado de Lab."
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Teléfono</label>
+						<input v-model="newResguardanteData.res_telefono" type="tel" placeholder="Ej. 9831234567"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+					</div>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+					<select v-model="newResguardanteData.res_departamento"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option :value="null" disabled>Seleccionar Departamento</option>
+						<option v-if="!departments || departments.length === 0" disabled>-- Cargando... --
+						</option>
+						<option v-else v-for="dept in departments" :key="dept.id" :value="dept.id">
+							{{ dept.dep_nombre }}
+						</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
+					<select v-model="newResguardanteData.id_oficina" :disabled="!newResguardanteData.res_departamento"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800 disabled:cursor-not-allowed">
+						<option :value="null" disabled>
+							{{ newResguardanteData.res_departamento ? 'Selecciona una Oficina' : 'Selecciona un departamento primero' }}
+						</option>
+						<option v-for="oficina in newModalFilteredOficinas" :key="oficina.id" :value="oficina.id">
+							{{ oficina.nombre }}
+						</option>
+						<option v-if="newResguardanteData.res_departamento && newModalFilteredOficinas.length === 0"
+							disabled>
+							-- No hay oficinas en este departamento --
+						</option>
+					</select>
+				</div>
+			</div>
+			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+				<button @click="showNewResguardanteModal = false" :disabled="isSubmitting"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
+				<button @click="saveNewResguardante" :disabled="isSubmitting"
+					class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+					{{ isSubmitting ? 'Guardando...' : 'Guardar Resguardante' }}
+				</button>
 			</div>
 		</div>
 	</div>
@@ -357,11 +349,13 @@
 	<!-- Resguardante Details Modal -->
 	<div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-5xl w-full max-h-[95vh] overflow-y-auto">
-			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-dark-bg z-10">
+			<div
+				class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-dark-bg z-10">
 				<h2 class="text-lg font-bold text-gray-900 dark:text-white pr-8">
-					Detalles de Resguardante - {{ selectedResguardante?.res_nombre }} {{ selectedResguardante?.res_apellidos }}
+					Detalles de Resguardante - {{ selectedResguardante?.res_nombre }} {{selectedResguardante?.res_apellidos }}
 				</h2>
-				<button @click="showDetailsModal = false" class="text-gray-400 hover:text-gray-600 text-2xl flex-shrink-0 focus:outline-none">
+				<button @click="showDetailsModal = false"
+					class="text-gray-400 hover:text-gray-600 text-2xl flex-shrink-0 focus:outline-none">
 					&times;
 				</button>
 			</div>
@@ -374,8 +368,7 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre Completo</p>
-							<p class="text-gray-900 dark:text-white font-semibold">{{
-								selectedResguardante?.res_nombre }} {{ selectedResguardante?.res_apellidos }}</p>
+							<p class="text-gray-900 dark:text-white font-semibold">{{selectedResguardante?.res_nombre }} {{ selectedResguardante?.res_apellidos }}</p>
 						</div>
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">RFC</p>
@@ -410,8 +403,7 @@
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Oficina</p>
 							<p class="text-gray-900 dark:text-white font-semibold">{{
-								selectedResguardante?.oficina.nombre + ' - ' +
-								selectedResguardante?.oficina.referencia || 'N/A' }}</p>
+								selectedResguardante?.oficina.nombre }}</p>
 						</div>
 					</div>
 					<div class="pt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[300px]">
@@ -431,44 +423,48 @@
 						<div
 							class="flex flex-col bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg h-[500px] overflow-hidden min-w-0">
 
-						<div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center gap-2 flex-shrink-0">
-							
-							<div class="min-w-0 flex-1">
-								<h3 class="font-semibold text-gray-800 dark:text-white truncate">
-									Bienes Asignados 
-									<span class="text-xs font-normal text-gray-500">({{ bienesAsignadosList.total || 0 }})</span>
-								</h3>
-							</div>
-							
-							<div class="flex items-center gap-2 flex-shrink-0">
-								
-								<button v-if="!isReleaseMode && (bienesAsignadosList.data && bienesAsignadosList.data.length > 0)"
-									@click="isReleaseMode = true"
-									class="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded hover:bg-gray-300 transition-colors whitespace-nowrap">
-									Seleccionar
-								</button>
+							<div
+								class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center gap-2 flex-shrink-0">
 
-								<template v-if="isReleaseMode">
-									<button 
-										@click="openReleaseConfirmation"
-										:disabled="selectedReleaseMap.size === 0"
-										class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded disabled:opacity-50 transition-colors whitespace-nowrap">
-										Liberar ({{ selectedReleaseMap.size }})
-									</button>
-									<button 
-										@click="isReleaseMode = false; selectedReleaseMap.clear()"
-										class="text-gray-500 hover:text-gray-700 dark:text-gray-400 px-1">
-										&times;
-									</button>
-								</template>
+								<div class="min-w-0 flex-1">
+									<h3 class="font-semibold text-gray-800 dark:text-white truncate">
+										Bienes Asignados
+										<span class="text-xs font-normal text-gray-500">({{ bienesAsignadosList.total ||
+											0 }})</span>
+									</h3>
+								</div>
 
-								<button @click="showAssignModal = true" v-if="!isReleaseMode"
-									class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded flex items-center gap-1 transition-colors whitespace-nowrap">
-									<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-									Nuevo
-								</button>
+								<div class="flex items-center gap-2 flex-shrink-0">
+
+									<button
+										v-if="!isReleaseMode && (bienesAsignadosList.data && bienesAsignadosList.data.length > 0)"
+										@click="isReleaseMode = true"
+										class="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded hover:bg-gray-300 transition-colors whitespace-nowrap">
+										Seleccionar
+									</button>
+
+									<template v-if="isReleaseMode">
+										<button @click="openReleaseConfirmation"
+											:disabled="selectedReleaseMap.size === 0"
+											class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded disabled:opacity-50 transition-colors whitespace-nowrap">
+											Liberar ({{ selectedReleaseMap.size }})
+										</button>
+										<button @click="isReleaseMode = false; selectedReleaseMap.clear()"
+											class="text-gray-500 hover:text-gray-700 dark:text-gray-400 px-1">
+											&times;
+										</button>
+									</template>
+
+									<button @click="showAssignModal = true" v-if="!isReleaseMode"
+										class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded flex items-center gap-1 transition-colors whitespace-nowrap">
+										<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M12 4v16m8-8H4"></path>
+										</svg>
+										Nuevo
+									</button>
+								</div>
 							</div>
-						</div>
 
 							<div
 								class="p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-bg flex-shrink-0">
@@ -513,11 +509,19 @@
 													class="rounded text-indigo-600 focus:ring-indigo-500">
 											</td>
 											<td class="px-4 py-3">
-												<div class="font-bold text-gray-800 dark:text-gray-200 text-xs md:text-sm">{{ bien.bien_descripcion}}</div>
-												<div class="font-mono text-[10px] text-blue-600 dark:text-blue-400 font-bold text-left">{{ bien.bien_codigo }}</div>
+												<div
+													class="font-bold text-gray-800 dark:text-gray-200 text-xs md:text-sm">
+													{{
+														bien.bien_descripcion }}</div>
+												<div
+													class="font-mono text-[10px] text-blue-600 dark:text-blue-400 font-bold text-left">
+													{{
+														bien.bien_codigo }}</div>
 											</td>
 											<td>
-												<div class="text-[10px] text-gray-500 truncate max-w-[200px]">{{bien.bien_marca }} {{bien.bien_modelo }}</div>
+												<div class="text-[10px] text-gray-500 truncate max-w-[200px]">
+													{{ bien.bien_marca }}
+													{{ bien.bien_modelo }}</div>
 											</td>
 
 										</tr>
@@ -544,118 +548,101 @@
 					</div>
 				</div>
 			</div>
-			<!-- Crear usuario Modal -->
-			<div v-if="showCreateUserModal && creatingUserFor"
-				class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		</div>
+	</div>
+	<!-- Crear usuario Modal -->
+	<div v-if="showCreateUserModal && creatingUserFor"
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
 
-				<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-					<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-						<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Usuario para {{
-							creatingUserFor.res_nombre }}</h2>
-						<button @click="closeCreateUserModal"
-							class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-					</div>
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
+			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Usuario para {{
+					creatingUserFor.res_nombre }}</h2>
+				<button @click="closeCreateUserModal"
+					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+			</div>
 
-					<div v-if="createUserError"
-						class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
-						role="alert">
-						<span class="font-medium text-sm">{{ createUserError }}</span>
-						<button @click="createUserError = null"
-							class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
-					</div>
-					<div class="p-6 space-y-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
-								Electrónico <span class="text-red-500">*</span></label>
-							<input v-model="newUserData.correo" type="email" placeholder="correo@institucion.com"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800">
-							<span v-if="creatingUserFor.res_correo"
-								class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se
-								usará el correo del resguardante.</span>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de
-								Usuario
-								<span class="text-red-500">*</span></label>
-							<select v-model="newUserData.rol_id"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-								<option :value="null" disabled>Seleccionar un Rol</option>
-								<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
-								</option>
-								<option v-else v-for="rol in rolesList" :key="rol.id" :value="rol.id">
-									{{ rol.rol_nombre }}
-								</option>
-							</select>
-						</div>
-						<div>
-							<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña
-								<span class="text-red-500">*</span></label>
-							<input v-model="newUserData.password" type="password"
-								placeholder="Contraseña para la cuenta"
-								class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-						</div>
-					</div>
-					<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-						<button @click="closeCreateUserModal" :disabled="isSubmitting"
-							class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
-						<button @click="saveNewUser" :disabled="isSubmitting"
-							class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
-							{{ isSubmitting ? 'Creando...' : 'Crear Usuario' }}
-						</button>
-					</div>
+			<div v-if="createUserError"
+				class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
+				role="alert">
+				<span class="font-medium text-sm">{{ createUserError }}</span>
+				<button @click="createUserError = null"
+					class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
+			</div>
+			<div class="p-6 space-y-4">
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
+						Electrónico <span class="text-red-500">*</span></label>
+					<input v-model="newUserData.correo" type="email" placeholder="correo@institucion.com"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800">
+					<span v-if="creatingUserFor.res_correo" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Se
+						usará el correo del resguardante.</span>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rol de
+						Usuario
+						<span class="text-red-500">*</span></label>
+					<select v-model="newUserData.rol_id"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<option :value="null" disabled>Seleccionar un Rol</option>
+						<option v-if="!rolesList || rolesList.length === 0" disabled>-- Cargando roles... --
+						</option>
+						<option v-else v-for="rol in rolesList" :key="rol.id" :value="rol.id">
+							{{ rol.rol_nombre }}
+						</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Contraseña
+						<span class="text-red-500">*</span></label>
+					<input v-model="newUserData.password" type="password" placeholder="Contraseña para la cuenta"
+						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 				</div>
 			</div>
-			<!-- Report Modal -->
-			<div v-if="showReportModal"
-				class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-				<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-					<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-						<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-						<button @click="showReportModal = false"
-							class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-					</div>
-					<div class="p-6 space-y-4">
-						<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
-						<div class="space-y-2">
-							<button
-								class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar
-								a PDF</button>
-							<button
-								class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar
-								a Excel</button>
-						</div>
-					</div>
-					<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-						<button @click="showReportModal = false"
-							class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-					</div>
-				</div>
+			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+				<button @click="closeCreateUserModal" :disabled="isSubmitting"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">Cancelar</button>
+				<button @click="saveNewUser" :disabled="isSubmitting"
+					class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+					{{ isSubmitting ? 'Creando...' : 'Crear Usuario' }}
+				</button>
 			</div>
 		</div>
 	</div>
-	<ConfirmModal 
-		:show="showReleaseConfirmModal"
-		:isSubmitting="isLoadingResguardados"
-		title="Confirmar Liberación"
-		:message="releaseMessage"
-		confirmText="Sí, Liberar Bienes"
-		confirmClass="bg-red-600 hover:bg-red-700"
-		@confirm="handleConfirmRelease"
-		@cancel="showReleaseConfirmModal = false"
-	/>
-	<ConfirmModal 
-        :show="showDeleteResguardanteModal" 
-        :isSubmitting="isSubmitting"
-        :errorMessage="deleteResguardanteError" 
-        title="Confirmar Eliminación"
-        :message="deleteResguardanteMessage" 
-        confirmText="Sí, Eliminar"
-        confirmClass="bg-red-600 hover:bg-red-700" 
-        @confirm="handleConfirmDeleteResguardante"
-        @cancel="cancelDeleteResguardante" 
-        @clearError="deleteResguardanteError = null" 
-    />
-	<ModalAsignarResguardo :show="showAssignModal" :resguardante="selectedResguardante" @close="showAssignModal = false" @confirm="handleAssignConfirm" />
+	<ConfirmModal :show="showReleaseConfirmModal" :isSubmitting="isLoadingResguardados" title="Confirmar Liberación"
+		:message="releaseMessage" confirmText="Sí, Liberar Bienes" confirmClass="bg-red-600 hover:bg-red-700"
+		@confirm="handleConfirmRelease" @cancel="showReleaseConfirmModal = false" />
+	<ConfirmModal :show="showDeleteResguardanteModal" :isSubmitting="isSubmitting"
+		:errorMessage="deleteResguardanteError" title="Confirmar Eliminación" :message="deleteResguardanteMessage"
+		confirmText="Sí, Eliminar" confirmClass="bg-red-600 hover:bg-red-700" @confirm="handleConfirmDeleteResguardante"
+		@cancel="cancelDeleteResguardante" @clearError="deleteResguardanteError = null" />
+	<ModalAsignarResguardo :show="showAssignModal" :resguardante="selectedResguardante" @close="showAssignModal = false"
+		@confirm="handleAssignConfirm" />
+	<!-- Report Modal -->
+	<div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
+			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
+				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
+				<button @click="showReportModal = false"
+					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+			</div>
+			<div class="p-6 space-y-4">
+				<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
+				<div class="space-y-2">
+					<button
+						class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar
+						a PDF</button>
+					<button
+						class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar
+						a Excel</button>
+				</div>
+			</div>
+			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
+				<button @click="showReportModal = false"
+					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script setup>
@@ -993,7 +980,8 @@ const saveEditResguardante = async () => {
 			id_oficina: editingResguardante.value.id_oficina || null,
 			res_correo: editingResguardante.value.res_correo || null,
 		};
-
+		console.log('Payload de edición:', payload);
+		console.log('/resguardantes/' + editingResguardante.value.id);
 		const response = await authenticatedFetch(`/resguardantes/${editingResguardante.value.id}`, {
 			method: 'PUT',
 			body: JSON.stringify(payload)
@@ -1059,6 +1047,7 @@ const handleConfirmDeleteResguardante = async () => {
 
 const viewResguardanteDetails = (resguardante) => {
 	selectedResguardante.value = resguardante
+	console.log(resguardante)
 	showDetailsModal.value = true
 	fetchBienesDelResguardante(resguardante.id);
 }
@@ -1133,44 +1122,44 @@ const saveNewUser = async () => {
 	}
 }
 const handleAssignConfirm = async (selectedGoods) => {
-    if (!selectedResguardante.value || selectedGoods.length === 0) return;
+	if (!selectedResguardante.value || selectedGoods.length === 0) return;
 
-    // Preparamos el payload incluyendo la bandera de acción
-    const payload = {
-        accion: 'create', // <--- Bandera explícita para el controlador
-        id_resguardante: selectedResguardante.value.id,
-        bienes_ids: selectedGoods.map(b => b.id) // Solo enviamos IDs
-    };
+	// Preparamos el payload incluyendo la bandera de acción
+	const payload = {
+		accion: 'create', // <--- Bandera explícita para el controlador
+		id_resguardante: selectedResguardante.value.id,
+		bienes_ids: selectedGoods.map(b => b.id) // Solo enviamos IDs
+	};
 
-    isLoading.value = true;
+	isLoading.value = true;
 
-    try {
-        // Petición POST estándar
-        const response = await authenticatedFetch('/resguardos', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
+	try {
+		// Petición POST estándar
+		const response = await authenticatedFetch('/resguardos', {
+			method: 'POST',
+			body: JSON.stringify(payload)
+		});
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'Error al asignar los bienes.');
-        }
+		if (!response.ok) {
+			const errData = await response.json().catch(() => ({}));
+			throw new Error(errData.message || 'Error al asignar los bienes.');
+		}
 
-        // Éxito
-        const data = await response.json();
-        generarPDFResguardo(selectedResguardante.value, selectedGoods);
+		// Éxito
+		const data = await response.json();
+		generarPDFResguardo(selectedResguardante.value, selectedGoods);
 
-        showAssignModal.value = false;
-        
-        // Recargar la tabla de bienes asignados
-        await fetchBienesDelResguardante(selectedResguardante.value.id);
+		showAssignModal.value = false;
 
-    } catch (error) {
-        console.error(error);
-        alert('Error: ' + error.message);
-    } finally {
-        isLoading.value = false;
-    }
+		// Recargar la tabla de bienes asignados
+		await fetchBienesDelResguardante(selectedResguardante.value.id);
+
+	} catch (error) {
+		console.error(error);
+		alert('Error: ' + error.message);
+	} finally {
+		isLoading.value = false;
+	}
 };
 
 // --- 5. LÓGICA DE LIBERACIÓN ---
@@ -1184,52 +1173,52 @@ const openReleaseConfirmation = () => {
 };
 
 const handleConfirmRelease = async () => {
-    isLoadingResguardados.value = true;
+	isLoadingResguardados.value = true;
 
-    try {
-        const bienesIds = Array.from(selectedReleaseMap.value.keys());
-        
-        // CAMBIO IMPORTANTE: Usamos POST en lugar de DELETE
-        // para aprovechar el "Action Dispatching" del controlador
-        const response = await authenticatedFetch('/resguardos', {
-            method: 'POST', // <--- Ahora es POST
-            body: JSON.stringify({ 
-                accion: 'release', // <--- Bandera VITAL para ejecutar procesarLiberacion()
-                bienes_ids: bienesIds 
-            }) 
-        });
+	try {
+		const bienesIds = Array.from(selectedReleaseMap.value.keys());
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            const msg = errData.message || errData.error || 'Error desconocido en el servidor';
-            throw new Error(msg);
-        }
-        // Éxito
-        showReleaseConfirmModal.value = false;
-        selectedReleaseMap.value.clear();
-        isReleaseMode.value = false;
-        
-        // Recargar la tabla
-        await fetchBienesDelResguardante(selectedResguardante.value.id, pageAsignados.value);
+		// CAMBIO IMPORTANTE: Usamos POST en lugar de DELETE
+		// para aprovechar el "Action Dispatching" del controlador
+		const response = await authenticatedFetch('/resguardos', {
+			method: 'POST', // <--- Ahora es POST
+			body: JSON.stringify({
+				accion: 'release', // <--- Bandera VITAL para ejecutar procesarLiberacion()
+				bienes_ids: bienesIds
+			})
+		});
+
+		if (!response.ok) {
+			const errData = await response.json().catch(() => ({}));
+			const msg = errData.message || errData.error || 'Error desconocido en el servidor';
+			throw new Error(msg);
+		}
+		// Éxito
+		showReleaseConfirmModal.value = false;
+		selectedReleaseMap.value.clear();
+		isReleaseMode.value = false;
+
+		// Recargar la tabla
+		await fetchBienesDelResguardante(selectedResguardante.value.id, pageAsignados.value);
 		console.log(bienesAsignadosList.value);
-		
+
 		// Generar el PDF del resguardo actualizado
 		const bienesAsignadosListo = computed(() => {
 			return bienesAsignadosList.value.data || [];
 		});
 		if (bienesAsignadosList.value && bienesAsignadosList.value.length > 0) {
-            generarPDFResguardo(selectedResguardante.value, bienesAsignadosListo.value, 'RESGUARDO');
-        } else {
-            console.warn("El resguardante se quedó sin bienes, no se generó PDF.");
-            // Opcional: Podrías generar un acta de "No Adeudo" si la lista está vacía.
-        }
+			generarPDFResguardo(selectedResguardante.value, bienesAsignadosListo.value, 'RESGUARDO');
+		} else {
+			console.warn("El resguardante se quedó sin bienes, no se generó PDF.");
+			// Opcional: Podrías generar un acta de "No Adeudo" si la lista está vacía.
+		}
 
-    } catch (error) {
-        console.error(error);
-        alert('Error: ' + error.message);
-    } finally {
-        isLoadingResguardados.value = false;
-    }
+	} catch (error) {
+		console.error(error);
+		alert('Error: ' + error.message);
+	} finally {
+		isLoadingResguardados.value = false;
+	}
 };
 
 // Al cerrar el modal principal, limpiar todo

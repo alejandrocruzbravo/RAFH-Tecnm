@@ -13,7 +13,7 @@
     </div>
     <div v-else class="space-y-6">
         <div class="flex justify-between items-center">
-            <label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Bienes Materiales</label>
+            <label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Bienes Materiales</label>
             <label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
                 Chetumal</label>
         </div>
@@ -21,7 +21,7 @@
             <strong>Error:</strong> {{ error }}
         </div>
 
-        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 flex items-end gap-4">
+        <div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 flex items-end gap-4 border border-gray-100 dark:border-gray-800">
             <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecciona un Área para
                     empezar</label>
@@ -47,11 +47,11 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
 
             <!-- Columna izquierda: Departamentos y Oficinas -->
             <div
-                class="lg:col-span-1 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                class="lg:col-span-1 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 max-h-[80vh] overflow-y-auto border border-gray-100 dark:border-gray-800">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white px-2">Departamentos</h3>
 
                 <div v-if="isLoadingStructure" class="flex items-center justify-center p-10">
@@ -127,7 +127,7 @@
                 <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div
                         class="xl:col-span-4 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 max-h-[80vh]">
-                        <div class="xl:col-span-2 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950">
+                        <div class="xl:col-span-2 bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  border border-gray-100 dark:border-gray-800">
                             <div
                                 class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                                 <div class="flex-1">
@@ -342,7 +342,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted,computed, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 import ModalNuevoBien from '../../../components/ModalNuevoBien.vue';
 import DeleteBienModal from '../../../components/DeleteBienModal.vue'
@@ -411,6 +411,9 @@ const selectedBienToReactivate = ref(null);
 const itemSeleccionadoParaQR = ref({});
 let searchTimeout = null;
 
+// Variable para rastrear el canal actual y poder desconectarnos
+let currentChannelSubscription = null;
+
 // --- 1. Funciones de Carga (API) ---
 // Carga el primer dropdown al iniciar
 const fetchAreas = async () => {
@@ -468,7 +471,6 @@ const fetchBienes = async (page = 1) => {
         const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes?${params.toString()}`)
         if (!response.ok) throw new Error('Error al cargar los bienes')
         bienesList.value = await response.json()
-        console.log(bienesList.value);
         totalItems.value = bienesList.value.total || 0
         currentPage.value = page
     } catch (e) {
@@ -545,7 +547,6 @@ const openDeleteModal = (bien) => {
  */
 const openEditModal = (bien) => {
     editingBien.value = bien
-    console.log(editingBien.value);
     showEditModal.value = true
 }
 
@@ -718,7 +719,6 @@ const openOficinaQR = (oficina) => {
  * (Se llama desde el botón "Generar QRs" del departamento)
  */
 const openLoteQR = (departamento) => {
-    console.log(departamento);
     loteTitle.value = `Oficinas en: ${departamento.dep_nombre}`;
     loteList.value = departamento.oficinas; // Pasa la lista de oficinas
     isBienesQR.value = false;
@@ -892,4 +892,38 @@ const onBienReactivated = () => {
     // Opcional: Si el bien se reactivó en la oficina actual, recargar la tabla principal
     if (selectedOficina.value) fetchBienes(selectedOficina.value.id);
 };
+
+watch(selectedOficina, (newOficina, oldOficina) => {
+    
+    // 1. Si ya estábamos escuchando una oficina anterior, nos salimos
+    if (oldOficina && currentChannelSubscription) {
+        console.log(`Desconectando del canal oficina.${oldOficina.id}`);
+        window.Echo.leave(`oficina.${oldOficina.id}`);
+        currentChannelSubscription = null;
+    }
+
+    // 2. Si seleccionó una nueva oficina, nos conectamos
+    if (newOficina) {
+        console.log(`Conectando al canal oficina.${newOficina.id}...`);
+        
+        currentChannelSubscription = window.Echo.private(`oficina.${newOficina.id}`)
+            .listen('.estado.cambiado', (e) => {
+                console.log('Evento WebSocket recibido:', e);
+                
+                if (e.nuevoEstado === 'ACTUALIZACION_MASIVA') {
+                    console.log('Actualización masiva detectada, refrescando bienes...');
+                    // Refresca toda la estructura y bienes
+                    fetchBienes(currentPage.value); 
+                    
+                    // Opcional: Feedback visual
+                    // showNotification('Inventario actualizado en tiempo real', 'info');
+                }
+            });
+    }
+});
+onUnmounted(() => {
+    if (selectedOficina.value) {
+        window.Echo.leave(`oficina.${selectedOficina.value.id}`);
+    }
+});
 </script>

@@ -1,33 +1,44 @@
 <template>
-	<div class="flex h-screen bg-white dark:bg-dark-bg">
-		<!-- Loading overlay during logout -->
-		<div v-if="isLoggingOut" class="fixed inset-0 bg-black bg-opacity-50 z-[49]"></div>
+	<div class="flex h-screen bg-gray-50 dark:bg-dark-bg relative overflow-hidden transition-colors duration-300">
 
-		<!-- Sidebar -->
-		<aside :class="[
-			'fixed md:static z-40 w-64 h-full dark:bg-dark-surface shadow-lg transition-transform duration-300 ease-in-out',
-			isSidebarActive ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-		]">
-			<!-- Sidebar Header -->
-			<div class="p-6 border-b border-blue-200 dark:border-gray-700">
-				<div class="flex items-center space-x-2">
-					<img src="/favicon.ico" alt="RAFH Logo" class="w-8 h-8">
-					<h1 class="text-2xl font-bold text-blue-900 dark:text-white">RAFH</h1>
-				</div>
-				<p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Panel Resguardante</p>
+		<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+			<div
+				class="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-teal-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow dark:block hidden">
 			</div>
 
-			<!-- Navigation Menu -->
+			<div
+				class="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] mix-blend-screen animate-blob dark:block hidden">
+			</div>
+
+			<div
+				class="absolute -bottom-[20%] left-[20%] w-[600px] h-[600px] bg-indigo-900/10 rounded-full blur-[150px] mix-blend-screen animate-blob animation-delay-4000 dark:block hidden">
+			</div>
+		</div>
+
+		<div v-if="isLoggingOut" class="fixed inset-0 bg-black bg-opacity-50 z-[60]"></div>
+
+		<aside :class="[
+			'fixed md:static z-40 md:z-auto w-64 h-full bg-white dark:bg-dark-surface shadow-xl transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-gray-800/50',
+			isSidebarActive ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+		]">
+			<div class="p-6 border-b border-gray-100 dark:border-gray-800">
+				<div class="flex items-center space-x-3">
+					<img src="/favicon.ico" alt="RAFH Logo" class="w-8 h-8 drop-shadow-[0_0_8px_rgba(20,184,166,0.5)]">
+					<h1 class="text-2xl font-bold text-blue-900 dark:text-white font-audiowide tracking-wider">RAFH</h1>
+				</div>
+				<p class="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium tracking-wide">Panel Resguardante
+				</p>
+			</div>
+
 			<ResguardanteSidebar @closeSidebar="closeSidebar" />
 		</aside>
 
-		<!-- Overlay for mobile -->
 		<div v-if="isSidebarActive" @click="closeSidebar" class="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30" />
 
-		<!-- Main Content -->
-		<div class="flex-1 flex flex-col">
-			<!-- Top Bar -->
-			<header class="bg-white dark:bg-dark-bg shadow-md">
+		<div class="flex-1 flex flex-col relative z-10 h-full">
+
+			<header
+				class="relative z-20 bg-white dark:bg-dark-surface/80 dark:backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-800 transition-colors duration-300">
 				<div class="p-4 flex items-center justify-between">
 					<button @click="toggleSidebar"
 						class="p-2 text-blue-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden">
@@ -36,12 +47,13 @@
 								d="M4 6h16M4 12h16M4 18h16" />
 						</svg>
 					</button>
+
 					<div class="flex-1"></div>
-					<div class="flex items-center gap-2">
-						<!-- Theme Toggle Button -->
+
+					<div class="flex items-center gap-3">
 						<button @click="toggleTheme" :class="[
-							'p-2 rounded-lg transition-colors',
-							isDark ? 'bg-yellow-100 text-yellow-900 hover:bg-yellow-200' : 'bg-blue-200 text-blue-900 hover:bg-blue-300'
+							'p-2 rounded-lg transition-all duration-300',
+							isDark ? 'bg-yellow-100/10 text-yellow-400 hover:bg-yellow-100/20' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
 						]" title="Cambiar tema">
 							<svg v-if="isDark" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
 								<path
@@ -52,55 +64,66 @@
 							</svg>
 						</button>
 					</div>
-					<div class="relative">
+
+					<div class="relative ml-2">
 						<button @click="isProfileMenuOpen = !isProfileMenuOpen"
-							class="flex items-center space-x-2 p-2 text-blue-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
-							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-									d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-							</svg>
+							class="flex items-center space-x-2 p-2 text-blue-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition">
+							<div
+								class="w-8 h-8 rounded-full bg-blue-100 dark:bg-teal-900/50 flex items-center justify-center text-blue-600 dark:text-teal-400 font-bold text-sm border border-blue-200 dark:border-teal-700">
+								{{ userName.charAt(0).toUpperCase() }}
+							</div>
 							<span class="hidden sm:inline text-sm font-medium">{{ userName }}</span>
+							<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+									d="M19 9l-7 7-7-7" />
+							</svg>
 						</button>
 
-						<!-- Profile Dropdown Menu -->
 						<div v-if="isProfileMenuOpen" @click.outside="!isLoggingOut && (isProfileMenuOpen = false)"
-							class="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-surface rounded-lg shadow-lg z-50 border border-gray-200 dark:border-gray-600">
-							<div class="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
-								<p class="text-sm font-semibold text-gray-900 dark:text-white">{{ userName }}</p>
-								<p class="text-xs text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
+							class="absolute right-0 mt-2 w-56 bg-white dark:bg-dark-surface/95 dark:backdrop-blur-xl rounded-xl shadow-2xl z-50 border border-gray-100 dark:border-gray-700 transform origin-top-right transition-all">
+							<div class="px-4 py-4 border-b border-gray-100 dark:border-gray-700">
+								<p class="text-sm font-bold text-gray-900 dark:text-white">{{ userName }}</p>
+								<p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{{ userEmail }}</p>
 							</div>
-							<button @click="handleLogout" :disabled="isLoggingOut" :class="{
-								'text-left text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600': !isLoggingOut,
-								'flex justify-center items-center text-gray-400 dark:text-gray-500 cursor-not-allowed': isLoggingOut
-							}" class="w-full px-4 py-2 text-sm transition">
-								<span v-if="isLoggingOut" class="flex items-center justify-center">
-									<div
-										class="spinner-logout mr-2 animate-spin inline-block w-4 h-4 border-2 border-current border-r-transparent rounded-full">
-									</div>
-									Cerrando sesión...
-								</span>
-								<span v-else>
-									Cerrar Sesión
-								</span>
-							</button>
+
+							<div class="p-1">
+								<button @click="handleLogout" :disabled="isLoggingOut" :class="{
+									'hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400': !isLoggingOut,
+									'text-gray-400 cursor-not-allowed': isLoggingOut
+								}" class="flex items-center w-full px-4 py-2 text-sm rounded-lg transition-colors mt-1">
+									<span v-if="isLoggingOut" class="flex items-center justify-center w-full">
+										<div
+											class="spinner-logout mr-2 animate-spin inline-block w-4 h-4 border-2 border-current border-r-transparent rounded-full">
+										</div>
+										Cerrando...
+									</span>
+									<span v-else class="flex items-center w-full">
+										<svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+											</path>
+										</svg>
+										Cerrar Sesión
+									</span>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</header>
 
-			<!-- Component Display Area -->
-			<section class="p-4 md:p-8 overflow-auto flex-1 bg-gray-50 dark:bg-dark-bg">
+			<section class="p-4 md:p-8 overflow-auto flex-1 bg-gray-50 dark:bg-transparent relative">
 				<Suspense>
 					<template #default>
 						<RouterView />
 					</template>
 					<template #fallback>
-						<div class="flex items-center justify-center h-64">
+						<div class="flex items-center justify-center h-full">
 							<div class="text-center">
 								<div
-									class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600">
+									class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600/30 border-t-blue-600">
 								</div>
-								<p class="mt-4 text-gray-600 dark:text-gray-400">Cargando...</p>
+								<p class="mt-4 text-sm text-gray-500 dark:text-gray-400 font-medium">Cargando...</p>
 							</div>
 						</div>
 					</template>
@@ -147,19 +170,55 @@ const userEmail = computed(() => userData.usuario_correo || 'email@example.com')
 
 const handleLogout = async () => {
 	if (isLoggingOut.value) return
-	
+
 	isLoggingOut.value = true
 	try {
 		const response = await logout()
-		if (response.ok) {
-			localStorage.removeItem('auth_token')
-			localStorage.removeItem('user')
-			router.push('/')
-		}
+		// Independientemente de la respuesta del server, limpiamos localmente
+		localStorage.removeItem('auth_token')
+		localStorage.removeItem('user')
+		router.push('/')
 	} catch (error) {
 		console.error('Error during logout:', error)
+		// Forzar salida en caso de error
+		localStorage.removeItem('auth_token')
+		localStorage.removeItem('user')
+		router.push('/')
 	} finally {
 		isLoggingOut.value = false
 	}
 }
 </script>
+
+<style scoped>
+/* Animaciones suaves para los orbes de luz */
+@keyframes blob {
+	0% {
+		transform: translate(0px, 0px) scale(1);
+	}
+
+	33% {
+		transform: translate(30px, -50px) scale(1.1);
+	}
+
+	66% {
+		transform: translate(-20px, 20px) scale(0.9);
+	}
+
+	100% {
+		transform: translate(0px, 0px) scale(1);
+	}
+}
+
+.animate-blob {
+	animation: blob 10s infinite;
+}
+
+.animate-pulse-slow {
+	animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animation-delay-4000 {
+	animation-delay: 4s;
+}
+</style>

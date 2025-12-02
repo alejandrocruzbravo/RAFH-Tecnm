@@ -1,311 +1,121 @@
 <template>
 	<div class="space-y-6">
-		<!-- Header -->
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Movimientos</h1>
-			<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Histórico de movimientos de sus bienes</p>
+			<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Histórico de traslados realizados por usted</p>
 		</div>
 
-		<!-- Filters and Search -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4">
-			<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<!-- Search Input -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar movimiento</label>
-					<input
-						v-model="searchQuery"
-						type="text"
-						placeholder="Bien, tipo, descripción..."
-						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-					/>
-				</div>
-
-				<!-- Filter by Type -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo</label>
-					<select
-						v-model="selectedType"
-						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						<option value="">Todos</option>
-						<option value="entrada">Entrada</option>
-						<option value="salida">Salida</option>
-						<option value="ajuste">Ajuste</option>
-					</select>
-				</div>
-
-				<!-- Filter by Status -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estado</label>
-					<select
-						v-model="selectedStatus"
-						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						<option value="">Todos</option>
-						<option value="pendiente">Pendiente</option>
-						<option value="completado">Completado</option>
-						<option value="cancelado">Cancelado</option>
-					</select>
-				</div>
-
-				<!-- Filter by Date Range -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Desde fecha</label>
-					<input
-						v-model="dateFrom"
-						type="date"
-						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-					/>
-				</div>
-			</div>
-
-			<!-- Action Buttons -->
-			<div class="flex gap-2 flex-wrap">
-				<button
-					@click="fetchMovimientos"
-					class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-				>
-					Actualizar
-				</button>
-				<button
-					@click="clearFilters"
-					class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition text-sm font-medium"
-				>
-					Limpiar filtros
-				</button>
-			</div>
-		</div>
-
-		<!-- Loading State -->
-		<div v-if="isLoading" class="flex items-center justify-center p-10 h-64">
-			<div class="text-center">
-				<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-				<p class="mt-4 text-gray-600 dark:text-gray-400">Cargando movimientos...</p>
-			</div>
-		</div>
-
-		<!-- Error State -->
-		<div v-else-if="error" class="p-4 bg-red-100 dark:bg-red-900 rounded-lg text-red-700 dark:text-red-200">
-			<h3 class="font-bold">Error al cargar movimientos</h3>
-			<p>{{ error }}</p>
-			<button @click="fetchMovimientos" class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-				Reintentar
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 flex justify-between items-center">
+			<h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Historial de Operaciones</h2>
+			<button @click="fetchMovimientos"
+				class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-2">
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+				Actualizar
 			</button>
 		</div>
 
-		<!-- Empty State -->
-		<div v-else-if="filteredMovimientos.length === 0" class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-8 text-center">
-			<svg class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-			</svg>
-			<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No hay movimientos</h3>
-			<p class="text-gray-600 dark:text-gray-400">No se encontraron movimientos que coincidan con los filtros.</p>
+		<div v-if="isLoading" class="flex items-center justify-center p-10 h-64">
+			<div class="text-center">
+				<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+				<p class="mt-4 text-gray-600 dark:text-gray-400">Cargando historial...</p>
+			</div>
 		</div>
 
-		<!-- Movimientos Table -->
+		<div v-else-if="movimientos.length === 0" class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-8 text-center">
+			<svg class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+			</svg>
+			<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sin movimientos registrados</h3>
+			<p class="text-gray-600 dark:text-gray-400">Aún no ha realizado movimientos de bienes.</p>
+		</div>
+
 		<div v-else class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-hidden">
 			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead>
-						<tr class="border-b border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Tipo</th>
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Bien</th>
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Cantidad</th>
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Estado</th>
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Fecha</th>
-							<th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Acciones</th>
+				<table class="w-full text-sm text-left">
+					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+						<tr>
+							<th class="px-6 py-3">Código</th>
+							<th class="px-6 py-3">Nombre del Bien</th>
+							<th class="px-6 py-3">Ubicación Origen (Oficina)</th>
+							<th class="px-6 py-3">Ubicación Destino</th>
+							<th class="px-6 py-3">Fecha</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-for="movimiento in filteredMovimientos" :key="movimiento.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-							<td class="py-3 px-4">
-								<span :class="[
-									'px-2 py-1 rounded-full text-xs font-semibold',
-									movimiento.tipo === 'entrada' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-									movimiento.tipo === 'salida' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-									'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-								]">
-									{{ movimiento.tipo || 'N/A' }}
-								</span>
+					<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+						<tr v-for="mov in movimientos" :key="mov.id" class="bg-white border-b dark:bg-dark-bg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+							
+							<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+								{{ mov.bien?.bien_codigo || 'N/A' }}
 							</td>
-							<td class="py-3 px-4 text-gray-900 dark:text-white font-medium">{{ movimiento.bien || 'N/A' }}</td>
-							<td class="py-3 px-4 text-gray-600 dark:text-gray-400">{{ movimiento.cantidad || 0 }}</td>
-							<td class="py-3 px-4">
-								<span :class="[
-									'px-2 py-1 rounded-full text-xs font-semibold',
-									movimiento.estado === 'completado' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-									movimiento.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-									'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-								]">
-									{{ movimiento.estado || 'N/A' }}
-								</span>
+
+							<td class="px-6 py-4 text-gray-700 dark:text-gray-300">
+								{{ mov.bien?.bien_descripcion || 'Sin descripción' }}
 							</td>
-							<td class="py-3 px-4 text-gray-600 dark:text-gray-400">{{ formatDate(movimiento.fecha) }}</td>
-							<td class="py-3 px-4">
-								<button
-									@click="viewMovimientoDetails(movimiento)"
-									class="text-blue-600 dark:text-blue-400 hover:underline text-sm"
-								>
-									Ver detalles
-								</button>
+
+							<td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+								<div class="flex items-center gap-2">
+									<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+									{{ mov.bien?.oficina?.nombre || 'Desconocido' }}
+								</div>
+							</td>
+
+							<td class="px-6 py-4">
+								<div class="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+									{{ mov.departamento?.dep_nombre || 'N/A' }}
+								</div>
+							</td>
+							<td class="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
+								{{ formatDate(mov.movimiento_fecha) }}
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
-		</div>
 
-		<!-- Details Modal -->
-		<div v-if="selectedMovimiento" @click="selectedMovimiento = null" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div @click.stop class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-				<div class="flex items-center justify-between mb-4">
-					<h2 class="text-xl font-bold text-gray-900 dark:text-white">Detalles del movimiento</h2>
-					<button @click="selectedMovimiento = null" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					</button>
-				</div>
-				<div class="space-y-4">
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ selectedMovimiento.tipo }}</p>
-					</div>
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Bien</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ selectedMovimiento.bien }}</p>
-					</div>
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ selectedMovimiento.cantidad }}</p>
-					</div>
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ selectedMovimiento.estado }}</p>
-					</div>
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Fecha</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ formatDate(selectedMovimiento.fecha) }}</p>
-					</div>
-					<div>
-						<label class="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-						<p class="text-gray-900 dark:text-white mt-1">{{ selectedMovimiento.descripcion || 'N/A' }}</p>
-					</div>
-				</div>
+			<div v-if="totalPages > 1" class="flex justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+				<button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 disabled:opacity-50">Anterior</button>
+				<span class="text-gray-600 dark:text-gray-300 self-center">Página {{ currentPage }} de {{ totalPages }}</span>
+				<button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 disabled:opacity-50">Siguiente</button>
 			</div>
 		</div>
-
 	</div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { authenticatedFetch } from '../../config/api.js'
 
 const isLoading = ref(false)
-const error = ref('')
 const movimientos = ref([])
-const searchQuery = ref('')
-const selectedType = ref('')
-const selectedStatus = ref('')
-const dateFrom = ref('')
-const selectedMovimiento = ref(null)
+const currentPage = ref(1)
+const totalPages = ref(1)
 
-const filteredMovimientos = computed(() => {
-	return movimientos.value.filter(mov => {
-		const matchesSearch = !searchQuery.value ||
-			(mov.bien && mov.bien.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-			(mov.tipo && mov.tipo.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-			(mov.descripcion && mov.descripcion.toLowerCase().includes(searchQuery.value.toLowerCase()))
-		
-		const matchesType = !selectedType.value || mov.tipo === selectedType.value
-		const matchesStatus = !selectedStatus.value || mov.estado === selectedStatus.value
-		
-		const matchesDate = !dateFrom.value || 
-			(mov.fecha && new Date(mov.fecha) >= new Date(dateFrom.value))
-		
-		return matchesSearch && matchesType && matchesStatus && matchesDate
-	})
-})
-
-const formatDate = (date) => {
-	if (!date) return 'N/A'
-	return new Date(date).toLocaleDateString('es-ES')
+const formatDate = (dateString) => {
+	if (!dateString) return ''
+	const date = new Date(dateString)
+	return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' })
 }
 
-const fetchMovimientos = () => {
+const fetchMovimientos = async (page = 1) => {
 	isLoading.value = true
-	error.value = ''
-
-	setTimeout(() => {
-		movimientos.value = [
-			{
-				id: 1,
-				tipo: 'entrada',
-				bien: 'Computadora de Escritorio',
-				cantidad: 1,
-				estado: 'completado',
-				fecha: '2025-01-15',
-				descripcion: 'Ingreso de equipo nuevo'
-			},
-			{
-				id: 2,
-				tipo: 'salida',
-				bien: 'Monitor LG 24"',
-				cantidad: 2,
-				estado: 'completado',
-				fecha: '2025-01-12',
-				descripcion: 'Salida para reparación'
-			},
-			{
-				id: 3,
-				tipo: 'ajuste',
-				bien: 'Impresora Láser HP',
-				cantidad: 1,
-				estado: 'pendiente',
-				fecha: '2025-01-10',
-				descripcion: 'Ajuste de inventario'
-			},
-			{
-				id: 4,
-				tipo: 'entrada',
-				bien: 'Teclado Mecánico',
-				cantidad: 5,
-				estado: 'completado',
-				fecha: '2025-01-08',
-				descripcion: 'Compra de repuestos'
-			},
-			{
-				id: 5,
-				tipo: 'salida',
-				bien: 'Mouse Inalámbrico',
-				cantidad: 3,
-				estado: 'cancelado',
-				fecha: '2025-01-05',
-				descripcion: 'Cancelado por cambio de requisito'
-			},
-			{
-				id: 6,
-				tipo: 'entrada',
-				bien: 'Monitor Dell 27"',
-				cantidad: 2,
-				estado: 'completado',
-				fecha: '2024-12-28',
-				descripcion: 'Asignación departamental'
-			}
-		]
+	try {
+		const response = await authenticatedFetch(`/mis-movimientos?page=${page}`)
+		if (!response.ok) throw new Error('Error al cargar historial')
+		
+		const data = await response.json()
+		movimientos.value = data.data
+		currentPage.value = data.current_page
+		totalPages.value = data.last_page
+	} catch (e) {
+		console.error(e)
+	} finally {
 		isLoading.value = false
-	}, 300)
+	}
 }
 
-const clearFilters = () => {
-	searchQuery.value = ''
-	selectedType.value = ''
-	selectedStatus.value = ''
-	dateFrom.value = ''
-}
-
-const viewMovimientoDetails = (movimiento) => {
-	selectedMovimiento.value = movimiento
+const changePage = (page) => {
+	fetchMovimientos(page)
 }
 
 onMounted(() => {

@@ -1,39 +1,47 @@
 <template>
 	<nav class="p-4 space-y-2">
-		<!-- Bienes Asignados -->
-		<RouterLink to="/resguardante/bienes-asignados"
-			@click="$emit('closeSidebar')"
+		<RouterLink to="/resguardante" @click="$emit('closeSidebar')"
 			class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
-			<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-					d="M12 8v4m0 4v-1m6.5-5H5.5A1.5 1.5 0 0 0 4 10.5v3a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 19.5 7Z" />
+			<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+				width="24" height="24" fill="none" viewBox="0 0 24 24">
+				<path stroke="currentColor" stroke-width="2"
+					d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z" />
+				<path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
 			</svg>
+
+			<label class="px-2" for="">Vista general</label>
+		</RouterLink>
+		<!-- Bienes Asignados -->
+		<RouterLink to="/resguardante/bienes-asignados" @click="$emit('closeSidebar')"
+			class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
+			<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+				width="24" height="24" fill="none" viewBox="0 0 24 24">
+				<path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+					d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+			</svg>
+
 			<label class="px-2" for="">Bienes asignados</label>
 		</RouterLink>
 
 		<!-- Movimientos -->
-		<RouterLink to="/resguardante/movimientos"
-			@click="$emit('closeSidebar')"
+		<RouterLink to="/resguardante/movimientos" @click="$emit('closeSidebar')"
 			class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
-			<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+			<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+				fill="none" viewBox="0 0 24 24">
 				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-					d="M13.5 8H3v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8m0 0a2 2 0 0 0-2-2h-2.5a2 2 0 0 0-1 .266M13.5 8V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v1m0 0a2 2 0 1 0 4 0m-4 0a2 2 0 1 1 4 0m6 0a2 2 0 1 0 4 0m-4 0a2 2 0 1 1 4 0" />
+					d="m7 16 4-4-4-4m6 8 4-4-4-4" />
 			</svg>
 			<label class="px-2" for="">Movimientos</label>
 		</RouterLink>
 
 		<!-- Transferencias -->
-		<RouterLink to="/resguardante/transferencias"
-			@click="$emit('closeSidebar')"
+		<RouterLink to="/resguardante/transferencias" @click="$emit('closeSidebar')"
 			class="flex px-4 py-3 mb-2 text-blue-900 dark:text-gray-300 rounded-lg hover:bg-blue-200 dark:hover:bg-gray-700 transition">
-			<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-				xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-					d="M8 16h8m0-8H8m8 4H8M5 3v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3m-4 0V1m-4 2V1" />
-			</svg>
-			<label class="px-2" for="">Transferencias</label>
+<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"/>
+</svg>
+
+			<label class="px-2" for="">Traspasos</label>
 		</RouterLink>
 	</nav>
 </template>

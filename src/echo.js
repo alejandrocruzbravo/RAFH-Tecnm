@@ -4,6 +4,7 @@ import Pusher from 'pusher-js';
 // Esto es necesario para que Echo encuentre la librería Pusher
 window.Pusher = Pusher;
 
+const token = localStorage.getItem('auth_token');
 // Creamos la instancia de Echo
 window.Echo = new Echo({
     broadcaster: 'reverb',
@@ -13,6 +14,14 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
+
+    authEndpoint: 'http://127.0.0.1:8081/api/broadcasting/auth',
+    auth: {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+        }
+    }
 });
 
 

@@ -322,7 +322,7 @@ const fetchGoods = async (page = 1) => {
   }
   isLoadingLeft.value = true;
   try {
-    const url = `/oficinas/${props.resguardante.id_oficina}/bienes?page=${page}&estado=Activo`;
+    const url = `/oficinas/${props.resguardante.id_oficina}/bienes?page=${page}&estado=Activo&sin_resguardo=true`;
     const response = await authenticatedFetch(url);
     if (!response.ok) throw new Error('Error al cargar bienes');
     const json = await response.json();

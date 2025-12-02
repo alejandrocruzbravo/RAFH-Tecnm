@@ -13,10 +13,10 @@
       </div>
 
       <div v-if="step === 1" class="p-6 space-y-4">
-        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Paso 1: Buscar en Catálogo CUCOP / CAMB</h3>
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white">Paso 1: Buscar en Catálogo CUCOP / INTERNA</h3>
 
         <form @submit.prevent="handleSearch" class="flex gap-2">
-          <input v-model="searchQuery" type="text" placeholder="Ingresa Clave CUCOP o CAMB"
+          <input v-model="searchQuery" type="text" placeholder="Ingresa Clave CUCOP o INTERNA"
             class="flex-1 w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           <button type="submit" :disabled="isLoadingSearch || !searchQuery"
             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">

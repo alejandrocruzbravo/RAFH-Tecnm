@@ -14,12 +14,12 @@
 
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Control de Áreas</label>
+			<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Control de Áreas</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
 				Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4 space-y-4">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4 space-y-4 border border-gray-100 dark:border-gray-800">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar por nombre o
@@ -59,9 +59,9 @@
 		</div>
 
 		<!-- TARJETAS DE ÁREAS -->
-		<div v-if="filteredAreas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+		<div v-if="filteredAreas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
 			<div v-for="area in filteredAreas" :key="area.id"
-				class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 hover:shadow-lg transition-shadow duration-300">
+				class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-800">
 				<div class="flex gap-4 mb-4">
 					<div class="flex-shrink-0">
 						<div
@@ -131,7 +131,7 @@
 		</div>
 
 		<!-- TABLA DE DEPARTAMENTOS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Departamentos</h2>
 				<button @click="openNewDepartmentModal"
@@ -234,7 +234,7 @@
 		</div>
 
 		<!-- TABLA DE EDIFICIOS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Edificios</h2>
 				<button @click="openNewBuildingModal"
@@ -325,7 +325,7 @@
 		</div>
 
 		<!-- TABLA DE OFICINAS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-6">
+		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Oficinas</h2>
 				<button @click="openNewOficinaModal"
