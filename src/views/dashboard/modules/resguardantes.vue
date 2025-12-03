@@ -753,9 +753,6 @@ const fetchResguardantesData = async (page = 1) => {
 			params.append('search', searchTerm.value.toUpperCase())
 		}
 
-		// 1. Hacemos SOLO dos peticiones principales
-		//    A) Los datos paginados de la tabla (/resguardantes)
-		//    B) Los catálogos para los modales (/formularios/resguardantes)
 		const [resguardantesRes, formDataRes] = await Promise.all([
 			authenticatedFetch(`/resguardantes?${params.toString()}`),
 			authenticatedFetch('/formularios/resguardantes')

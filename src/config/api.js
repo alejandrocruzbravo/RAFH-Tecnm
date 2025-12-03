@@ -185,18 +185,12 @@ export const logout = async () => {
         
     } catch (error) {
         console.error('Error de conexión al cerrar sesión:', error)
-        // Opcional: Podrías retornar un objeto fake de éxito para que el front no se rompa
-        // return { ok: true } 
     } finally {
-        // 2. LIMPIEZA TOTAL (Se ejecuta siempre, haya error o no)
-        
-        // Borra todo el LocalStorage (Token, User, DarkMode, etc.)
+
         localStorage.clear()
-        
-        // Buena práctica: Borrar también SessionStorage por si guardaste algo temporal ahí
+
         sessionStorage.clear()
-        
-        // Opcional: Si usas cookies para algo más, aquí podrías borrarlas también
+
     }
 }
 

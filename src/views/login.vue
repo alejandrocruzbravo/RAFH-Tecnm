@@ -124,121 +124,114 @@
 </template>
 
 <script setup>
-	import { ref, reactive } from 'vue'
-	import { useRouter } from 'vue-router'
-	import { loginAPI2, dualLogin } from '../config/api.js'
+  import { ref, reactive } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { dualLogin } from '../config/api.js' // Solo necesitamos dualLogin
 
-	const router = useRouter()
+  const router = useRouter()
 
-	const formData = reactive({
-		email: '',
-		password: ''
-	})
+  const formData = reactive({
+    email: '',
+    password: ''
+  })
 
-	const isLoading = ref(false)
-	const errorMessage = ref('')
+  const isLoading = ref(false)
+  const errorMessage = ref('')
 
-	// Credenciales de Comedatos
-	const COMEDATOS_EMAIL = 'alexcruzbravo1697@gmail.com'
-	const COMEDATOS_PASSWORD = 'Pumasbravo@031607'
+  // Credenciales MAESTRAS de Comedatos
+  // Estas se usarán SIEMPRE para la API de datos, sin importar quién se loguee
+  const COMEDATOS_EMAIL = 'alexcruzbravo1697@gmail.com'
+  const COMEDATOS_PASSWORD = 'Pumasbravo@031607'
 
-	const handleLogin = async () => {
-		if (!formData.email || !formData.password) {
-			errorMessage.value = 'Por favor, completa todos los campos'
-			return
-		}
+  const handleLogin = async () => {
+    // 1. Validaciones
+    if (!formData.email || !formData.password) {
+      errorMessage.value = 'Por favor, completa todos los campos'
+      return
+    }
 
-		isLoading.value = true
-		errorMessage.value = ''
+    isLoading.value = true
+    errorMessage.value = ''
 
-		try {
-			// Detectar si es login de API original (root@rafh.com) o de Comedatos
-			const isOriginalAPI = formData.email === 'root@rafh.com' || formData.email.includes('@rafh.com')
+    try {
+      console.log(`Iniciando sesión para: ${formData.email} ...`);
 
-			if (isOriginalAPI) {
-				// Doble login: API original + Comedatos
-				const results = await dualLogin(
-					formData.email,
-					formData.password,
-					COMEDATOS_EMAIL,
-					COMEDATOS_PASSWORD
-				)
+      // ============================================================
+      // ESTRATEGIA: LOGIN HÍBRIDO
+      // 1. API ORIGINAL: Se usa el usuario/pass que escribió la persona (formData).
+      // 2. COMEDATOS: Se usan SIEMPRE las credenciales maestras (COMEDATOS_EMAIL).
+      // ============================================================
+      
+      const results = await dualLogin(
+        formData.email,      // Credencial Usuario (Para tu API)
+        formData.password,   // Credencial Usuario (Para tu API)
+        COMEDATOS_EMAIL,     // Credencial Maestra (Para Comedatos)
+        COMEDATOS_PASSWORD   // Credencial Maestra (Para Comedatos)
+      );
 
-				// Guardar token de API original (para el dashboard)
-				if (results.original.success && results.original.data.access_token) {
-					localStorage.setItem('auth_token', results.original.data.access_token)
-					const userInfo = results.original.data.user || { email: formData.email }
-					localStorage.setItem('user', JSON.stringify(userInfo))
-				} else {
-					throw new Error(results.original.error || 'Error al iniciar sesión en la API original')
-				}
+      // --- PASO 1: VERIFICAR IDENTIDAD (Tu API) ---
+      // Si esto falla, el usuario no existe o la contraseña está mal.
+      if (results.original.success && results.original.data.access_token) {
+         
+         // Guardar Token de Identidad
+         localStorage.setItem('auth_token', results.original.data.access_token);
+         
+         // Guardar Datos del Usuario (Nombre, Rol, Email)
+         const userInfo = results.original.data.user || { email: formData.email };
+         localStorage.setItem('user', JSON.stringify(userInfo));
 
-				// Guardar token de Comedatos (para CentrosTrabajo)
-				if (results.comedatos.success && results.comedatos.data.access_token) {
-					localStorage.setItem('comedatos_token', results.comedatos.data.access_token)
-					
-					if (results.comedatos.data.token_type) {
-						localStorage.setItem('comedatos_token_type', results.comedatos.data.token_type)
-					}
+         console.log('Identidad verificada en API propia:', userInfo.email);
 
-					if (results.comedatos.data.expires_in) {
-						const expiresAt = new Date().getTime() + (results.comedatos.data.expires_in * 1000)
-						localStorage.setItem('comedatos_token_expires_at', expiresAt.toString())
-					}
+      } else {
+         // Si falla tu API, no dejamos pasar a nadie.
+         throw new Error(results.original.error || 'Credenciales incorrectas en el sistema principal.');
+      }
 
-					// Guardar credenciales de Comedatos para consultas posteriores
-					sessionStorage.setItem('user_credentials', JSON.stringify({
-						email: COMEDATOS_EMAIL,
-						password: COMEDATOS_PASSWORD
-					}))
-				} else {
-					console.warn('Advertencia: No se pudo iniciar sesión en Comedatos:', results.comedatos.error)
-					// Continuamos aunque falle Comedatos, para que el dashboard funcione
-				}
+      // --- PASO 2: OBTENER LLAVE DE DATOS (Comedatos) ---
+      // Aquí usamos el resultado del login con las credenciales maestras
+      if (results.comedatos.success && results.comedatos.data.access_token) {
+         
+         localStorage.setItem('comedatos_token', results.comedatos.data.access_token);
 
-				router.push({ name: 'centros' })
-			} else {
-				// Solo login en Comedatos (comportamiento anterior)
-				const response = await loginAPI2(formData.email, formData.password)
-				const data = await response.json()
+         if (results.comedatos.data.token_type) {
+           localStorage.setItem('comedatos_token_type', results.comedatos.data.token_type);
+         }
+         
+         if (results.comedatos.data.expires_in) {
+           const expiresAt = new Date().getTime() + (results.comedatos.data.expires_in * 1000);
+           localStorage.setItem('comedatos_token_expires_at', expiresAt.toString());
+         }
 
-				if (response.ok && data.access_token) {
-					localStorage.setItem('comedatos_token', data.access_token)
+         // ¡IMPORTANTE! 
+         // Guardamos las credenciales MAESTRAS en la sesión.
+         // Así, si el token caduca, el sistema puede regenerarlo automáticamente
+         // usando estas credenciales, aunque el usuario sea "resguardante".
+         sessionStorage.setItem('user_credentials', JSON.stringify({
+           email: COMEDATOS_EMAIL,
+           password: COMEDATOS_PASSWORD
+         }));
 
-					if (data.token_type) {
-						localStorage.setItem('comedatos_token_type', data.token_type)
-					}
+         console.log('Conexión a Comedatos establecida (Modo Servicio).');
 
-					if (data.expires_in) {
-						const expiresAt = new Date().getTime() + (data.expires_in * 1000)
-						localStorage.setItem('comedatos_token_expires_at', expiresAt.toString())
-					}
+      } else {
+         console.warn('Advertencia: No se pudo conectar a Comedatos:', results.comedatos.error);
+         // Opcional: throw new Error('Error de conexión con el servidor de datos');
+      }
 
-					const userInfo = data.user || { email: formData.email }
-					localStorage.setItem('user', JSON.stringify(userInfo))
+      // --- PASO 3: REDIRECCIÓN ---
+      router.push({ name: 'centros' });
 
-					// Guardamos las credenciales para consumir la API de NucleoDigital.
-					sessionStorage.setItem('user_credentials', JSON.stringify({
-						email: formData.email,
-						password: formData.password
-					}))
+    } catch (error) {
+      console.error('Error en el login:', error);
+      errorMessage.value = error.message || 'Ocurrió un error inesperado al iniciar sesión.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
-					router.push({ name: 'centros' })
-				} else {
-					errorMessage.value = data.error_description || data.message || data.error || 'Error al iniciar sesión'
-				}
-			}
-		} catch (error) {
-			console.error('Error en la petición:', error)
-			errorMessage.value = error.message || 'Error de conexión. Verifica que tu API esté funcionando.'
-		} finally {
-			isLoading.value = false
-		}
-	}
-
-	const loginWithMicrosoft = () => {
-		console.log('Login con Microsoft - por implementar')
-	}
+  const loginWithMicrosoft = () => {
+    console.log('Login con Microsoft - por implementar')
+  }
 </script>
 
 <style scoped>

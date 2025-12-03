@@ -906,8 +906,7 @@ watch(selectedOficina, (newOficina, oldOficina) => {
     if (newOficina) {
         console.log(`Conectando al canal oficina.${newOficina.id}...`);
         
-        currentChannelSubscription = window.Echo.private(`oficina.${newOficina.id}`)
-            .listen('.estado.cambiado', (e) => {
+        currentChannelSubscription = window.Echo.private(`oficina.${newOficina.id}`)            .listen('.estado.cambiado', (e) => {
                 console.log('Evento WebSocket recibido:', e);
                 
                 if (e.nuevoEstado === 'ACTUALIZACION_MASIVA') {
@@ -918,7 +917,7 @@ watch(selectedOficina, (newOficina, oldOficina) => {
                     // Opcional: Feedback visual
                     // showNotification('Inventario actualizado en tiempo real', 'info');
                 }
-            });
+        });
     }
 });
 onUnmounted(() => {
