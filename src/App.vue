@@ -4,6 +4,7 @@ import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+import ModalSessionExpired from './components/ModalSessionExpired.vue';
 
 const route = useRoute()
 const isDashboard = computed(() => route.path.startsWith('/dashboard'))
@@ -19,4 +20,5 @@ const hideNavbarFooter = computed(() => isDashboard || isResguardante)
 		</main>
 		<Footer v-if="!hideNavbarFooter" />
 	</div>
+	<ModalSessionExpired />
 </template>

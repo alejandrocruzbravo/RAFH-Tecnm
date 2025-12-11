@@ -1,3 +1,5 @@
+import { isSessionExpired } from './sessionState.js';
+
 // Configuración Global de la API
 export const API_CONFIG = {
     // URL base de tu API de Laravel
@@ -10,7 +12,7 @@ export const API_CONFIG = {
         REFRESH: '/refresh'
     },
 
-  // Headers por defecto
+    // Headers por defecto
     DEFAULT_HEADERS: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
@@ -60,118 +62,59 @@ export const authenticatedFetch = async (url, options = {}) => {
     const defaultOptions = {
         headers: {
             ...API_CONFIG.DEFAULT_HEADERS,
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-        ...options.headers
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+            ...options.headers
         }
     }
+    try {
+        // 2. HACEMOS LA PETICIÓN ESPERANDO LA RESPUESTA
+        const response = await fetch(`${API_CONFIG.BASE_URL}${url}`, {
+            ...defaultOptions,
+            ...options
+        });
 
-    return fetch(`${API_CONFIG.BASE_URL}${url}`, {
-    ...defaultOptions,
-    ...options
-    })
+        // 3. LÓGICA DE INTERCEPCIÓN DE ERROR 401 (Token Caducado)
+        if (response.status === 401) {
+            // Verificamos si ya se disparó el proceso para no repetirlo múltiples veces
+            if (!isSessionExpired.value) {
+                console.warn('Sesión expirada (401). Iniciando redirección...');
+
+                // A. Activamos el Modal (esto hace que aparezca en App.vue)
+                isSessionExpired.value = true;
+
+                // B. Limpiamos el token (Ajusta 'auth_token' al nombre real de tu llave en localStorage)
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+                // Si tienes otros datos de usuario, límpialos también:
+                // 
+
+                // C. Esperamos 3 segundos y redirigimos
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+            }
+            // Retornamos la respuesta aunque sea error para detener el flujo limpiamente
+            return response;
+        }
+
+        // 4. Si no es 401, retornamos la respuesta normal al componente
+        return response;
+
+    } catch (error) {
+        // Manejo de errores de red (cuando no hay internet o el servidor está caído)
+        console.error('Error de conexión con la API', error);
+        throw error;
+    }
 }
 
 // Función del login (API original)
 export const login = async (usuario_correo, usuario_pass) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
-    method: 'POST',
-    headers: API_CONFIG.DEFAULT_HEADERS,
-    body: JSON.stringify({ usuario_correo, usuario_pass })
+        method: 'POST',
+        headers: API_CONFIG.DEFAULT_HEADERS,
+        body: JSON.stringify({ usuario_correo, usuario_pass })
     })
     return response
-}
-
-// Función del login para la segunda API (OAuth2)
-// Obtiene el token usando grant_type password
-export const loginAPI2 = async (email, password) => {
-    const response = await fetch(`${API_CONFIG_2.BASE_URL}${API_CONFIG_2.ENDPOINTS.TOKEN}`, {
-        method: 'POST',
-        headers: API_CONFIG_2.DEFAULT_HEADERS,
-        body: JSON.stringify({
-            grant_type: API_CONFIG_2.CLIENT_CREDENTIALS.grant_type,
-            client_id: API_CONFIG_2.CLIENT_CREDENTIALS.client_id,
-            client_secret: API_CONFIG_2.CLIENT_CREDENTIALS.client_secret,
-            username: email, // El username es el email
-            password: password
-        })
-    })
-    return response
-}
-
-// Función para hacer consultas autenticadas con la segunda API
-// Usa el token de Comedatos y envía email/password en el body
-export const authenticatedQueryAPI2 = async (endpoint, email, password, options = {}) => {
-    const token = getComedatosToken()
-    const defaultOptions = {
-        method: 'POST',
-        headers: {
-            ...API_CONFIG_2.DEFAULT_HEADERS,
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-            ...options.headers
-        },
-        body: JSON.stringify({
-            email: email,
-            password: password,
-            ...options.body
-        })
-    }
-
-    return fetch(`${API_CONFIG_2.BASE_URL}${endpoint}`, {
-        ...defaultOptions,
-        ...options
-    })
-}
-
-// Función para hacer doble login: API original + Comedatos
-// Retorna { original: { success, data }, comedatos: { success, data } }
-export const dualLogin = async (usuario_correo, usuario_pass, comedatosEmail, comedatosPassword) => {
-    const [originalResponse, comedatosResponse] = await Promise.allSettled([
-        login(usuario_correo, usuario_pass),
-        loginAPI2(comedatosEmail, comedatosPassword)
-    ])
-
-    const results = {
-        original: { success: false, data: null, error: null },
-        comedatos: { success: false, data: null, error: null }
-    }
-
-    // Procesar respuesta de API original
-    if (originalResponse.status === 'fulfilled') {
-        try {
-            const response = originalResponse.value
-            const data = await response.json()
-            if (response.ok && data.access_token) {
-                results.original.success = true
-                results.original.data = data
-            } else {
-                results.original.error = data.message || 'Error en login API original'
-            }
-        } catch (error) {
-            results.original.error = error.message || 'Error al procesar respuesta API original'
-        }
-    } else {
-        results.original.error = originalResponse.reason?.message || 'Error en login API original'
-    }
-
-    // Procesar respuesta de Comedatos
-    if (comedatosResponse.status === 'fulfilled') {
-        try {
-            const response = comedatosResponse.value
-            const data = await response.json()
-            if (response.ok && data.access_token) {
-                results.comedatos.success = true
-                results.comedatos.data = data
-            } else {
-                results.comedatos.error = data.error_description || data.error || 'Error en login Comedatos'
-            }
-        } catch (error) {
-            results.comedatos.error = error.message || 'Error al procesar respuesta Comedatos'
-        }
-    } else {
-        results.comedatos.error = comedatosResponse.reason?.message || 'Error en login Comedatos'
-    }
-
-    return results
 }
 
 // Función para hacer logout
@@ -182,7 +125,7 @@ export const logout = async () => {
             method: 'POST'
         })
         return response
-        
+
     } catch (error) {
         console.error('Error de conexión al cerrar sesión:', error)
     } finally {

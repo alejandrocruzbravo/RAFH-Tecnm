@@ -215,7 +215,7 @@
                                                             :title="'📍 Ubicación Actual: ' + (bien.ubicacion_actual?.nombre || 'Desconocida')">
                                                             En tránsito
                                                     </span>
-                                                    <span v-else-if="bien.bien_estado === 'Extravíado'"
+                                                    <span v-else-if="bien.bien_estado === 'Extravíado' || bien.bien_estado === 'Extraviado' "
                                                         class="inline-block px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-semibold">Extravíado</span>
                                                     <span v-else-if="bien.bien_estado === 'Baja'"
                                                         class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-xs font-semibold">Baja</span>
@@ -452,7 +452,7 @@ const fetchStructure = async () => {
     }
 }
 
-// Carga los Bienes (Cuadro Blanco)
+// Carga los Bienes
 const fetchBienes = async (page = 1) => {
     if (!selectedOficina.value) return
 
@@ -906,7 +906,7 @@ watch(selectedOficina, (newOficina, oldOficina) => {
     if (newOficina) {
         console.log(`Conectando al canal oficina.${newOficina.id}...`);
         
-        currentChannelSubscription = window.Echo.private(`oficina.${newOficina.id}`)            .listen('.estado.cambiado', (e) => {
+        currentChannelSubscription = window.Echo.private(`oficina.${newOficina.id}`).listen('.estado.cambiado', (e) => {
                 console.log('Evento WebSocket recibido:', e);
                 
                 if (e.nuevoEstado === 'ACTUALIZACION_MASIVA') {

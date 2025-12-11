@@ -19,11 +19,6 @@ const router = createRouter({
       component: () => import('../views/dashboard/dashboard-view.vue'),
     },
     {
-      path: '/centros',
-      name: 'centros',
-      component: () => import('../views/CentrosTrabajo.vue'),
-    },
-    {
       path: '/dashboard/:component?',
       name: 'dashboard-component',
       component: () => import('../views/dashboard/dashboard-view.vue'),

@@ -108,16 +108,6 @@
 
 					<label class="px-3 font-medium cursor-pointer">Movimientos</label>
 				</RouterLink>
-
-				<RouterLink to="/dashboard/analisis" @click="closeSidebar"
-					class="flex px-4 py-3 mb-2 text-gray-700 dark:text-gray-400 rounded-lg hover:bg-blue-50 hover:text-blue-900 dark:hover:bg-white/5 dark:hover:text-white transition-all duration-200">
-					<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-						fill="none" viewBox="0 0 24 24">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-							d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" />
-					</svg>
-					<label class="px-3 font-medium cursor-pointer">Análisis</label>
-				</RouterLink>
 			</nav>
 
 		</aside>
@@ -287,7 +277,6 @@ const componentMap = {
 	workcenter: defineAsyncComponent(() => import('./modules/workcenter.vue')),
 	"profile-edit": defineAsyncComponent(() => import('./modules/profile-edit.vue')),
 	catalogoCucop: defineAsyncComponent(() => import('./modules/CatalogoCucopCamba.vue')),
-	analisis: defineAsyncComponent(() => import('./modules/analisis.vue')),
 }
 
 const currentComponent = computed(() => {

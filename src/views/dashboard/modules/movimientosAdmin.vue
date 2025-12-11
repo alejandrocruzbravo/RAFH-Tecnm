@@ -142,7 +142,7 @@
 							<td class="px-6 py-4">
 								<span :class="[
 									'px-2.5 py-1 rounded-full text-xs font-bold border',
-									mov.movimiento_tipo === 'TRASLADO_FISICO' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800' :
+									mov.movimiento_tipo === 'MOVIMIENTO' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800' :
 									mov.movimiento_tipo === 'ALTA' ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800' :
                                     mov.movimiento_tipo === 'ASIGNACION' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800' :
 									'bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
