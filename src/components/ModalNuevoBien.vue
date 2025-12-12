@@ -356,12 +356,10 @@ const imprimirFormato = (items) => {
     const primerBien = items.data[0];
     // Preparar datos generales extrayendo las relaciones
     const datosGenerales = {
-        // Usamos encadenamiento opcional (?.) por seguridad
         oficina_nombre: primerBien.oficina?.nombre || 'SIN OFICINA',
         departamento_nombre: primerBien.oficina?.departamento?.dep_nombre || 'SIN DEPARTAMENTO',
         area_nombre: primerBien.oficina?.departamento?.area?.area_nombre || 'SIN ÁREA',
         cantidad: items.cantidad,
-        // Datos del formulario (estos siguen viniendo de tus variables reactivas)
         bien_clave: selectedCatalogoItem.value.camb,
         bien_descripcion: newBienData.value.bien_descripcion,
         bien_caracteristicas: newBienData.value.bien_caracteristicas,

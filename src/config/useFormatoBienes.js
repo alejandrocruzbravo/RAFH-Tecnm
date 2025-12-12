@@ -203,21 +203,6 @@ const listaBienes = Array.isArray(items) ? items : (items.data || []);
       const elBien = listaBienes[0];
       const serieVisible = (elBien.bien_serie === 'SIN SERIE') ? '' : (elBien.bien_serie || '');
 
-      // Opción A: En la misma línea (Estilo Marca/Modelo)
-      /*
-      doc.setFont("helvetica", "normal");
-      doc.text("CÓDIGO:", marginX, currentY);
-      doc.line(marginX + 17, currentY + 1, midPoint - 5, currentY + 1);
-      doc.setFont("helvetica", "bold");
-      doc.text(elBien.bien_codigo, marginX + 19, currentY);
-
-      doc.setFont("helvetica", "normal");
-      doc.text("SERIE:", midPoint, currentY);
-      doc.line(midPoint + 15, currentY + 1, pageWidth - marginX, currentY + 1);
-      doc.setFont("helvetica", "bold");
-      doc.text(serieVisible, midPoint + 17, currentY);
-      */
-
       // Opción B: Renglones completos (Más limpio si el código es largo)
       drawLineField("CÓDIGO:", elBien.bien_codigo, currentY);
       currentY += 8;

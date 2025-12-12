@@ -13,12 +13,14 @@
 
 	<div v-else class="space-y-6">
 		<div class="flex justify-between items-center">
-			<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Resguardantes</label>
+			<label
+				class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Resguardantes</label>
 			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
 				Chetumal</label>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 border border-gray-100 dark:border-gray-800">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 border border-gray-100 dark:border-gray-800">
 			<div class="flex flex-col md:flex-row gap-4 items-end">
 				<div class="flex-1">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar
@@ -42,7 +44,8 @@
 			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative border border-gray-100 dark:border-gray-800">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 overflow-x-auto relative border border-gray-100 dark:border-gray-800">
 			<div v-if="isLoadingResguardantes"
 				class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg transition-all duration-300">
 				<div class="animate-spin rounded-full h-10 w-10 border-b-2 border-t-2 border-blue-600"></div>
@@ -76,13 +79,14 @@
 							<button v-if="!resguardante.usuario_id_rol" @click="openCreateUserModal(resguardante)"
 								title="Crear Usuario"
 								class="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded transition-colors">
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M18 10h-2m0 0H8m2 0v2m0-2V8"></path>
+								<svg class="w-[18px] h-[18px] text-gray-800 dark:text-white" aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+									viewBox="0 0 24 24">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+										stroke-width="2"
+										d="M16 12h4m-2 2v-4M4 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
 								</svg>
+
 							</button>
 							<button @click="viewResguardanteDetails(resguardante)"
 								class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
@@ -352,7 +356,8 @@
 			<div
 				class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-dark-bg z-10">
 				<h2 class="text-lg font-bold text-gray-900 dark:text-white pr-8">
-					Detalles de Resguardante - {{ selectedResguardante?.res_nombre }} {{selectedResguardante?.res_apellidos }}
+					Detalles de Resguardante - {{ selectedResguardante?.res_nombre }}
+					{{ selectedResguardante?.res_apellidos }}
 				</h2>
 				<button @click="showDetailsModal = false"
 					class="text-gray-400 hover:text-gray-600 text-2xl flex-shrink-0 focus:outline-none">
@@ -368,7 +373,8 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre Completo</p>
-							<p class="text-gray-900 dark:text-white font-semibold">{{selectedResguardante?.res_nombre }} {{ selectedResguardante?.res_apellidos }}</p>
+							<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.res_nombre }}
+								{{ selectedResguardante?.res_apellidos }}</p>
 						</div>
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">RFC</p>

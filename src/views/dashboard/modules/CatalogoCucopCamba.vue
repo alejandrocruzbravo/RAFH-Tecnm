@@ -136,10 +136,6 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Partida Específica</label>
                             <input v-model="newItem.partida_especifica" type="text" class="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clave CUCOP +</label>
-                            <input v-model="newItem.clave_cucop_plus" type="text" class="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        </div>
                     </div>
                 </div>
 
@@ -180,10 +176,6 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Partida Específica</label>
                             <input v-model="editingItem.partida_especifica" type="text" class="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clave CUCOP +</label>
-                            <input v-model="editingItem.clave_cucop_plus" type="text" class="w-full px-3 py-2 rounded border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                     </div>
                 </div>
@@ -240,7 +232,6 @@ const deletingItem = ref(null)
 const newItem = ref({
     clave_cucop: '',
     partida_especifica: '',
-    clave_cucop_plus: '',
     descripcion: '',
     camb: ''
 })
@@ -249,7 +240,6 @@ const editingItem = ref({
     id: null,
     clave_cucop: '',
     partida_especifica: '',
-    clave_cucop_plus: '',
     descripcion: '',
     camb: ''
 })
@@ -335,7 +325,7 @@ const filteredCatalogo = computed(() => {
 
 // --- Funciones CRUD: NUEVO ---
 const openNewModal = () => {
-    newItem.value = { clave_cucop: '', partida_especifica: '', clave_cucop_plus: '', descripcion: '', camb: '' }
+    newItem.value = { clave_cucop: '', partida_especifica: '', descripcion: '', camb: '' }
     newError.value = null
     showNewModal.value = true
 }
@@ -352,10 +342,8 @@ const saveNewItem = async () => {
     try {
         // El backend añade los campos constantes (tipo, nivel, etc.) automáticamente
         const payload = {
-            tipo: '1', // Aunque el backend lo fuerza, a veces es mejor enviarlo si la validación 'required' es estricta antes de la lógica
             clave_cucop: newItem.value.clave_cucop,
             partida_especifica: newItem.value.partida_especifica,
-            clave_cucop_plus: newItem.value.clave_cucop_plus,
             descripcion: newItem.value.descripcion,
             camb: newItem.value.camb
         }
@@ -386,7 +374,6 @@ const openEditModal = (item) => {
         id: item.id ?? item._id ?? null,
         clave_cucop: item.clave_cucop,
         partida_especifica: item.partida_especifica,
-        clave_cucop_plus: item.clave_cucop_plus,
         descripcion: item.descripcion,
         camb: item.camb
     }
@@ -412,7 +399,6 @@ const saveEditItem = async () => {
             tipo: '1',
             clave_cucop: editingItem.value.clave_cucop,
             partida_especifica: editingItem.value.partida_especifica,
-            clave_cucop_plus: editingItem.value.clave_cucop_plus || 'N/A',
             descripcion: editingItem.value.descripcion,
             camb: editingItem.value.camb
         }
