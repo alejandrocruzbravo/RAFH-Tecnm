@@ -32,15 +32,6 @@
 					class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">
 					Nuevo Resguardante
 				</button>
-				<button @click="showReportModal = true"
-					class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium flex items-center gap-2 whitespace-nowrap">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-							d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4H7a2 2 0 01-2-2v-4a2 2 0 012-2h10a2 2 0 012 2v4a2 2 0 01-2 2zm2-6a2 2 0 11-4 0 2 2 0 014 0z">
-						</path>
-					</svg>
-					Reporte
-				</button>
 			</div>
 		</div>
 
@@ -624,31 +615,6 @@
 		@cancel="cancelDeleteResguardante" @clearError="deleteResguardanteError = null" />
 	<ModalAsignarResguardo :show="showAssignModal" :resguardante="selectedResguardante" @close="showAssignModal = false"
 		@confirm="handleAssignConfirm" />
-	<!-- Report Modal -->
-	<div v-if="showReportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Generar Reporte</h2>
-				<button @click="showReportModal = false"
-					class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-			</div>
-			<div class="p-6 space-y-4">
-				<p class="text-gray-600 dark:text-gray-400">Seleccione el formato de exportación:</p>
-				<div class="space-y-2">
-					<button
-						class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">Exportar
-						a PDF</button>
-					<button
-						class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">Exportar
-						a Excel</button>
-				</div>
-			</div>
-			<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-				<button @click="showReportModal = false"
-					class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cerrar</button>
-			</div>
-		</div>
-	</div>
 </template>
 
 <script setup>

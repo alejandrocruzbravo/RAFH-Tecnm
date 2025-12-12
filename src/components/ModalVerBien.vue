@@ -211,6 +211,7 @@ const fetchFullData = async (id) => {
         // Actualizamos bienData con la respuesta completa que incluye relaciones
         // (movimientos_bien, resguardos, etc.)
         bienData.value = data.data || data; // Maneja si viene envuelto en 'data' o directo
+        console.log(bienData.value)
         
     } catch (error) {
         console.error("Error obteniendo detalles del bien:", error);

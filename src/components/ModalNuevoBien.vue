@@ -128,9 +128,13 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo Adquisición</label>
               <select v-model="newBienData.bien_tipo_adquisicion"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                <option value="1">Compra Directa</option>
-                <option value="2">Donación</option>
-                <option value="3">Entrada por Almacén</option>
+                <option value="Compra Directa">Compra Directa</option>
+                <option value="Donación">Donación</option>
+                <option value="Entrada por Almacén">Entrada por Almacén</option>
+                <option value="Producción">Producción</option>
+                <option value="Reposición">Reposición</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Indocumentación">Indocumentación</option>
               </select>
             </div>
             <div>
