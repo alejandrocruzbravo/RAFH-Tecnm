@@ -9,34 +9,8 @@ export const API_CONFIG = {
         LOGIN: '/login',
         LOGOUT: '/logout',
         USER: '/user',
-        REFRESH: '/refresh'
-    },
-
-    // Headers por defecto
-    DEFAULT_HEADERS: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    }
-}
-
-// Configuración para la segunda API (OAuth2 con grant_type password)
-export const API_CONFIG_2 = {
-    // URL base proxied localmente (ver vite.config.js)
-    BASE_URL: '/comedatos',
-    // Endpoints de la API Comedatos
-    ENDPOINTS: {
-        TOKEN: '/oauth/token', // Endpoint para obtener el token (OAuth2)
-        LOGIN: '/api/NucleoDigital', // Endpoint para consultar datos protegidos
-        LOGOUT: '/logout',
-        USER: '/user',
-        REFRESH: '/refresh'
-    },
-
-    // Credenciales del cliente OAuth2
-    CLIENT_CREDENTIALS: {
-        grant_type: 'password',
-        client_id: '4',
-        client_secret: 'VJi8wbu3t5tiXP7A7e81G8kXq6jK5VxlcLWVIucR'
+        REFRESH: '/refresh',
+        PROFILE: '/perfil'  // Nuevo endpoint para el perfil
     },
 
     // Headers por defecto
@@ -50,12 +24,6 @@ export const API_CONFIG_2 = {
 export const getAuthToken = () => {
     return localStorage.getItem('auth_token')
 }
-
-// Función para obtener el token de Comedatos
-export const getComedatosToken = () => {
-    return localStorage.getItem('comedatos_token')
-}
-
 // Función para hacer peticiones autenticadas
 export const authenticatedFetch = async (url, options = {}) => {
     const token = getAuthToken()
@@ -145,9 +113,10 @@ export const getUserProfile = async () => {
 
 // Función para actualizar el perfil del usuario
 export const updateUserProfile = async (userData) => {
-    const response = await authenticatedFetch(API_CONFIG.ENDPOINTS.USER, {
+    // Usamos el endpoint '/perfil' que definimos en el PerfilController
+    const response = await authenticatedFetch(API_CONFIG.ENDPOINTS.PROFILE, {
         method: 'PUT',
         body: JSON.stringify(userData)
-    })
-    return response
+    });
+    return response;
 }

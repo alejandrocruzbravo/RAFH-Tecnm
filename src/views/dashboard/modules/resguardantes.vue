@@ -138,7 +138,7 @@
 	</div>
 	<!-- New Resguardante Modal -->
 	<div v-if="showNewResguardanteModal"
-		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Resguardante</h2>
@@ -235,7 +235,7 @@
 	</div>
 	<!-- Edit Resguardante Modal -->
 	<div v-if="showEditResguardanteModal && editingResguardante.id"
-		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 				<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Resguardante</h2>
@@ -342,7 +342,7 @@
 		</div>
 	</div>
 	<!-- Resguardante Details Modal -->
-	<div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+	<div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-5xl w-full max-h-[95vh] overflow-y-auto">
 			<div
 				class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-dark-bg z-10">
@@ -549,7 +549,7 @@
 	</div>
 	<!-- Crear usuario Modal -->
 	<div v-if="showCreateUserModal && creatingUserFor"
-		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 			<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
@@ -1093,17 +1093,15 @@ const saveNewUser = async () => {
 const handleAssignConfirm = async (selectedGoods) => {
 	if (!selectedResguardante.value || selectedGoods.length === 0) return;
 
-	// Preparamos el payload incluyendo la bandera de acción
 	const payload = {
-		accion: 'create', // <--- Bandera explícita para el controlador
+		accion: 'create', 
 		id_resguardante: selectedResguardante.value.id,
-		bienes_ids: selectedGoods.map(b => b.id) // Solo enviamos IDs
+		bienes_ids: selectedGoods.map(b => b.id) 
 	};
 
 	isLoading.value = true;
 
 	try {
-		// Petición POST estándar
 		const response = await authenticatedFetch('/resguardos', {
 			method: 'POST',
 			body: JSON.stringify(payload)
@@ -1114,13 +1112,11 @@ const handleAssignConfirm = async (selectedGoods) => {
 			throw new Error(errData.message || 'Error al asignar los bienes.');
 		}
 
-		// Éxito
 		const data = await response.json();
-		generarPDFResguardo(selectedResguardante.value, selectedGoods);
+		imprimirValeActualizado(selectedResguardante.value.id);
 
 		showAssignModal.value = false;
 
-		// Recargar la tabla de bienes asignados
 		await fetchBienesDelResguardante(selectedResguardante.value.id);
 
 	} catch (error) {
@@ -1129,6 +1125,26 @@ const handleAssignConfirm = async (selectedGoods) => {
 	} finally {
 		isLoading.value = false;
 	}
+};
+
+const imprimirValeActualizado = async (resguardanteId) => {
+    try {
+        console.log("Generando vale consolidado...");
+        const response = await authenticatedFetch(`/resguardantes/${resguardanteId}/bienes-activos`);
+        
+        if (!response.ok) throw new Error("Error al obtener el listado actualizado de bienes");
+
+        const responseData = await response.json();
+        const todosLosBienes = responseData.data || [];
+
+        if (todosLosBienes.length > 0) {
+            generarPDFResguardo(selectedResguardante.value, todosLosBienes, 'RESGUARDO');
+        }
+
+    } catch (e) {
+        console.error("Error al generar el PDF actualizado:", e);
+        alert("Los bienes se asignaron, pero hubo un error generando el PDF.");
+    }
 };
 
 // --- 5. LÓGICA DE LIBERACIÓN ---
@@ -1147,12 +1163,10 @@ const handleConfirmRelease = async () => {
 	try {
 		const bienesIds = Array.from(selectedReleaseMap.value.keys());
 
-		// CAMBIO IMPORTANTE: Usamos POST en lugar de DELETE
-		// para aprovechar el "Action Dispatching" del controlador
 		const response = await authenticatedFetch('/resguardos', {
-			method: 'POST', // <--- Ahora es POST
+			method: 'POST', 
 			body: JSON.stringify({
-				accion: 'release', // <--- Bandera VITAL para ejecutar procesarLiberacion()
+				accion: 'release', 
 				bienes_ids: bienesIds
 			})
 		});
@@ -1175,11 +1189,13 @@ const handleConfirmRelease = async () => {
 		const bienesAsignadosListo = computed(() => {
 			return bienesAsignadosList.value.data || [];
 		});
-		if (bienesAsignadosList.value && bienesAsignadosList.value.length > 0) {
+
+		console.log(bienesAsignadosList.value.data);
+
+		if (bienesAsignadosList.value.data && bienesAsignadosList.value.data.length > 0) {
 			generarPDFResguardo(selectedResguardante.value, bienesAsignadosListo.value, 'RESGUARDO');
 		} else {
 			console.warn("El resguardante se quedó sin bienes, no se generó PDF.");
-			// Opcional: Podrías generar un acta de "No Adeudo" si la lista está vacía.
 		}
 
 	} catch (error) {

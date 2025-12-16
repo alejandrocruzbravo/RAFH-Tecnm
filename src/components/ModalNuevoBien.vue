@@ -1,6 +1,6 @@
 <template>
   <div v-if="show"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 transition-opacity duration-300 ease-out"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 transition-opacity duration-300 ease-out backdrop-blur-sm"
     @click.self="closeModal">
 
     <div
@@ -102,7 +102,11 @@
             <input v-model="newBienData.bien_serie" type="text" placeholder="Número de serie de fábrica"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
           </div>
-
+          <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secuencia Alfabética</label>
+              <input v-model="newBienData.bien_sec_alfabetica" type="text" maxlength="5" placeholder="Ej. A, B, AA"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white uppercase">
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Valor Monetario (por
@@ -206,6 +210,7 @@ const formResetData = {
   bien_valor_monetario: '',
   bien_proveedor: '',
   bien_numero_factura: '',
+  bien_sec_alfabetica: '',
   bien_estado: 'Activo'
 }
 const newBienData = ref({ ...formResetData }); // <-- Ref unificado
@@ -296,7 +301,8 @@ const handleSave = async () => {
       bien_provedor: formData.bien_proveedor || 'SIN PROVEEDOR',
       bien_numero_factura: formData.bien_numero_factura || 'SIN FACTURA',
       bien_estado: formData.bien_estado,
-      bien_marca: formData.bien_marca || 'SIN MARCA'
+      bien_marca: formData.bien_marca || 'SIN MARCA',
+      bien_sec_alfabetica: formData.bien_sec_alfabetica || null,
     };
 
     // 2. ¡Llamada a la API!

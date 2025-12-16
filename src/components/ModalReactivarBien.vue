@@ -1,6 +1,6 @@
 <template>
   <div v-if="show && bien"
-    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 
     <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] flex flex-col">
 
@@ -68,9 +68,9 @@
           </h3>
           <div class="flex gap-2">
             <input v-model="searchResguardanteQuery" type="text" placeholder="Buscar por Nombre, RFC o CURP" 
-                   class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-            <button @click="searchResguardantes" :disabled="isLoadingSearch"
-                    class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors disabled:opacity-50">
+                   class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50" :disabled="!selectedOficina">
+            <button @click="searchResguardantes" :disabled="isLoadingSearch || !selectedOficina"
+                    class="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors disabled:opacity-50" >
               {{ isLoadingSearch ? '...' : 'Buscar' }}
             </button>
           </div>
@@ -90,7 +90,26 @@
             </div>
             <button @click="selectedResguardante = null" class="text-red-500 text-xs hover:underline">Quitar</button>
           </div>
+          <div v-if="isExternalResguardante" class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg flex gap-3 items-start animate-fade-in">
+            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-yellow-800 dark:text-yellow-300">Aviso de Ubicación</p>
+              <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                El resguardante seleccionado <b>NO pertenece</b> a la oficina elegida arriba.
+              </p>
+              <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                El bien se reactivará con estado: <span class="font-bold border-b border-yellow-600">En tránsito</span>.
+                <br>
+                Ubicación Física: <b>Oficina Seleccionada</b>.
+                <br>
+                Dueño Administrativo: <b>Oficina del Resguardante</b>.
+              </p>
+            </div>
+          </div>
         </div>
+
 
       </div>
 
@@ -106,8 +125,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-
+import { ref, watch, computed } from 'vue';
+import { generarPDFResguardo } from '@/config/resguardo_pdf.js';
 const props = defineProps({
   show: { type: Boolean, required: true },
   bien: { type: Object, default: null },
@@ -136,6 +155,12 @@ const resguardantesResults = ref([]);
 const selectedResguardante = ref(null);
 const isLoadingSearch = ref(false);
 
+const isExternalResguardante = computed(() => {
+  if (!selectedResguardante.value || !selectedOficina.value) return false;
+  
+  // Comparamos IDs. Asegúrate de que ambos sean del mismo tipo (número o string)
+  return String(selectedResguardante.value.id_oficina) !== String(selectedOficina.value);
+});
 // --- Reset al abrir ---
 watch(() => props.show, (val) => {
   if (val) {
@@ -212,6 +237,7 @@ const searchResguardantes = async () => {
   finally { isLoadingSearch.value = false; }
 }
 
+
 // --- Guardar Reactivación ---
 const handleReactivar = async () => {
   if (!selectedOficina.value) return;
@@ -223,7 +249,7 @@ const handleReactivar = async () => {
     const payload = {
       accion: 'reactivar',
       id_oficina: selectedOficina.value,
-      //id_resguardante: selectedResguardante.value ? selectedResguardante.value.id : null
+      id_resguardante: selectedResguardante.value ? selectedResguardante.value.id : null
     };
     console.log(payload);
     const res = await props.fetchFunction(`/bienes/${props.bien.id}`, {
@@ -231,7 +257,13 @@ const handleReactivar = async () => {
       body: JSON.stringify(payload)
     });
 
+    const data = await res.json();
+
     if (!res.ok) throw new Error('Error al reactivar el bien.');
+    console.log("Bien reactivado:", data);
+    if (data.resguardante_asignado_id) {
+        await imprimirValeActualizado(data.resguardante_asignado_id);
+    }
 
     emit('reactivate-success');
     closeModal();
@@ -241,6 +273,31 @@ const handleReactivar = async () => {
   } finally {
     isSubmitting.value = false;
   }
+}
+
+const imprimirValeActualizado = async (resguardanteId) => {
+    try {
+        console.log("Generando vale tras reactivación...");
+        
+        // 1. Obtener datos del resguardante
+        const resUser = await props.fetchFunction(`/resguardantes/${resguardanteId}`);
+        const dataUser = await resUser.json();
+        const resguardante = dataUser.data || dataUser;
+
+        // 2. Obtener sus bienes (incluyendo el recién reactivado)
+        // Usamos la ruta dedicada que creamos anteriormente
+        const resBienes = await props.fetchFunction(`/resguardantes/${resguardanteId}/bienes-activos`);
+        const dataBienes = await resBienes.json();
+        const todosLosBienes = dataBienes.data || [];
+
+        // 3. Generar PDF
+        if (todosLosBienes.length > 0) {
+            generarPDFResguardo(resguardante, todosLosBienes, 'RESGUARDO');
+        }
+    } catch (e) {
+        console.error("Error al generar PDF:", e);
+        errorMessage.value = "Bien reactivado, pero falló la generación del PDF.";
+    }
 }
 
 const closeModal = () => emit('close');

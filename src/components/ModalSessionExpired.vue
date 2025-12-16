@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isSessionExpired" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] transition-opacity duration-300">
+    <div v-if="isSessionExpired" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] transition-opacity duration-300 backdrop-blur-lg">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 max-w-sm w-full text-center transform scale-100 animate-bounce-in">
             
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-6">

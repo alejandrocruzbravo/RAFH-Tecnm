@@ -14,14 +14,26 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
     const pageWidth = doc.internal.pageSize.getWidth();
     const today = new Date().toLocaleDateString('es-MX');
 
-    // --- CONSTANTES SOLICITADAS ---
+    // --- CONSTANTES ---
     const CONSTANTES = {
         PLANTEL: "INSTITUTO TECNOLÓGICO DE CHETUMAL",
         CLAVE: "115130014",
         CENTRO_TRABAJO: "23DIT0001L"
     };
 
-    // --- ENCABEZADO PRINCIPAL ---
+    // --- HELPER PARA LIMPIAR DATOS "BASURA" ---
+    // Devuelve true si el dato es nulo, vacío o es un placeholder como "SIN SERIE"
+    const esDatoInvalido = (valor) => {
+        if (!valor) return true; // Nulo o undefined
+        const v = String(valor).trim().toUpperCase();
+        const invalidos = [
+            'SIN SERIE', 'S/N', 'S/S', 'SIN NUMERO', 'NO TIENE', 
+            'SIN MARCA', 'SIN MODELO', '0', 'N/A'
+        ];
+        return invalidos.includes(v);
+    };
+
+    // --- ENCABEZADO ---
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     
@@ -31,16 +43,14 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
         
     doc.text(tituloTexto, pageWidth / 2, 20, { align: 'center' });
 
-    // --- DATOS DEL PLANTEL (Líneas superiores) ---
-    doc.setFontSize(8); // Ajusté un poco el tamaño para que quepa bien el nombre largo
+    // --- DATOS DEL PLANTEL ---
+    doc.setFontSize(8); 
     doc.setFont('helvetica', 'normal');
 
     let currentY = 35;
     const lineHeight = 7;
 
-    // Fila 1: Plantel y Clave
     doc.text('PLANTEL', marginLeft, currentY);
-    // Texto del Plantel centrado sobre la línea
     doc.text(CONSTANTES.PLANTEL, marginLeft + 65, currentY - 1, { align: 'center' });
     doc.line(marginLeft + 25, currentY, marginLeft + 110, currentY); 
     
@@ -50,12 +60,10 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
 
     currentY += lineHeight;
 
-    // Fila 2: Área y Centro de Trabajo
-    // Intentamos sacar el área del objeto departamento si existe
     const nombreArea = resguardante.departamento?.dep_nombre || '';
 
     doc.text('ÁREA', marginLeft, currentY);
-    doc.text(nombreArea, marginLeft + 65, currentY - 1, { align: 'center', maxWidth: 80 }); // MaxWidth por si es muy largo
+    doc.text(nombreArea, marginLeft + 65, currentY - 1, { align: 'center', maxWidth: 80 }); 
     doc.line(marginLeft + 25, currentY, marginLeft + 110, currentY); 
 
     doc.text('CENTRO DE TRABAJO', marginLeft + 115, currentY);
@@ -70,31 +78,19 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
 
     currentY += 3;
 
-    // Preparar Nombre Completo (Concatenando nombre y apellidos de tu DB)
     const nombreCompleto = `${resguardante.res_nombre || ''} ${resguardante.res_apellidos || ''}`.trim();
-    // RFC o CURP
     const rfcCurp = resguardante.res_rfc || resguardante.res_curp || '';
 
-    // Tabla Invertida (Datos arriba, Etiquetas abajo)
     autoTable(doc, {
         startY: currentY,
         body: [
-            [
-                nombreCompleto, 
-                rfcCurp, 
-                today, 
-                '' 
-            ],
+            [nombreCompleto, rfcCurp, today, ''],
             ['NOMBRE', 'RFC/CURP', 'FECHA DE ELABORACIÓN', 'FIRMA']
         ],
         theme: 'grid',
         styles: { 
-            fontSize: 8, 
-            halign: 'center', 
-            valign: 'middle',
-            lineColor: [0, 0, 0], 
-            lineWidth: 0.1,
-            textColor: [0, 0, 0]
+            fontSize: 8, halign: 'center', valign: 'middle',
+            lineColor: [0, 0, 0], lineWidth: 0.1, textColor: [0, 0, 0]
         },
         didParseCell: function(data) {
             if (data.row.index === 0) {
@@ -116,44 +112,61 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
 
     currentY += 3;
 
-    // MAPEO DE DATOS SEGÚN TU CAPTURA DE PANTALLA
+    // MAPEO DE DATOS CON LIMPIEZA AGRESIVA
     const bodyBienes = bienes.map((bien, index) => {
-        // Construimos una descripción rica con Marca y Modelo
-        const desc = bien.bien_descripcion || '';
-        const marca = bien.bien_marca ? ` MARCA: ${bien.bien_marca}` : '';
-        const modelo = bien.bien_modelo ? ` MODELO: ${bien.bien_modelo}` : '';
-        const descripcionCompleta = `${desc}${marca}${modelo}`;
+        // 1. Limpieza de Marca y Modelo antes de concatenar
+        const marcaRaw = bien.bien_marca;
+        const modeloRaw = bien.bien_modelo;
+        
+        let detalleAdicional = '';
+        
+        // Solo agregamos la marca si NO es "SIN MARCA" o vacía
+        if (!esDatoInvalido(marcaRaw)) {
+            detalleAdicional += ` MARCA: ${marcaRaw}`;
+        }
+        
+        // Solo agregamos el modelo si NO es "SIN MODELO" o vacío
+        if (!esDatoInvalido(modeloRaw)) {
+            detalleAdicional += ` MODELO: ${modeloRaw}`;
+        }
+
+        const descripcionCompleta = (bien.bien_descripcion || '') + detalleAdicional;
+
+        // 2. Limpieza de Clave/Código
+        // Si es "S/N" o vacío, devuelve cadena vacía
+        const codigo = esDatoInvalido(bien.bien_codigo) ? '' : bien.bien_codigo;
+        
+        // 3. Limpieza de Serie
+        // Si es "SIN SERIE", "S/N", etc., devuelve cadena vacía
+        const serie = esDatoInvalido(bien.bien_serie) ? '' : bien.bien_serie;
+
+        // 4. Limpieza de Precio
+        // Si es 0 o inválido, devuelve cadena vacía
+        const precioVal = parseFloat(bien.bien_valor_monetario || 0);
+        const precio = (precioVal > 0) ? `$${precioVal.toFixed(2)}` : '';
 
         return [
             index + 1, 
-            bien.bien_codigo || 'S/N', // Clave CAMB
-            descripcionCompleta,       // Nombre y Características
-            `$${parseFloat(bien.bien_valor_monetario || 0).toFixed(2)}`, // Precio
-            bien.bien_serie || 'S/N'   // Serie
+            codigo, 
+            descripcionCompleta,       
+            precio, 
+            serie
         ];
     });
 
-    // Tabla de Bienes (Sin color verde)
+    // Tabla de Bienes
     autoTable(doc, {
         startY: currentY,
-        head: [['CANTIDAD', 'CLAVE CAMB', 'NOMBRE Y CARACTERÍSTICAS DEL BIEN', 'PRECIO', 'No. DE SERIE']],
+        head: [['#', 'CLAVE CAMB', 'NOMBRE Y CARACTERÍSTICAS DEL BIEN', 'PRECIO', 'No. DE SERIE']],
         body: bodyBienes,
         theme: 'grid',
         styles: {
-            fontSize: 7,
-            cellPadding: 2,
-            lineColor: [0, 0, 0],
-            lineWidth: 0.1,
-            valign: 'middle',
-            textColor: [0, 0, 0]
+            fontSize: 7, cellPadding: 2, lineColor: [0, 0, 0],
+            lineWidth: 0.1, valign: 'middle', textColor: [0, 0, 0]
         },
         headStyles: {
-            fillColor: [255, 255, 255], // BLANCO
-            textColor: [0, 0, 0],       // NEGRO
-            fontStyle: 'bold',
-            halign: 'center',
-            lineWidth: 0.1,
-            lineColor: [0, 0, 0]
+            fillColor: [255, 255, 255], textColor: [0, 0, 0],
+            fontStyle: 'bold', halign: 'center', lineWidth: 0.1, lineColor: [0, 0, 0]
         },
         columnStyles: {
             0: { halign: 'center', cellWidth: 15 }, 
@@ -169,17 +182,14 @@ export const generarPDFResguardo = (resguardante, bienes, tipo = 'RESGUARDO') =>
                     content: `TOTAL DE BIENES RESGUARDADOS:  ${bienes.length}`, 
                     colSpan: 5, 
                     styles: { 
-                        halign: 'right', 
-                        fontStyle: 'bold',
-                        fillColor: [255, 255, 255],
-                        textColor: [0, 0, 0]
+                        halign: 'right', fontStyle: 'bold',
+                        fillColor: [255, 255, 255], textColor: [0, 0, 0]
                     } 
                 }
             ]
         ]
     });
 
-    // Guardar el archivo
     const safeName = (nombreCompleto || 'resguardante').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     doc.save(`Resguardo_${safeName}_${today.replace(/\//g, '-')}.pdf`);
 };

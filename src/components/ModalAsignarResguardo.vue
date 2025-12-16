@@ -1,6 +1,6 @@
 <template>
   <div v-if="show"
-    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] p-4 transition-opacity duration-300"
+    class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60] p-4 transition-opacity duration-300 backdrop-blur-sm"
     @click.self="closeModal">
 
     <div class="bg-white dark:bg-dark-bg rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">

@@ -4,6 +4,7 @@ import autoTable from 'jspdf-autotable';
 import imgSep from '/images/EDUCACION-LOGO.png';
 import imgTecnm from '/images/Logo-TecNM.png';
 import imgItch from '/images/logoEscuela.png';
+
 /**
  * Genera el PDF de "Resguardo Interno de Bienes" o "Alta de Bienes"
  * @param {Object} data - Datos generales (Oficina, Depto, Características comunes)
@@ -40,48 +41,37 @@ export const generarFormatoBienes = async (data, items) => {
   const pageWidth = 216; // Ancho carta aprox
 
   // --- 1. ENCABEZADO (LOGOS) ---
-  // Aquí debes cargar tus imagenes en Base64 o URL.
-  // Ejemplo: doc.addImage(logoEducacionBase64, 'PNG', marginX, 10, 40, 15);
-  
-  // Placeholder visual para los logos (borra esto cuando pongas los reales)
-try {
-      // Convertimos las 3 imágenes a Base64 simultáneamente
+  try {
       const [logo1, logo2, logo3] = await Promise.all([
           cargarImagen(imgSep),
           cargarImagen(imgTecnm),
           cargarImagen(imgItch)
       ]);
 
-      // Dibujar Logo Izquierdo (Educación)
-      // (imagen, formato, x, y, ancho, alto)
+      // Logo Izquierdo
       doc.addImage(logo1, 'PNG', marginX, 10, 50, 15); 
-
-      // Dibujar Logo Central (TecNM)
-      // Calculamos el centro: (AnchoPagina / 2) - (AnchoLogo / 2)
+      // Logo Central
       doc.addImage(logo2, 'PNG', (pageWidth / 2) - 15, 10, 30, 15);
-
-      // Dibujar Logo Derecho (ITC)
+      // Logo Derecho
       doc.addImage(logo3, 'PNG', pageWidth - marginX - 18, 8, 18, 18);
 
   } catch (error) {
       console.error("Error cargando logos:", error);
-      // Si fallan las imágenes, el PDF se genera igual pero sin ellas
   }
 
-  currentY += 20; // Bajamos después de los logos
+  currentY += 20; 
 
   // --- 2. FOLIO SIBISEP ---
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   const textFolio = "FOLIO SIBISEP:";
-  const folioX = pageWidth - marginX - 60; // Posición calculada a la derecha
+  const folioX = pageWidth - marginX - 60; 
   doc.text(textFolio, folioX, currentY);
-  doc.line(folioX + 28, currentY + 1, pageWidth - marginX, currentY + 1); // Línea
+  doc.line(folioX + 28, currentY + 1, pageWidth - marginX, currentY + 1);
 
   currentY += 15;
 
-  // --- 3. DATOS DE UBICACIÓN (Área, Depto, Oficina) ---
-  // Función auxiliar para dibujar renglones: "ETIQUETA: _______________"
+  // --- 3. DATOS DE UBICACIÓN ---
   const drawLineField = (label, value, y) => {
     doc.setFont("helvetica", "normal");
     doc.text(label, marginX, y);
@@ -90,10 +80,10 @@ try {
     const lineStart = marginX + labelWidth;
     const lineEnd = pageWidth - marginX;
     
-    doc.line(lineStart, y + 1, lineEnd, y + 1); // Línea base
+    doc.line(lineStart, y + 1, lineEnd, y + 1); 
     
     if (value) {
-        doc.setFont("helvetica", "bold"); // Valor en negrita
+        doc.setFont("helvetica", "bold"); 
         doc.text(value.toUpperCase(), lineStart + 2, y);
     }
   };
@@ -113,9 +103,7 @@ try {
   
   currentY += 10;
 
-  // --- 5. DETALLES DEL BIEN (Formulario) ---
-  // Usamos la misma lógica pero a veces compartiendo renglón (Marca | Modelo)
-  
+  // --- 5. DETALLES DEL BIEN ---
   doc.setFontSize(10);
 
   // CAMB
@@ -130,7 +118,7 @@ try {
   drawLineField("CARACTERÍSTICAS:", data.bien_caracteristicas, currentY);
   currentY += 8;
 
-  // MARCA Y MODELO (Comparten línea)
+  // MARCA Y MODELO 
   const midPoint = pageWidth / 2;
   
   // Marca
@@ -149,7 +137,7 @@ try {
   
   currentY += 8;
 
-  // CANTIDAD Y VALOR (Comparten línea)
+  // CANTIDAD Y VALOR
   // Cantidad
   doc.setFont("helvetica", "normal");
   doc.text("CANTIDAD:", marginX, currentY);
@@ -162,17 +150,22 @@ try {
   doc.text("VALOR:", midPoint, currentY);
   doc.line(midPoint + 15, currentY + 1, pageWidth - marginX, currentY + 1);
   doc.setFont("helvetica", "bold");
-  const valorFmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(data.bien_valor_monetario || 0);
+
+  const valorRaw = parseFloat(data.bien_valor_monetario || 0);
+  
+  // Si es mayor a 0 formatea a moneda, si es 0 deja la cadena vacía
+  const valorFmt = valorRaw > 0 
+      ? new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(valorRaw) 
+      : '';
   doc.text(valorFmt, midPoint + 17, currentY);
 
   currentY += 8;
 
-  // DOCUMENTACIÓN SOPORTE (Dos líneas en el diseño original)
+  // DOCUMENTACIÓN SOPORTE
   doc.setFont("helvetica", "normal");
   doc.text("DOCUMENTACIÓN", marginX, currentY);
   currentY += 5;
   doc.text("SOPORTE:", marginX, currentY);
-  // Línea larga al lado de "SOPORTE:"
   doc.line(marginX + 22, currentY + 1, pageWidth - marginX, currentY + 1);
   doc.setFont("helvetica", "bold");
   doc.text((data.bien_numero_factura || '').toUpperCase(), marginX + 25, currentY);
@@ -180,7 +173,6 @@ try {
   currentY += 8;
 
   // FORMA DE ADQUISICIÓN
-  // Mapeo rápido de IDs a Texto si es necesario
   const tiposAdq = { 1: 'COMPRA DIRECTA', 2: 'DONACIÓN', 3: 'ALMACÉN' };
   const adqTexto = tiposAdq[data.bien_tipo_adquisicion] || data.bien_tipo_adquisicion || '';
   drawLineField("FORMA DE ADQUISICIÓN:", adqTexto, currentY);
@@ -192,29 +184,30 @@ try {
 
   currentY += 10;
 
-  // --- 6. TABLA DE CÓDIGOS Y SERIES ---
-const listaBienes = Array.isArray(items) ? items : (items.data || []);
+  // --- 6. TABLA DE CÓDIGOS Y SERIES (CONCATENACIÓN AQUI) ---
+  const listaBienes = Array.isArray(items) ? items : (items.data || []);
 
-  // 2. Construcción del cuerpo de la tabla con la validación de 'SIN SERIE'
   if (items.cantidad === 1) {
       // --- CASO 1: UN SOLO BIEN ---
-      // Pintamos el Código y Serie como parte del formulario, SIN tabla.
-      
       const elBien = listaBienes[0];
       const serieVisible = (elBien.bien_serie === 'SIN SERIE') ? '' : (elBien.bien_serie || '');
+      
+      // 👇 AQUI SE CONCATENA LA SECUENCIA
+      const codigoCompleto = elBien.bien_codigo + (elBien.bien_sec_alfabetica || '');
 
-      // Opción B: Renglones completos (Más limpio si el código es largo)
-      drawLineField("CÓDIGO:", elBien.bien_codigo, currentY);
+      drawLineField("CÓDIGO:", codigoCompleto, currentY);
       currentY += 8;
       drawLineField("NÚMERO DE SERIE:", serieVisible, currentY);
 
   } else {
-      // --- CASO 2: MÚLTIPLES BIENES ---
-      // Pintamos la tabla
-      
+      // --- CASO 2: MÚLTIPLES BIENES (TABLA) ---
       const tableBody = listaBienes.map(item => {
           const serieVisible = (item.bien_serie === 'SIN SERIE') ? '' : (item.bien_serie || '');
-          return [item.bien_codigo || '', serieVisible];
+          
+          // 👇 AQUI SE CONCATENA LA SECUENCIA PARA LA TABLA
+          const codigoCompleto = (item.bien_codigo || '') + (item.bien_sec_alfabetica || '');
+          
+          return [codigoCompleto, serieVisible];
       });
 
       autoTable(doc, {
@@ -245,7 +238,6 @@ const listaBienes = Array.isArray(items) ? items : (items.data || []);
 
   // --- DESCARGA ---
   const fecha = new Date().toISOString().slice(0,10);
-  // Cambiamos el nombre si es único o múltiple para fácil identificación
   const tipoArchivo = items.cantidad === 1 ? 'Resguardo_Unico' : 'Resguardo_Lote';
   const nombreArchivo = `${tipoArchivo}_${data.bien_clave}_${fecha}.pdf`;
   

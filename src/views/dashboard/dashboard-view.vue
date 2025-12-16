@@ -269,7 +269,6 @@ const componentMap = {
 	bienes: defineAsyncComponent(() => import('./modules/bienes.vue')),
 	gestores: defineAsyncComponent(() => import('./modules/gestores.vue')),
 	main: defineAsyncComponent(() => import('./modules/main.vue')),
-	mantenimiento: defineAsyncComponent(() => import('./modules/mantenimiento.vue')),
 	resguardantes: defineAsyncComponent(() => import('./modules/resguardantes.vue')),
 	roles: defineAsyncComponent(() => import('./modules/roles.vue')),
 	solicitudes: defineAsyncComponent(() => import('./modules/solicitudes.vue')),

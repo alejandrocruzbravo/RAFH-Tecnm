@@ -42,10 +42,10 @@
 				<thead class="bg-gray-100 dark:bg-gray-700">
 					<tr>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Tipo</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Solicitante</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Descripción</th>
+						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Solicitante (Origen)</th>
+						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Destino</th>
 						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Estado</th>
-						<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Acciones</th>
+						<th class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Acciones</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
@@ -54,9 +54,9 @@
 
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">Traspaso</td>
 						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{
-							solicitud.resguardante_origen?.res_nombre || 'N/A' }}</td>
-						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ solicitud.traspaso_observaciones }}
-						</td>
+							solicitud.resguardante_origen?.res_nombre + ' ' + solicitud.resguardante_origen?.res_apellidos || 'N/A' }}</td>
+						<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{
+							solicitud.resguardante_destino?.res_nombre + ' ' + solicitud.resguardante_destino?.res_apellidos || 'N/A' }}</td>
 						<td class="px-4 py-3">
 							<span v-if="solicitud.traspaso_estado === 'Pendiente'"
 								class="inline-block px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-xs font-semibold">
@@ -71,7 +71,7 @@
 								{{ solicitud.traspaso_estado }}
 							</span>
 						</td>
-						<td class="px-4 py-3 flex gap-2">
+						<td class="px-4 py-3 flex gap-2 justify-end">
 							<button @click="viewSolicitudDetails(index)"
 								class="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
 								title="Ver detalles">
@@ -86,7 +86,7 @@
 
 
 							</button>
-							<button v-if="solicitud.traspaso_estado === 'Pendiente'" @click="approveSolicitud(index)"
+							<button v-if="solicitud.traspaso_estado === 'Pendiente'" @click="openApproveModal(solicitud)"
 								class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs transition-colors">
 								Aprobar
 							</button>
@@ -95,7 +95,7 @@
 								disabled>
 								Aprobar
 							</button>
-							<button v-if="solicitud.traspaso_estado === 'Pendiente'" @click="rejectSolicitud(index)"
+							<button v-if="solicitud.traspaso_estado === 'Pendiente'" @click="rejectSolicitud(solicitud)"
 								class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors">
 								Rechazar
 							</button>
@@ -267,11 +267,23 @@
 			</div>
 		</div>
 	</div>
+<ModalConfirmarTraspaso 
+    :show="showApproveModal"
+    :is-submitting="isApproving"
+    :bien-descripcion="selectedSolicitud?.bien?.bien_descripcion"
+    :bien-codigo="selectedSolicitud?.bien?.bien_codigo"
+    :nombre-origen="selectedSolicitud?.resguardante_origen ? `${selectedSolicitud.resguardante_origen.res_nombre} ${selectedSolicitud.resguardante_origen.res_apellidos}` : 'Desconocido'"
+    :nombre-destino="selectedSolicitud?.resguardante_destino ? `${selectedSolicitud.resguardante_destino.res_nombre} ${selectedSolicitud.resguardante_destino.res_apellidos}` : 'Desconocido'"
+    @close="showApproveModal = false"
+    @confirm="handleConfirmApprove"
+/>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
+import ModalConfirmarTraspaso from '@/components/ModalConfirmarTraspaso.vue';
+import { generarPDFResguardo } from '@/config/resguardo_pdf.js';
 
 // --- ESTADOS DE CARGA ---
 const isLoading = ref(true)
@@ -291,22 +303,6 @@ const searchTerm = ref('')
 const showDetailsSolicitudModal = ref(false)
 const selectedSolicitudDetails = ref(null)
 
-const confirmModal = ref({
-    show: false,
-    title: '',
-    message: '',
-    type: 'primary', // 'primary' o 'danger'
-    action: null,    // 'aprobar' o 'rechazar'
-    index: null      // índice en el array de solicitudes
-});
-
-const successModal = ref({
-    show: false,
-    title: '',
-    message: '',
-    type: 'success'
-});
-
 const isLoadingDetails = ref(false); // <--- ¡AÑADIDA AQUÍ!
 let searchTimeout = null
 
@@ -314,6 +310,15 @@ let searchTimeout = null
 const totalPages = computed(() => {
 	return Math.ceil(totalItems.value / itemsPerPage) || 1
 })
+
+const showApproveModal = ref(false);
+const isApproving = ref(false);
+const selectedSolicitud = ref(null);
+
+const openApproveModal = (solicitud) => {
+  selectedSolicitud.value = solicitud;
+  showApproveModal.value = true;
+};
 
 const fetchSolicitudes = async (page = 1) => {
 	isLoading.value = true
@@ -477,33 +482,73 @@ const viewSolicitudDetails = async (index) => {
     }
 }
 // Función para APROBAR
-const approveSolicitud = async (index) => {
-    // Obtenemos la solicitud real del array data
-    const solicitud = solicitudes.value.data[index];
-    
-    if(!confirm(`¿Autorizar traspaso de "${solicitud.bien?.bien_descripcion}" a ${solicitud.resguardante_destino?.res_nombre}?`)) return;
+const handleConfirmApprove = async () => {
+	console.log('Aprobando solicitud:', selectedSolicitud.value);
+    if (!selectedSolicitud.value) return;
+
+    isApproving.value = true;
 
     try {
-
-        const response = await authenticatedFetch(`/traspasos/${solicitud.id}`, {
+        // A. Petición al Backend
+        const response = await authenticatedFetch(`/traspasos/${selectedSolicitud.value.id}`, {
             method: 'PUT',
             body: JSON.stringify({ estado: 'Aprobada' })
         });
 
-        if (response.ok) {
-            alert('Traspaso autorizado. El inventario ha sido actualizado.');
-            // Recargamos la tabla para ver el cambio de estado
-            fetchSolicitudes(currentPage.value);
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || 'Error al aprobar');
+
+        // B. DOBLE GENERACIÓN DE VALES
+        if (data.estado_final === 'Aprobada') {
+            
+            // 1. Vale para el ORIGEN (Quien entregó el bien -> Su lista disminuye)
+            await imprimirValeActualizado(data.id_origen);
+            
+            // Pequeña pausa para evitar bloqueo de popups del navegador
+            await new Promise(r => setTimeout(r, 800));
+
+            // 2. Vale para el DESTINO (Quien recibió el bien -> Su lista aumenta)
+            await imprimirValeActualizado(data.id_destino);
+        }
+
+        // C. Finalizar
+        showApproveModal.value = false;
+        // alert('Traspaso autorizado exitosamente.'); // Opcional
+        fetchSolicitudes(currentPage.value); // Recargar tabla
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message);
+    } finally {
+        isApproving.value = false;
+    }
+};
+const imprimirValeActualizado = async (resguardanteId) => {
+    if (!resguardanteId) return;
+    try {
+        // A. Obtener datos del resguardante
+        const resUser = await authenticatedFetch(`/resguardantes/${resguardanteId}`);
+        const dataUser = await resUser.json();
+        const resguardante = dataUser.data || dataUser;
+
+        // B. Obtener sus bienes actualizados (Usando la ruta dedicada que creamos antes)
+        const resBienes = await authenticatedFetch(`/resguardantes/${resguardanteId}/bienes-activos`);
+        const dataBienes = await resBienes.json();
+        const todosLosBienes = dataBienes.data || [];
+
+        // C. Generar PDF
+        // Nota: Si el usuario origen se queda sin bienes, todosLosBienes estará vacío.
+        // Puedes decidir si imprimir una "hoja de no adeudo" o no imprimir nada.
+        if (todosLosBienes.length > 0) {
+            generarPDFResguardo(resguardante, todosLosBienes, 'RESGUARDO');
         } else {
-            const err = await response.json();
-            alert('Error: ' + (err.message || 'No se pudo aprobar'));
+            console.log(`El resguardante ${resguardanteId} ya no tiene bienes.`);
         }
     } catch (e) {
-        console.error(e);
-        alert('Error de conexión');
+        console.error(`Error generando vale para ID ${resguardanteId}:`, e);
     }
 }
-
 // Función para RECHAZAR
 const rejectSolicitud = async (index) => {
     const solicitud = solicitudes.value.data[index];

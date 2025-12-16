@@ -1,7 +1,7 @@
 <template>
   <div v-if="show"
     id="impresion-lote-modal"
-    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 print:hidden"
+    class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 print:hidden backdrop-blur-sm"
     @click.self="emit('close')">
 
     <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] flex flex-col 
@@ -94,12 +94,14 @@ const emit = defineEmits(['close']);
 const itemsProcesados = computed(() => {
     return props.lista.map(item => {
         if (props.isBienes) {
-            // Estructura para BIENES
+            const baseCode = item.codigo || item.bien_codigo;
+            const sec = item.sec_alfabetica|| '';
+            console.log(sec);
             return {
-                original: item, // Guardamos referencia al original
+                original: item,
                 titulo_principal: item.nombre || item.bien_descripcion || 'Sin Descripción',
-                codigo_visible: item.codigo,
-                valor_qr: item.codigo // El QR del bien es su código único
+                codigo_visible: baseCode + sec,
+                valor_qr: baseCode
             };
         } else {
             // Estructura para OFICINAS
@@ -224,22 +226,26 @@ const downloadPDF = async () => {
     doc.save(`${prefix}_${new Date().toISOString().slice(0,10)}.pdf`);
 };
 
-// --- Función 2: Descargar CSV Dinámico ---
+
 const downloadCSV = () => {
   let headers = [];
   let rows = [];
 
-  // VALIDACIÓN LÓGICA: Definir columnas según el tipo
   if (props.isBienes) {
-      headers = ['Código', 'Nombre', 'Descripción', 'Departamento'];
+      // 👇 1. Cambiamos el encabezado
+      headers = ['Código', 'Sec. Alfabética', 'Nombre', 'Descripción', 'Oficina'];
+      
       rows = props.lista.map(item => [
-          item.codigo,
-          item.nombre,
-          item.descripcion,
-          item.departamento_nombre
+          item.codigo || item.bien_codigo,
+          // Nota: Asegúrate que usas la propiedad correcta aquí (bien_sec_alfabetica)
+          item.bien_sec_alfabetica || item.sec_alfabetica || '',        
+          item.nombre || item.bien_descripcion,
+          item.descripcion || item.bien_caracteristicas,
+          // 👇 2. Cambiamos el dato a mostrar
+          item.oficina_nombre || ''
       ]);
   } else {
-      // Lógica para OFICINAS
+      // ... (código oficinas sin cambios)
       headers = ['Código Oficina', 'Nombre'];
       rows = props.lista.map(item => [
           item.ofi_codigo,
@@ -247,7 +253,7 @@ const downloadCSV = () => {
       ]);
   }
 
-  // Generación del archivo
+  // ... (resto de la función igual)
   const clean = (text) => `"${(text || '').toString().replace(/"/g, '""')}"`;
   
   const csvContent = [
@@ -261,38 +267,36 @@ const downloadCSV = () => {
   const link = document.createElement('a');
   link.setAttribute('href', url);
   
-  // Nombre dinámico
   const date = new Date().toISOString().slice(0,10);
-  let filename = 'codigos_qr.csv'; // Nombre por defecto
+  // ... (cálculo de nombre de archivo) ...
+  let filename = 'codigos_qr.csv'; 
 
+  if (props.lista.length > 0) {
+      const primerItem = props.lista[0];
+      // ... (función limpiarTexto) ...
+      const limpiarTexto = (texto) => {
+          if (!texto) return 'general';
+          return texto.toString()
+              .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+              .replace(/[^a-zA-Z0-9\s-_]/g, '') 
+              .trim()
+              .replace(/\s+/g, '_'); 
+      };
 
-if (props.lista.length > 0) {
-    const primerItem = props.lista[0];
-
-    // Función auxiliar para limpiar el nombre (Quitar acentos, espacios -> guiones)
-    const limpiarTexto = (texto) => {
-        if (!texto) return 'general';
-        return texto.toString()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita tildes (á -> a)
-            .replace(/[^a-zA-Z0-9\s-_]/g, '') // Quita caracteres especiales
-            .trim()
-            .replace(/\s+/g, '_'); // Reemplaza espacios por guiones bajos
-    };
-
-    if (props.isBienes) {
-
-        const nombreOfi = limpiarTexto(primerItem.oficina_nombre);
-        filename = `QR_bienes_${nombreOfi}`;
-    } else {
-
-        const nombreDep = limpiarTexto(
-            primerItem.departamento_nombre || 
-            (primerItem.departamento ? primerItem.departamento.dep_nombre : '') || 
-            'Departamento'
-        );
-        filename = `QR_oficinas_${nombreDep}`;
-    }
-}
+      if (props.isBienes) {
+          // Usamos nombre de oficina para el archivo si está disponible
+          const nombreOfi = limpiarTexto(primerItem.oficina_nombre || primerItem.oficina?.nombre);
+          filename = `QR_bienes_${nombreOfi}`;
+      } else {
+           // ...
+           const nombreDep = limpiarTexto(
+              primerItem.departamento_nombre || 
+              (primerItem.departamento ? primerItem.departamento.dep_nombre : '') || 
+              'Departamento'
+          );
+          filename = `QR_oficinas_${nombreDep}`;
+      }
+  }
   
   link.setAttribute('download', `${filename}_${date}.csv`);
   

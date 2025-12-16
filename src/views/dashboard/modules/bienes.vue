@@ -145,9 +145,16 @@
                                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm">
                                         Nuevo Bien
                                     </button>
-                                    <button
-                                        class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors font-medium text-sm">
-                                        Reporte
+                                    <button 
+                                    
+                                        @click="handleGenerarReporte"
+                                        :disabled="isGeneratingReport"
+                                        class="bg-[#008ba0] hover:bg-[#006f80] text-white font-bold py-2 px-4 rounded flex items-center gap-2">
+                                        <svg v-if="!isGeneratingReport" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        <span v-if="isGeneratingReport">Generando...</span>
+                                        <span v-else>Reporte</span>
+                                        
+                                        
                                     </button>
                                 </div>
 
@@ -202,8 +209,9 @@
                                                         @change="toggleSelection(bien)"
                                                         class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500">
                                                 </td>
-                                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
-                                                    bien.bien_codigo || 'N/A' }}</small></td>
+                                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                                    <small>{{ bien.bien_codigo + " "+(bien.bien_sec_alfabetica || '') }}</small>
+                                                </td>
                                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400"><small>{{
                                                     bien.bien_descripcion || 'N/A' }}</small></td>
                                                 <td class="px-4 py-3">
@@ -344,6 +352,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted,computed, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
+import { generarPDFResguardo } from '@/config/resguardo_pdf.js';
+import { generarReporteInventario } from '@/config/useReporteInventario.js';
 import ModalNuevoBien from '../../../components/ModalNuevoBien.vue';
 import DeleteBienModal from '../../../components/DeleteBienModal.vue'
 import EditarBienModal from '../../../components/EditarBienModal.vue'
@@ -414,7 +424,8 @@ let searchTimeout = null;
 // Variable para rastrear el canal actual y poder desconectarnos
 let currentChannelSubscription = null;
 
-// --- 1. Funciones de Carga (API) ---
+const isGeneratingReport = ref(false);
+
 // Carga el primer dropdown al iniciar
 const fetchAreas = async () => {
     error.value = null
@@ -613,8 +624,7 @@ const closeBajaModal = () => {
     showBajaModal.value = false
     bajaError.value = null
     isSubmittingBaja.value = false
-    // Si la acción que cerró este modal fue una confirmación (mover/baja),
-    // `preventReopenVer` estará en true y evitaremos reabrir el modal 'Ver'.
+
     if (selectedBien.value && !preventReopenVer.value) {
         showVerModal.value = true;
     }
@@ -626,8 +636,8 @@ const closeBajaModal = () => {
  */
 const handleConfirmBaja = async () => {
     if (!selectedBien.value) return;
-    isSubmittingBaja.value = true
-    bajaError.value = null
+    isSubmittingBaja.value = true;
+    bajaError.value = null;
 
     try {
         const response = await authenticatedFetch(`/bienes/${selectedBien.value.id}`, {
@@ -636,15 +646,24 @@ const handleConfirmBaja = async () => {
                 accion: 'baja',
             }),
         });
+
+        const responseData = await response.json();
+
         if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.message || 'No se pudo dar de baja el bien.');
+            throw new Error(responseData.message || 'No se pudo dar de baja el bien.');
         }
 
-        // Evita que el modal 'Ver' se reabra automáticamente al confirmar la baja
-        preventReopenVer.value = true
+        console.log("responseData.resResguardante_afectado_id:", responseData.resResguardante_afectado_id);
+        if (responseData.resguardante_afectado_id) {
+            await regenerarValeResguardo(responseData.resguardante_afectado_id);
+        }
+
+        preventReopenVer.value = true;
         closeBajaModal();
-        fetchBienes(); // Recarga la tabla
+
+        if (typeof fetchBienes === 'function') {
+             fetchBienes(); 
+        }
 
     } catch (err) {
         console.error('Error al dar de baja el bien:', err);
@@ -653,11 +672,40 @@ const handleConfirmBaja = async () => {
         isSubmittingBaja.value = false;
     }
 }
+const regenerarValeResguardo = async (resguardanteId) => {
+    try {
+        console.log(`Regenerando vale para resguardante ID: ${resguardanteId}...`);
+
+        //Obtener datos del Resguardante
+        const resResguardante = await authenticatedFetch(`/resguardantes/${resguardanteId}`);
+        if (!resResguardante.ok) throw new Error("No se pudo obtener info del resguardante");
+        
+        const dataRes = await resResguardante.json();
+        const resguardante = dataRes.data || dataRes; 
+        const resBienes = await authenticatedFetch(`/resguardantes/${resguardanteId}/bienes-activos`);
+        console.log(dataRes);
+        console.log(resBienes)
+        if (!resBienes.ok) throw new Error("No se pudieron obtener los bienes restantes");
+        
+        const dataBienes = await resBienes.json();
+        const bienesRestantes = dataBienes.data || dataBienes;
+
+        if (bienesRestantes.length > 0) {
+
+            generarPDFResguardo(resguardante, bienesRestantes, 'RESGUARDO');
+
+        } else {
+            console.log("El resguardante se quedó sin bienes. No se genera vale.");
+        }
+
+    } catch (e) {
+        console.error("Error al regenerar el vale automático:", e);
+    }
+}
 /**
  * Cierra "Ver" y abre "Mover"
  */
 const openMoveModal = () => {
-    // 'selectedBien' ya está seteado por openVerModal
     showVerModal.value = false // Cierra el modal de "Ver"
     showMoveModal.value = true // Abre el modal de "Mover"
 }
@@ -845,6 +893,7 @@ const openBienBatchQRModal = () => {
         id: bien.id,
         nombre: bien.bien_descripcion,
         codigo: bien.bien_codigo || bien.numero_serie,
+        sec_alfabetica: bien.bien_sec_alfabetica || '',
         descripcion: bien.bien_caracteristicas,
         oficina_nombre: oficinaNombre,
         departamento_nombre: deptoNombre
@@ -854,7 +903,7 @@ const openBienBatchQRModal = () => {
 }
 
 const openIndividualQR = (bien) => {
-    const deptoNombre = getCurrentContextNames().deptoNombre;
+    const oficinaNombre = getCurrentContextNames().oficinaNombre;
     const item = {
         ...bien, // Copiamos todas las propiedades originales (id, codigo, marca, etc.)
 
@@ -862,7 +911,7 @@ const openIndividualQR = (bien) => {
         nombre: bien.bien_descripcion,
         codigo: bien.bien_codigo,
         descripcion: bien.bien_caracteristicas,
-        departamento_nombre: deptoNombre
+        oficina: oficinaNombre
     };
     itemSeleccionadoParaQR.value = item; // Guardamos el objeto completo
     isBienesQR.value = true;
@@ -881,16 +930,89 @@ const openReactivarFromBajas = (bien) => {
     showReactivarModal.value = true;
 };
 
-const onBienReactivated = () => {
+const onBienReactivated = async () => {
+    // 1. Cerramos los modales visualmente primero para mejor UX
     showReactivarModal.value = false;
     selectedBienToReactivate.value = null;
-    // Recargar la lista de bajas para que desaparezca el item
-    // (Si dejaste el modal abierto, necesitas una forma de decirle que recargue. 
-    //  Lo más fácil es cerrar y abrir, o usar un key/ref).
-    showBajasModal.value = false; // Cierro todo para volver al inicio limpio
+    showBajasModal.value = false;
 
-    // Opcional: Si el bien se reactivó en la oficina actual, recargar la tabla principal
-    if (selectedOficina.value) fetchBienes(selectedOficina.value.id);
+    // 2. Recargamos la tabla esperando la respuesta del servidor
+    if (selectedOficina.value) {
+        try {
+            // Opcional: Reiniciar a página 1 para ver el cambio si ordenas por 'updated_at'
+            // currentPage.value = 1; 
+            
+            // CRÍTICO: Usamos await para asegurar que la vista se actualice con los nuevos datos
+            await fetchBienes(1);
+            
+            // Opcional: Mensaje de éxito flotante aquí si no lo tiene el modal
+        } catch (error) {
+            console.error("Error al refrescar la tabla:", error);
+        }
+    }
+};
+const handleGenerarReporte = async () => {
+  // 1. Validaciones
+  if (!selectedOficina.value || !selectedOficina.value.id) return;
+  
+  isGeneratingReport.value = true;
+  
+  try {
+    // 2. Obtener TODA la lista de bienes (sin paginar, o una pagina muy grande)
+    // El endpoint de tu imagen es: /oficinas/{id}/bienes
+    // Agregamos 'per_page=1000' o 'all=true' si tu backend lo soporta para reporte completo
+    const response = await authenticatedFetch(`/oficinas/${selectedOficina.value.id}/bienes?per_page=9999`); 
+    
+    if (!response.ok) throw new Error('Error al obtener datos del inventario');
+    
+    const dataResponse = await response.json();
+    // Tu backend devuelve la lista en 'data' o directamente el array
+    const listaBienes = dataResponse.data || dataResponse;
+
+    // 3. Preparar Datos de la Oficina y Jefe
+    // Buscamos el departamento padre en 'structureData' para sacar el titular
+    let nombreJefe = 'NO ASIGNADO';
+    let nombreDepto = 'SIN DEPARTAMENTO';
+    let nombreArea = 'SIN ÁREA';
+
+    // structureData contiene los departamentos del área seleccionada
+    const deptoPadre = structureData.value.find(dept => 
+        dept.oficinas.some(ofi => ofi.id === selectedOficina.value.id)
+    );
+
+    if (deptoPadre) {
+        console.log(deptoPadre);
+        nombreJefe = deptoPadre.dep_resposable || 'SIN TITULAR';
+        nombreDepto = deptoPadre.dep_nombre;
+        // Asumiendo que el área viene en el depto o la tomamos del dropdown
+        // Opción A: si depto tiene relación area
+        if (deptoPadre.area) {
+            nombreArea = deptoPadre.area.area_nombre;
+        } 
+        // Opción B: buscar en areasList usando selectedArea.value
+        else {
+             const areaObj = areasList.value.find(a => a.id === selectedArea.value);
+             if (areaObj) nombreArea = areaObj.area_nombre;
+        }
+    }
+
+    const datosOficinaParaPDF = {
+        nombre: selectedOficina.value.nombre,
+        area: nombreArea,
+        departamento: nombreDepto,
+        jefe_departamento: nombreJefe
+    };
+
+    // 4. Generar PDF
+    await generarReporteInventario(datosOficinaParaPDF, listaBienes);
+
+  } catch (error) {
+    console.error("Error al generar reporte:", error);
+    // Puedes usar una notificación toast aquí si tienes una librería
+    alert('Hubo un error al generar el reporte.');
+  } finally {
+    isGeneratingReport.value = false;
+  }
 };
 
 watch(selectedOficina, (newOficina, oldOficina) => {

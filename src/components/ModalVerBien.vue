@@ -1,5 +1,5 @@
 <template>
-    <div v-if="show && bienData" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <div v-if="show && bienData" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 
         <div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
 
@@ -60,7 +60,10 @@
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t dark:border-gray-600">
-                            <InfoBien label="Código" :value="bienData.bien_codigo" />
+                            <InfoBien 
+                                label="Código" 
+                                :value="bienData.bien_codigo + (bienData.bien_sec_alfabetica || '')" 
+                            />
                             <InfoBien label="Marca" :value="bienData.bien_marca" />
                             <InfoBien label="Modelo" :value="bienData.bien_modelo" />
                             <InfoBien label="N/S" :value="bienData.bien_serie" />

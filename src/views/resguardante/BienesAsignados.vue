@@ -12,7 +12,7 @@
 				<!-- Search Input -->
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar bien</label>
-					<input v-model="searchQuery" type="text" placeholder="Nombre o descripción del bien..."
+					<input v-model="searchQuery" type="text" placeholder="Buscar por descripción o código..."
 						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
 				</div>
 
@@ -22,20 +22,8 @@
 					<select v-model="selectedStatus"
 						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
 						<option value="">Todos</option>
-						<option value="activo">Activo</option>
-						<option value="inactivo">Inactivo</option>
-					</select>
-				</div>
-
-				<!-- Filter by Category -->
-				<div>
-					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoría</label>
-					<select v-model="selectedCategory"
-						class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-border text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-						<option value="">Todas</option>
-						<option value="electrónica">Electrónica</option>
-						<option value="muebles">Muebles</option>
-						<option value="otros">Otros</option>
+						<option value="Activo">Activo</option>
+						<option value="En tránsito">En tránsito</option>
 					</select>
 				</div>
 			</div>
@@ -44,7 +32,7 @@
 			<div class="flex gap-2 flex-wrap">
 				<button @click="fetchBienes"
 					class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-					Actualizar
+					Aplicar Filtros
 				</button>
 				<button @click="clearFilters"
 					class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition text-sm font-medium">
@@ -296,20 +284,14 @@ const fetchBienes = async () => {
 
 		// Solo enviamos search si el usuario escribió algo
 		if (searchQuery.value.trim()) {
-			params.append('search', searchQuery.value.toUpperCase())
+			params.append('search', searchQuery.value) // Quitamos .toUpperCase() para dejar que el Backend maneje ILIKE
 		}
-
-		// Enviamos filtros de estado y categoría si están seleccionados
-		// (Asegúrate de que tu Backend reciba estos filtros también)
 		if (selectedStatus.value) {
+			// Enviamos el valor exacto (ej. "Activo" o "En tránsito")
 			params.append('estado', selectedStatus.value)
 		}
-		if (selectedCategory.value) {
-			params.append('categoria', selectedCategory.value)
-		}
 
-		// PASO 2: URL Dinámica usando el ID del resguardante
-		// Cambiamos /oficinas/9/... por /resguardantes/${resguardanteId}/...
+
 		const response = await authenticatedFetch(`/mis-bienes?${params.toString()}`)
 
 		if (!response.ok) throw new Error('Error al cargar los bienes asignados')
@@ -331,7 +313,6 @@ const fetchBienes = async () => {
 const clearFilters = () => {
 	searchQuery.value = ''
 	selectedStatus.value = ''
-	selectedCategory.value = ''
 	currentPage.value = 1
 	fetchBienes()
 }

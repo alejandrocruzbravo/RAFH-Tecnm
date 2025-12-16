@@ -121,7 +121,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import ModalExito from './ModalExito.vue' // <--- IMPORTANTE
+import ModalExito from './ModalExito.vue' 
 
 const props = defineProps({
   show: Boolean,

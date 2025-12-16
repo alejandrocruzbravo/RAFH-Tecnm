@@ -13,14 +13,17 @@
 	</div>
 
 	<div v-else class="space-y-6">
-		<div class="flex justify-between items-center">
-			<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Control de Áreas</label>
-			<label class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de
-				Chetumal</label>
+		<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+			<div>
+				<label class="text-2xl font-bold text-gray-900 dark:text-white font-audiowide tracking-wide">Control de
+					Áreas</label>
+				<p class="text-sm md:text-base text-gray-600 dark:text-gray-400">Instituto Tecnológico de Chetumal</p>
+			</div>
 		</div>
 
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950  p-4 space-y-4 border border-gray-100 dark:border-gray-800">
-			<div class="flex flex-col md:flex-row gap-4 items-end">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 space-y-4 border border-gray-100 dark:border-gray-800">
+			<div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
 				<div class="flex-1">
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Buscar por nombre o
 						código</label>
@@ -28,7 +31,7 @@
 						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 				</div>
 				<button @click="openNewAreaModal"
-					class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">
+					class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap">
 					Nueva Área
 				</button>
 			</div>
@@ -47,30 +50,33 @@
 			</div>
 		</div>
 
-		<!-- TARJETAS DE ÁREAS -->
-		<div v-if="filteredAreas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
+		<div v-if="filteredAreas.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 			<div v-for="area in filteredAreas" :key="area.id"
-				class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-800">
-				<div class="flex gap-4 mb-4">
-					<div class="flex-shrink-0">
-						<div
-							:class="['flex items-center justify-center h-12 w-12 rounded-lg', area.iconBg || 'bg-gray-100', area.iconColor || 'text-gray-600']">
-							<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-									d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
-							</svg>
+				class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-800 flex flex-col justify-between h-full">
+				<div>
+					<div class="flex gap-4 mb-4">
+						<div class="flex-shrink-0">
+							<div
+								:class="['flex items-center justify-center h-12 w-12 rounded-lg', area.iconBg || 'bg-gray-100', area.iconColor || 'text-gray-600']">
+								<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
+								</svg>
+							</div>
+						</div>
+						<div class="flex-1 min-w-0">
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white truncate"
+								:title="area.area_nombre">{{ area.area_nombre }}</h3>
+							<p class="text-sm text-gray-600 dark:text-gray-400">Código: {{ area.area_codigo }}</p>
 						</div>
 					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ area.area_nombre }}</h3>
-						<p class="text-sm text-gray-600 dark:text-gray-400">Código: {{ area.area_codigo }}</p>
+					<div class="space-y-1 mb-4 text-sm">
+						<p class="text-gray-600 dark:text-gray-400">Edificio: <span
+								class="font-medium text-gray-800 dark:text-gray-200">{{ area.edificio &&
+									area.edificio.nombre ? area.edificio.nombre : 'No asignado' }}</span></p>
 					</div>
 				</div>
-				<div class="space-y-1 mb-4 text-sm">
-					<p class="text-gray-600 dark:text-gray-400">Edificio: {{ area.edificio && area.edificio.nombre ?
-						area.edificio.nombre : 'No asignado' }}</p>
-				</div>
-				<div class="flex gap-2">
+				<div class="flex gap-2 mt-auto">
 					<button @click="editArea(area)"
 						class="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded transition-colors text-sm font-medium">Editar</button>
 					<button @click="openDeleteConfirm(area)"
@@ -81,28 +87,23 @@
 			</div>
 		</div>
 
-		<!-- Pagination Controls -->
-		<div v-if="filteredAreas.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-			<button
-				@click="prevPage"
-				:disabled="currentPage === 1"
-				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-			>
+		<div v-if="filteredAreas.length > 0"
+			class="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-bg rounded-lg">
+			<button @click="prevPage" :disabled="currentPage === 1"
+				class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
 				Atrás
 			</button>
 
-			<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-				Página {{ currentPage }} de {{ totalPages }} | Total: {{ totalItems }} resultados
+			<span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">
+				Página {{ currentPage }} de {{ totalPages }} <br class="sm:hidden"> <span
+					class="hidden sm:inline">|</span> Total: {{ totalItems }}
 			</span>
 
-			<button
-				@click="nextPage"
-				:disabled="currentPage === totalPages"
-				class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-			>
+			<button @click="nextPage" :disabled="currentPage === totalPages"
+				class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
 				Adelante
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -110,19 +111,18 @@
 			</button>
 		</div>
 
-		<div v-else class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 text-center">
+		<div v-if="filteredAreas.length === 0"
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 text-center">
 			<h3 class="text-lg font-medium text-gray-900 dark:text-white">No existen registros</h3>
-			<p class="text-gray-600 dark:text-gray-400" v-if="areas.length === 0">Aún no se ha registrado ninguna área.
-				Haz clic en "Nueva Área" para comenzar.</p>
-			<p class="text-gray-600 dark:text-gray-400" v-else>No hay áreas que coincidan con tu búsqueda o filtros.</p>
+			<p class="text-gray-600 dark:text-gray-400">No hay áreas que coincidan con tu búsqueda.</p>
 		</div>
 
-		<!-- TABLA DE DEPARTAMENTOS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
-			<div class="flex justify-between items-center mb-4">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800">
+			<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Departamentos</h2>
 				<button @click="openNewDepartmentModal"
-					class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
+					class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
 					Nuevo Departamento
 				</button>
 			</div>
@@ -134,98 +134,103 @@
 					class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead class="bg-gray-100 dark:bg-gray-700">
-						<tr>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Nombre</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Código</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Responsable</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Área</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Correo</th>
-							<th class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Acciones</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-for="dept in departmentPaginatedData" :key="dept.id"
-							class="hover:bg-gray-50 dark:hover:bg-gray-700">
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								<div class="font-medium text-gray-900 dark:text-white">{{ dept.dep_nombre }}</div>
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								{{ dept.dep_codigo || 'N/A' }}
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ dept.dep_resposable ||
-								'Sin asignación' }}</td>
-							<td class="px-6 py-4 text-gray-600 dark:text-gray-400">{{ getAreaName(dept.id_area) }}</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ dept.dep_correo_institucional ||
-								'Sin asignación' }}</td>
-							<td class="px-4 py-3 flex gap-2 justify-end">
-								<button @click="openEditDepartmentModal(dept)"
-									class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-									title="Editar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-										</path>
-									</svg>
-								</button>
-								<button @click="openDeleteDepartmentModal(dept)"
-									class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-									title="Eliminar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-										</path>
-									</svg>
-								</button>
-							</td>
-						</tr>
-						<tr v-if="departmentPaginatedData.length === 0">
-							<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No existen registros
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="overflow-x-auto -mx-4 sm:mx-0">
+				<div class="inline-block min-w-full align-middle">
+					<table class="min-w-full text-sm">
+						<thead class="bg-gray-100 dark:bg-gray-700">
+							<tr>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Nombre</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Código</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Responsable</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Área</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Correo</th>
+								<th
+									class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Acciones</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+							<tr v-for="dept in departmentPaginatedData" :key="dept.id"
+								class="hover:bg-gray-50 dark:hover:bg-gray-700">
+								<td
+									class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">
+									{{ dept.dep_nombre }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									dept.dep_codigo || 'N/A' }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									dept.dep_resposable || 'Sin asignación' }}</td>
+								<td class="px-6 py-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									getAreaName(dept.id_area) }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									dept.dep_correo_institucional || 'Sin asignación' }}</td>
+								<td class="px-4 py-3 flex gap-2 justify-end whitespace-nowrap">
+									<button @click="openEditDepartmentModal(dept)"
+										class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+										title="Editar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+											</path>
+										</svg>
+									</button>
+									<button @click="openDeleteDepartmentModal(dept)"
+										class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+										title="Eliminar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+											</path>
+										</svg>
+									</button>
+								</td>
+							</tr>
+							<tr v-if="departmentPaginatedData.length === 0">
+								<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No
+									existen registros</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
-			<!-- Pagination Controls for Departamentos -->
-			<div v-if="filteredDepartments.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-				<button
-					@click="departmentCurrentPage = departmentCurrentPage > 1 ? departmentCurrentPage - 1 : 1"
+			<div v-if="filteredDepartments.length > 0"
+				class="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+				<button @click="departmentCurrentPage = departmentCurrentPage > 1 ? departmentCurrentPage - 1 : 1"
 					:disabled="departmentCurrentPage === 1"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
-					Atrás
+					</svg> Atrás
 				</button>
-
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-					Página {{ departmentCurrentPage }} de {{ departmentTotalPages }} | Total: {{ filteredDepartments.length }} resultados
-				</span>
-
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Página {{
+					departmentCurrentPage }} de {{ departmentTotalPages }}</span>
 				<button
 					@click="departmentCurrentPage = departmentCurrentPage < departmentTotalPages ? departmentCurrentPage + 1 : departmentTotalPages"
 					:disabled="departmentCurrentPage === departmentTotalPages"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
-					Adelante
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
+					Adelante <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
 				</button>
 			</div>
 		</div>
 
-		<!-- TABLA DE EDIFICIOS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
-			<div class="flex justify-between items-center mb-4">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800">
+			<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Edificios</h2>
 				<button @click="openNewBuildingModal"
-					class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
+					class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
 					Nuevo Edificio
 				</button>
 			</div>
@@ -236,87 +241,83 @@
 					class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
 
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead class="bg-gray-100 dark:bg-gray-700">
-						<tr>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Nombre</th>
-							<th class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Acciones</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-for="building in buildingPaginatedData" :key="building.id"
-							class="hover:bg-gray-50 dark:hover:bg-gray-700">
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								<div class="font-medium text-gray-900 dark:text-white">{{ building.nombre }}</div>
-							</td>
-							<td class="px-4 py-3 flex gap-2 justify-end">
-								<button @click="openEditBuildingModal(building)"
-									class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-									title="Editar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-										</path>
-									</svg>
-								</button>
-								<button @click="openDeleteBuildingModal(building)"
-									class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-									title="Eliminar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-										</path>
-									</svg>
-								</button>
-							</td>
-						</tr>
-
-						<tr v-if="buildingPaginatedData.length === 0">
-							<td colspan="2" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No existen registros
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="overflow-x-auto -mx-4 sm:mx-0">
+				<div class="inline-block min-w-full align-middle">
+					<table class="min-w-full text-sm">
+						<thead class="bg-gray-100 dark:bg-gray-700">
+							<tr>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Nombre</th>
+								<th
+									class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Acciones</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+							<tr v-for="building in buildingPaginatedData" :key="building.id"
+								class="hover:bg-gray-50 dark:hover:bg-gray-700">
+								<td
+									class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium">
+									{{ building.nombre }}</td>
+								<td class="px-4 py-3 flex gap-2 justify-end whitespace-nowrap">
+									<button @click="openEditBuildingModal(building)"
+										class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+										title="Editar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+											</path>
+										</svg>
+									</button>
+									<button @click="openDeleteBuildingModal(building)"
+										class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+										title="Eliminar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+											</path>
+										</svg>
+									</button>
+								</td>
+							</tr>
+							<tr v-if="buildingPaginatedData.length === 0">
+								<td colspan="2" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No
+									existen registros</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
-			<!-- Pagination Controls for Edificios -->
-			<div v-if="filteredBuildings.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-				<button
-					@click="buildingCurrentPage = buildingCurrentPage > 1 ? buildingCurrentPage - 1 : 1"
+			<div v-if="filteredBuildings.length > 0"
+				class="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+				<button @click="buildingCurrentPage = buildingCurrentPage > 1 ? buildingCurrentPage - 1 : 1"
 					:disabled="buildingCurrentPage === 1"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
-					Atrás
+					</svg> Atrás
 				</button>
-
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-					Página {{ buildingCurrentPage }} de {{ buildingTotalPages }} | Total: {{ filteredBuildings.length }} resultados
-				</span>
-
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Página {{
+					buildingCurrentPage }} de {{ buildingTotalPages }}</span>
 				<button
 					@click="buildingCurrentPage = buildingCurrentPage < buildingTotalPages ? buildingCurrentPage + 1 : buildingTotalPages"
 					:disabled="buildingCurrentPage === buildingTotalPages"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
-					Adelante
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
+					Adelante <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
 				</button>
 			</div>
 		</div>
 
-		<!-- TABLA DE OFICINAS -->
-		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-6 border border-gray-100 dark:border-gray-800">
-			<div class="flex justify-between items-center mb-4">
+		<div
+			class="bg-white dark:bg-dark-bg rounded-lg shadow-md dark:shadow-stone-950 p-4 sm:p-6 border border-gray-100 dark:border-gray-800">
+			<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
 				<h2 class="text-xl font-bold text-gray-900 dark:text-white">Oficinas</h2>
 				<button @click="openNewOficinaModal"
-					class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
+					class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium text-sm">
 					Nueva Oficina
 				</button>
 			</div>
@@ -325,122 +326,114 @@
 				<input v-model="searchOficina" type="text" placeholder="Escribe para buscar..."
 					class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 			</div>
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm">
-					<thead class="bg-gray-100 dark:bg-gray-700">
-						<tr>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Oficina</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Código</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Edificio</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Departamento
-							</th>
-							<th class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Referencia</th>
-							<th class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">Acciones</th>
-						</tr>
-					</thead>
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-						<tr v-if="isLoading">
-							<td colspan="4" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								Cargando oficinas...
-							</td>
-						</tr>
-						<tr v-else-if="fetchOficinasError">
-							<td colspan="4" class="px-4 py-6 text-center text-red-500">
-								Error al cargar oficinas: {{ fetchOficinasError.message }}
-							</td>
-						</tr>
-						<tr v-else-if="oficinaPaginatedData.length > 0" v-for="oficina in oficinaPaginatedData"
-							:key="oficina.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								<div class="font-medium text-gray-900 dark:text-white">
-									{{ oficina.nombre }}
-								</div>
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								{{ oficina.ofi_codigo || 'N/A' }}
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								{{ getBuildingName(oficina.id_edificio) }}
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								{{ getDepartmentName(oficina.id_departamento) }}
-							</td>
-							<td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-								{{ oficina.referencia || 'Sin referencia' }}
-							</td>
 
-							<td class="px-4 py-3 flex gap-2 justify-end">
-								<button @click="openEditOficinaModal(oficina)"
-									class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-									title="Editar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-										</path>
-									</svg>
-								</button>
-								<button @click="openDeleteOficinaModal(oficina)"
-									class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-									title="Eliminar">
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-										</path>
-									</svg>
-								</button>
-							</td>
-						</tr>
-
-						<tr v-else-if="!isLoading && !fetchOficinasError">
-							<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-								No existen registros
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<div class="overflow-x-auto -mx-4 sm:mx-0">
+				<div class="inline-block min-w-full align-middle">
+					<table class="min-w-full text-sm">
+						<thead class="bg-gray-100 dark:bg-gray-700">
+							<tr>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Oficina</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Código</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Edificio</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Departamento</th>
+								<th
+									class="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Referencia</th>
+								<th
+									class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+									Acciones</th>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+							<tr v-if="isLoading">
+								<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">Cargando
+									oficinas...</td>
+							</tr>
+							<tr v-else-if="fetchOficinasError">
+								<td colspan="6" class="px-4 py-6 text-center text-red-500">Error al cargar oficinas: {{
+									fetchOficinasError.message }}</td>
+							</tr>
+							<tr v-else-if="oficinaPaginatedData.length > 0" v-for="oficina in oficinaPaginatedData"
+								:key="oficina.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+								<td
+									class="px-4 py-3 text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">
+									{{ oficina.nombre }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									oficina.ofi_codigo || 'N/A' }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									getBuildingName(oficina.id_edificio) }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{
+									getDepartmentName(oficina.id_departamento) }}</td>
+								<td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap truncate max-w-[150px]"
+									:title="oficina.referencia">{{ oficina.referencia || 'Sin referencia' }}</td>
+								<td class="px-4 py-3 flex gap-2 justify-end whitespace-nowrap">
+									<button @click="openEditOficinaModal(oficina)"
+										class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+										title="Editar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+											</path>
+										</svg>
+									</button>
+									<button @click="openDeleteOficinaModal(oficina)"
+										class="p-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+										title="Eliminar">
+										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+											</path>
+										</svg>
+									</button>
+								</td>
+							</tr>
+							<tr v-else-if="!isLoading && !fetchOficinasError">
+								<td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">No
+									existen registros</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
-			<!-- Pagination Controls for Oficinas -->
-			<div v-if="filteredOficinas.length > 0" class="flex items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
-				<button
-					@click="oficinaCurrentPage = oficinaCurrentPage > 1 ? oficinaCurrentPage - 1 : 1"
+			<div v-if="filteredOficinas.length > 0"
+				class="flex flex-col sm:flex-row items-center justify-center gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
+				<button @click="oficinaCurrentPage = oficinaCurrentPage > 1 ? oficinaCurrentPage - 1 : 1"
 					:disabled="oficinaCurrentPage === 1"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
-					Atrás
+					</svg> Atrás
 				</button>
-
-				<span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-					Página {{ oficinaCurrentPage }} de {{ oficinaTotalPages }} | Total: {{ filteredOficinas.length }} resultados
-				</span>
-
+				<span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Página {{
+					oficinaCurrentPage }} de {{ oficinaTotalPages }}</span>
 				<button
 					@click="oficinaCurrentPage = oficinaCurrentPage < oficinaTotalPages ? oficinaCurrentPage + 1 : oficinaTotalPages"
 					:disabled="oficinaCurrentPage === oficinaTotalPages"
-					class="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center gap-2"
-				>
-					Adelante
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					class="w-full sm:w-auto px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white disabled:opacity-50 hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2">
+					Adelante <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
 				</button>
 			</div>
 		</div>
 
-		<!-- Modal de nuevo Departamento -->
 		<div v-if="showNewDepartmentModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Nuevo Departamento</h2>
 					<button @click="showNewDepartmentModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="newDepartmentError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -448,7 +441,6 @@
 					<button @click="newDepartmentError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre</label>
@@ -464,16 +456,13 @@
 					<div>
 						<label
 							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsable</label>
-
 						<select v-model="newDepartmentData.responsable"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
 							<option :value="null">Seleccionar un responsable</option>
-
 							<option v-if="jefesDepartamento.length === 0" disabled>-- No hay responsables --</option>
-
-							<option v-else v-for="r in jefesDepartamento" :key="r.id" :value="r.res_nombre">
-								{{ r.res_nombre }}
+							<option v-else v-for="r in jefesDepartamento" :key="r.id"
+								:value="r.res_nombre + '  ' + r.res_apellidos">
+								{{ r.res_nombre + " " + r.res_apellidos }}
 							</option>
 						</select>
 					</div>
@@ -484,29 +473,22 @@
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							��rea a la que pertenece
-						</label>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área a la que
+							pertenece</label>
 						<select v-model="newDepartmentData.id_area"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
 							<option :value="null">Seleccionar un área</option>
-
-							<option v-if="areasList.length === 0" disabled class="text-gray-400">
-								-- No hay áreas disponibles --
-							</option>
-
+							<option v-if="areasList.length === 0" disabled class="text-gray-400">-- No hay áreas
+								disponibles --</option>
 							<option v-for="area in areasList.areas" :key="area.id" :value="area.id">
 								{{ area.area_nombre }}
 							</option>
 						</select>
 					</div>
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
 					<button @click="showNewDepartmentModal = false"
 						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-
 					<button @click="saveNewDepartment" :disabled="isSubmitting"
 						class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
 						{{ isSubmitting ? 'Guardando...' : 'Guardar' }}
@@ -515,17 +497,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de editar Departamento -->
 		<div v-if="showEditDepartmentModal && editingDepartment"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Departamento</h2>
 					<button @click="showEditDepartmentModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="editDepartmentError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -533,9 +512,7 @@
 					<button @click="editDepartmentError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre del
 							Departamento</label>
@@ -548,38 +525,30 @@
 						<input v-model="editingDepartment.codigo" type="text" placeholder="Ej. DEP-SIST"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-
 					<div class="relative z-10">
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área a la que
 							pertenece</label>
 						<select v-model="editingDepartment.id_area"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null">Seleccionar un área</option>
-							<option v-if="areasList.length === 0" disabled class="text-gray-400">
-								-- No hay ��reas disponibles --
-							</option>
-							<option v-for="area in areasList.areas" :key="area.id" :value="area.id">
-								{{ area.area_nombre }}
-							</option>
+							<option v-if="areasList.length === 0" disabled class="text-gray-400">-- No hay áreas
+								disponibles --</option>
+							<option v-for="area in areasList.areas" :key="area.id" :value="area.id">{{ area.area_nombre
+								}}</option>
 						</select>
 					</div>
-
 					<div>
 						<label
 							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Responsable</label>
-
 						<select v-model="editingDepartment.responsable"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-
 							<option :value="null" disabled>Seleccionar un responsable</option>
 							<option v-if="jefesDepartamento.length === 0" disabled>-- No hay responsables --</option>
-
-							<option v-else v-for="r in jefesDepartamento" :key="r.id" :value="r.res_nombre">
-								{{ r.res_nombre }}
+							<option v-else v-for="r in jefesDepartamento" :key="r.id"
+								:value="r.res_nombre + ' ' + r.res_apellidos">{{ r.res_nombre + " " + r.res_apellidos }}
 							</option>
 						</select>
 					</div>
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Correo
 							Institucional</label>
@@ -598,17 +567,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de nueva Área -->
 		<div v-if="showNewAreaModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Nueva Área</h2>
 					<button @click="showNewAreaModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="newAreaError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -616,7 +582,6 @@
 					<button @click="newAreaError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
@@ -629,38 +594,36 @@
 						<input v-model="newAreaData.area_codigo" type="text" placeholder="Ej: 001"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
-						<select v-model="newAreaData.id_edificio" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+						<select v-model="newAreaData.id_edificio"
+							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null">Seleccionar edificio</option>
-							<option v-if="buildings.length === 0" disabled class="text-gray-400">-- No hay edificios disponibles --</option>
-							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">
-								{{ b.nombre }}
-							</option>
+							<option v-if="buildings.length === 0" disabled class="text-gray-400">-- No hay edificios
+								disponibles --</option>
+							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">{{ b.nombre }}</option>
 						</select>
 					</div>
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
-					<button @click="showNewAreaModal = false" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
-					<button @click="saveNewArea" :disabled="isSubmitting" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
+					<button @click="showNewAreaModal = false"
+						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
+					<button @click="saveNewArea" :disabled="isSubmitting"
+						class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium disabled:opacity-50">
 						{{ isSubmitting ? 'Creando...' : 'Crear Área' }}
 					</button>
 				</div>
 			</div>
 		</div>
-		<!-- Modal de editar área -->
-		<div v-if="showEditAreaModal && editingArea"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 
+		<div v-if="showEditAreaModal && editingArea"
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
-					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Área PUTO</h2>
+					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Área</h2>
 					<button @click="showEditAreaModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="editAreaError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -668,7 +631,6 @@
 					<button @click="editAreaError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Área</label>
@@ -688,13 +650,10 @@
 							<option :value="null">Seleccionar edificio</option>
 							<option v-if="buildings.length === 0" disabled class="text-gray-400">-- No hay edificios
 								disponibles --</option>
-							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">
-								{{ b.nombre }}
-							</option>
+							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">{{ b.nombre }}</option>
 						</select>
 					</div>
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
 					<button @click="showEditAreaModal = false"
 						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
@@ -706,17 +665,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de nuevo Edificio -->
 		<div v-if="showNewBuildingModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Nuevo Edificio</h2>
 					<button @click="showNewBuildingModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="newBuildingError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -724,9 +680,7 @@
 					<button @click="newBuildingError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
 						<input v-model="newBuildingData.nombre" type="text" placeholder="Ej. Edificio A"
@@ -744,18 +698,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de editar Edificio -->
 		<div v-if="showEditBuildingModal && editingBuilding"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Edificio</h2>
 					<button @click="showEditBuildingModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="editBuildingError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -763,16 +713,13 @@
 					<button @click="editBuildingError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio</label>
 						<input v-model="editingBuilding.nombre" type="text"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
 					<button @click="showEditBuildingModal = false"
 						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
@@ -784,18 +731,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de nueva Oficina -->
 		<div v-if="showNewOficinaModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Crear Nueva Oficina</h2>
 					<button @click="showNewOficinaModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="newOficinaError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -803,9 +746,7 @@
 					<button @click="newOficinaError = null"
 						class="font-bold text-2xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
 						<input v-model="newOficinaData.nombre" type="text" placeholder="Nombre de la oficina"
@@ -817,7 +758,6 @@
 						<input v-model="newOficinaData.codigo" type="text" placeholder="Ej: 001"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-
 					<div class="relative z-10">
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Edificio al que
 							pertenece</label>
@@ -825,21 +765,19 @@
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null" disabled>Seleccionar un edificio</option>
 							<option v-if="buildings.length === 0" disabled>-- No hay edificios --</option>
-							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">
-								{{ b.nombre }}
-							</option>
+							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">{{ b.nombre }}</option>
 						</select>
 					</div>
 					<div>
-						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
+						<label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Departamento</label>
 						<select v-model="newOficinaData.id_departamento"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null" disabled>Seleccionar un departamento</option>
 							<option v-if="!departments.data || departments.data.length === 0" disabled>-- Cargando... --
 							</option>
-							<option v-else v-for="dept in departments.data" :key="dept.id" :value="dept.id">
-								{{ dept.dep_nombre }}
-							</option>
+							<option v-else v-for="dept in departments.data" :key="dept.id" :value="dept.id">{{
+								dept.dep_nombre }}</option>
 						</select>
 					</div>
 					<div>
@@ -861,18 +799,14 @@
 			</div>
 		</div>
 
-		<!-- Modal de editar oficina -->
 		<div v-if="showEditOficinaModal && editingOficina"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-
+			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 			<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-md w-full">
-
 				<div class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6">
 					<h2 class="text-lg font-bold text-gray-900 dark:text-white">Editar Oficina</h2>
 					<button @click="showEditOficinaModal = false"
 						class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
 				</div>
-
 				<div v-if="editOficinaError"
 					class="bg-red-700 text-white px-6 py-4 border-b border-red-900 flex justify-between items-center"
 					role="alert">
@@ -880,9 +814,7 @@
 					<button @click="editOficinaError = null"
 						class="font-bold text-xl text-white opacity-70 hover:opacity-100 leading-none">&times;</button>
 				</div>
-
 				<div class="p-6 space-y-4">
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de la
 							Oficina</label>
@@ -902,21 +834,16 @@
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 							<option :value="null" disabled>Seleccionar un edificio</option>
 							<option v-if="buildings.length === 0" disabled>-- No hay edificios --</option>
-							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">
-								{{ b.nombre }}
-							</option>
+							<option v-else v-for="b in buildings" :key="b.id" :value="b.id">{{ b.nombre }}</option>
 						</select>
 					</div>
-
 					<div>
 						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Referencia
 							(Opcional)</label>
 						<input v-model="editingOficina.referencia" type="text"
 							class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
 					</div>
-
 				</div>
-
 				<div class="flex gap-2 justify-end border-t border-gray-300 dark:border-gray-600 p-6">
 					<button @click="showEditOficinaModal = false"
 						class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">Cancelar</button>
@@ -1175,7 +1102,7 @@ const fetchAllData = async () => {
 
 		const fetchedAreas = await areasRes.json()
 		areas.value = fetchedAreas
-		console.log(areas.value	)
+		console.log(areas.value)
 		totalItems.value = fetchedAreas.total || 0
 		currentPage.value = 1
 		const optionsData = await optionsRes.json()
@@ -1556,14 +1483,16 @@ const saveNewDepartment = async () => {
 }
 
 const openEditDepartmentModal = (department) => {
+	console.log(department);
 	editingDepartment.value = {
 		id: department.id,
 		name: department.dep_nombre,
 		codigo: department.dep_codigo,
-		responsable: department.dep_responsable,
+		responsable: department.dep_resposable,
 		correo: department.dep_correo_institucional,
 		id_area: department.id_area
 	}
+	console.log('Editing Department:', editingDepartment.value)
 
 	editDepartmentError.value = null
 	showEditDepartmentModal.value = true
@@ -1827,7 +1756,7 @@ const openNewOficinaModal = () => {
 	newOficinaData.value = {
 		nombre: '',
 		codigo: '',
-		referencia:'',
+		referencia: '',
 		id_edificio: null,
 		id_departamento: null
 	}

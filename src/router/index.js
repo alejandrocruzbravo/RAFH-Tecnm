@@ -14,6 +14,16 @@ const router = createRouter({
       component: () => import('../views/login.vue'),
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('../views/ForgotPassword.vue')
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('../views/ResetPassword.vue')
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/dashboard/dashboard-view.vue'),
@@ -49,44 +59,58 @@ const router = createRouter({
           name: 'transferencias',
           component: () => import('../views/resguardante/Transferencias.vue'),
         },
+        {
+          path: 'bienes-departamento',
+          name: 'bienes-departamento',
+          component: () => import('../views/resguardante/BienesDepartamento.vue'),
+          // Protección exclusiva: Solo deja entrar si el usuario tiene Rol 4
+          beforeEnter: (to, from, next) => {
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+
+            if (user && user.usuario_id_rol === 4) {
+              next(); // Adelante, jefe
+            } else {
+              next('/resguardante'); // Si es otro rol (ej. 3), lo regresa al inicio
+            }
+          }
+        },
+        {
+          path: 'perfil',  // La ruta será /resguardante/perfil
+          name: 'resguardante-perfil',
+          component: () => import('../views/resguardante/PerfilResguardante.vue'),
+        },
+        
       ],
     }
   ],
 })
 router.beforeEach((to, from, next) => {
-  // 1. Obtener usuario almacenado
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
   const isAuthenticated = !!localStorage.getItem('auth_token');
 
-  // 2. Si la ruta requiere autenticación y no hay token, mandar al login
-  // (Asegúrate de que tus rutas tengan meta: { requiresAuth: true })
+
   if (to.meta.requiresAuth && !isAuthenticated) {
     return next('/login');
   }
 
-  // 3. LÓGICA DE ROLES (Protección real)
   if (isAuthenticated && user) {
-    
-    // CASO RESGUARDANTE (Rol 3)
-    if (user.usuario_id_rol === 3) {
-      // Si intenta entrar al Dashboard general o rutas de admin
-      // (Asumiendo que '/dashboard' es solo para admins)
-      if (to.path === '/dashboard' || to.path === '/bienes') { 
-         // IMPORTANTE: Evitar bucle infinito. Solo redirigir si no va ya a '/resguardante'
-         if (to.path !== '/resguardante') {
-             return next('/resguardante');
-         }
+    const rolesLimitados = [3, 4]; 
+
+    if (rolesLimitados.includes(user.usuario_id_rol)) {
+
+      if (to.path === '/dashboard' || to.path === '/bienes') {
+
+        if (to.path !== '/resguardante') {
+          return next('/resguardante');
+        }
       }
     }
-    // CASO ADMIN (Opcional: Si el admin no debe ver la vista de resguardante)
-    if (user.usuario_id_rol !== 3 && to.path === '/resguardante') {
-       return next('/dashboard');
+    if (!rolesLimitados.includes(user.usuario_id_rol) && to.path === '/resguardante') {
+      return next('/dashboard');
     }
-    
   }
-
-  // 4. Si pasa todas las validaciones, dejar pasar
   next();
 });
 
