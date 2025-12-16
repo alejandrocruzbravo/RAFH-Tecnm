@@ -306,7 +306,7 @@
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
 					<select v-model="editingResguardante.id_oficina" :disabled="!editingResguardante.res_departamento"
 						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800 disabled:cursor-not-allowed">
-						<option :value="null" disabled>{{ editingResguardante.res_departamento ? 'Selecciona unaoficina' : 'Selecciona un departamento primero' }}
+						<option :value="null" disabled>{{ editingResguardante.res_departamento ? 'Selecciona una oficina' : 'Selecciona un departamento primero' }}
 						</option>
 						<option v-for="oficina in editModalFilteredOficinas" :key="oficina.id" :value="oficina.id">
 							{{ oficina.nombre }}
@@ -896,8 +896,8 @@ const saveNewResguardante = async () => {
 	isSubmitting.value = true
 	try {
 		const payload = {
-			res_nombre: newResguardanteData.value.res_nombre,
-			res_apellidos: newResguardanteData.value.res_apellidos,
+			res_nombre: newResguardanteData.value.res_nombre.toUpperCase(),
+			res_apellidos: newResguardanteData.value.res_apellidos.toUpperCase(),
 			res_puesto: newResguardanteData.value.res_puesto,
 			res_departamento: newResguardanteData.value.res_departamento,
 			res_rfc: newResguardanteData.value.res_rfc || null, // Envía null si está vacío
@@ -942,10 +942,12 @@ watch(() => newResguardanteData.value.res_departamento, () => {
 });
 
 const openEditResguardanteModal = (resguardante) => {
+	//console.log("Oficina del resguardante a editar:", resguardante.id_oficina);
+	console.log("resguardante a editar:", resguardante);
 	editingResguardante.value = {
 		id: resguardante.id,
-		res_nombre: resguardante.res_nombre,
-		res_apellidos: resguardante.res_apellidos,
+		res_nombre: resguardante.res_nombre.toUpperCase(),
+		res_apellidos: resguardante.res_apellidos.toUpperCase(),
 		res_puesto: resguardante.res_puesto,
 		res_departamento: resguardante.res_departamento, // Asume que tu API envía el ID
 		res_rfc: resguardante.res_rfc,
@@ -956,6 +958,7 @@ const openEditResguardanteModal = (resguardante) => {
 		res_id_usuario: resguardante.res_id_usuario, // <-- AÑADIR ESTA LÍNEA
 		usuario_id_rol: resguardante.usuario_id_rol  // <-- AÑADIR ESTA LÍNEA
 	};
+	console.log('Editando resguardante:', editingResguardante.value);
 	editResguardanteError.value = null;
 	showEditResguardanteModal.value = true;
 };
@@ -966,11 +969,11 @@ const editModalFilteredOficinas = computed(() => {
 	}
 	return oficinasList.value.filter(oficina => oficina.id_departamento === deptId);
 });
-watch(() => editingResguardante.value.res_departamento, (newDeptId, oldDeptId) => {
+/*watch(() => editingResguardante.value.res_departamento, (newDeptId, oldDeptId) => {
 	if (newDeptId !== oldDeptId) {
 		editingResguardante.value.id_oficina = null;
 	}
-});
+});*/
 const saveEditResguardante = async () => {
 	if (!editingResguardante.value.id) return
 	editResguardanteError.value = null
@@ -986,8 +989,8 @@ const saveEditResguardante = async () => {
 	isSubmitting.value = true
 	try {
 		const payload = {
-			res_nombre: editingResguardante.value.res_nombre,
-			res_apellidos: editingResguardante.value.res_apellidos,
+			res_nombre: editingResguardante.value.res_nombre.toUpperCase(),
+			res_apellidos: editingResguardante.value.res_apellidos.toUpperCase()	,
 			res_puesto: editingResguardante.value.res_puesto,
 			res_departamento: editingResguardante.value.res_departamento,
 			res_rfc: editingResguardante.value.res_rfc || null,
@@ -1073,8 +1076,6 @@ const viewResguardanteDetails = (resguardante) => {
     if (resguardante.res_id_usuario) {
         fetchHistorialMovimientos(resguardante.res_id_usuario);
     } else {
-        // Si no tiene usuario, limpiamos la lista o mostramos mensaje
-        console.warn('Este resguardante no tiene usuario asociado para consultar historial.');
         historialMovimientos.value = [];
         isLoadingHistorial.value = false;
     }

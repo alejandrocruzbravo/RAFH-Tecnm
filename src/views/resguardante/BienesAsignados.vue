@@ -284,7 +284,8 @@ const fetchBienes = async () => {
 
 		// Solo enviamos search si el usuario escribió algo
 		if (searchQuery.value.trim()) {
-			params.append('search', searchQuery.value) // Quitamos .toUpperCase() para dejar que el Backend maneje ILIKE
+			params.append('search', searchQuery.value.toUpperCase()); 
+			
 		}
 		if (selectedStatus.value) {
 			// Enviamos el valor exacto (ej. "Activo" o "En tránsito")
