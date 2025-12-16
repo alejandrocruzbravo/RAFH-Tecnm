@@ -277,6 +277,24 @@
     @close="showApproveModal = false"
     @confirm="handleConfirmApprove"
 />
+<ConfirmModal 
+    :show="showRejectConfirmModal" 
+    :is-submitting="isRejecting"
+    title="Rechazar Solicitud"
+    message="¿Estás seguro de que deseas rechazar esta solicitud de traspaso? Esta acción no se puede deshacer."
+    confirmText="Sí, Rechazar"
+    confirmClass="bg-red-600 hover:bg-red-700"
+    @confirm="handleConfirmReject"
+    @cancel="showRejectConfirmModal = false" 
+/>
+
+<ModalExito 
+    :show="showNotificationModal" 
+    :title="notificationTitle" 
+    :message="notificationMessage"
+    :type="notificationType"
+    @close="showNotificationModal = false"
+/>
 </template>
 
 <script setup>
@@ -284,6 +302,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { authenticatedFetch } from '../../../config/api.js'
 import ModalConfirmarTraspaso from '@/components/ModalConfirmarTraspaso.vue';
 import { generarPDFResguardo } from '@/config/resguardo_pdf.js';
+import ModalExito from '@/components/ModalExito.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
 
 // --- ESTADOS DE CARGA ---
 const isLoading = ref(true)
@@ -314,6 +334,16 @@ const totalPages = computed(() => {
 const showApproveModal = ref(false);
 const isApproving = ref(false);
 const selectedSolicitud = ref(null);
+
+const showRejectConfirmModal = ref(false);
+const isRejecting = ref(false);
+const solicitudToReject = ref(null); // Guardamos la solicitud temporalmente
+
+// --- ESTADOS PARA NOTIFICACIÓN ---
+const showNotificationModal = ref(false);
+const notificationTitle = ref('');
+const notificationMessage = ref('');
+const notificationType = ref('success');
 
 const openApproveModal = (solicitud) => {
   selectedSolicitud.value = solicitud;
@@ -550,27 +580,53 @@ const imprimirValeActualizado = async (resguardanteId) => {
     }
 }
 // Función para RECHAZAR
-const rejectSolicitud = async (index) => {
-    const solicitud = solicitudes.value.data[index];
+const rejectSolicitud = (solicitud) => { // Recibe el objeto solicitud directamente, no el índice
+    solicitudToReject.value = solicitud;
+    showRejectConfirmModal.value = true;
+};
 
-    if(!confirm('¿Rechazar esta solicitud?')) return;
+const handleConfirmReject = async () => {
+    if (!solicitudToReject.value) return;
+
+    isRejecting.value = true;
 
     try {
-        const response = await authenticatedFetch(`/traspasos/${solicitud.id}`, {
+        const response = await authenticatedFetch(`/traspasos/${solicitudToReject.value.id}`, {
             method: 'PUT',
             body: JSON.stringify({ estado: 'Rechazada' })
         });
 
-        if (response.ok) {
-            fetchSolicitudes(currentPage.value);
-        } else {
-            const err = await response.json();
-            alert('Error: ' + (err.message || 'No se pudo rechazar'));
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'No se pudo rechazar la solicitud.');
         }
+
+        // Éxito: Cerrar modal de confirmación y mostrar notificación
+        showRejectConfirmModal.value = false;
+        
+        notificationTitle.value = 'Solicitud Rechazada';
+        notificationMessage.value = 'El traspaso ha sido rechazado correctamente.';
+        notificationType.value = 'success'; // O 'info' si prefieres azul
+        showNotificationModal.value = true;
+
+        // Recargar tabla
+        fetchSolicitudes(currentPage.value);
+					setTimeout(() => {
+						showNotificationModal.value = false;
+					}, 5000);
     } catch (e) {
         console.error(e);
+        // Error: Cerrar modal y mostrar error
+        showRejectConfirmModal.value = false;
+        
+        notificationTitle.value = 'Error';
+        notificationMessage.value = e.message;
+        notificationType.value = 'error';
+        showNotificationModal.value = true;
+    } finally {
+        isRejecting.value = false;
+        solicitudToReject.value = null;
     }
-}
-
-
+};
 </script>

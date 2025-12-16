@@ -306,7 +306,7 @@
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Oficina</label>
 					<select v-model="editingResguardante.id_oficina" :disabled="!editingResguardante.res_departamento"
 						class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800 disabled:cursor-not-allowed">
-						<option :value="null" disabled>{{ editingResguardante.res_departamento ? 'Selecciona una oficina' : 'Selecciona un departamento primero' }}
+						<option :value="null" disabled>{{ editingResguardante.res_departamento ? 'Selecciona unaoficina' : 'Selecciona un departamento primero' }}
 						</option>
 						<option v-for="oficina in editModalFilteredOficinas" :key="oficina.id" :value="oficina.id">
 							{{ oficina.nombre }}
@@ -342,7 +342,8 @@
 		</div>
 	</div>
 	<!-- Resguardante Details Modal -->
-	<div v-if="showDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+	<div v-if="showDetailsModal"
+		class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
 		<div class="bg-white dark:bg-dark-bg rounded-lg shadow-lg max-w-5xl w-full max-h-[95vh] overflow-y-auto">
 			<div
 				class="flex items-center justify-between border-b border-gray-300 dark:border-gray-600 p-6 sticky top-0 bg-white dark:bg-dark-bg z-10">
@@ -364,7 +365,8 @@
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
 						<div>
 							<p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nombre Completo</p>
-							<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.res_nombre }}
+							<p class="text-gray-900 dark:text-white font-semibold">{{ selectedResguardante?.res_nombre
+								}}
 								{{ selectedResguardante?.res_apellidos }}</p>
 						</div>
 						<div>
@@ -406,14 +408,57 @@
 					<div class="pt-4 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[300px]">
 
 						<div
-							class="flex flex-col bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg">
+							class="flex flex-col bg-white dark:bg-dark-surface border border-gray-200 dark:border-gray-700 rounded-lg h-[500px]">
 							<div
-								class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+								class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 flex-shrink-0">
 								<h3 class="font-semibold text-gray-800 dark:text-white">Historial de Movimientos</h3>
 							</div>
-							<div
-								class="flex-1 flex items-center justify-center p-8 text-gray-400 dark:text-gray-500 italic">
-								Próximamente: Tabla de historial...
+
+							<div class="flex-1 overflow-y-auto relative p-0">
+
+								<div v-if="isLoadingHistorial"
+									class="absolute inset-0 z-10 flex justify-center items-center bg-white/80 dark:bg-gray-800/80">
+									<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+								</div>
+
+								<div v-if="!isLoadingHistorial && historialMovimientos.length === 0"
+									class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500 italic p-6">
+									<svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor"
+										viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+											d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+									</svg>
+									<p>Sin movimientos registrados</p>
+								</div>
+
+								<table v-else class="w-full text-sm text-left">
+									<thead
+										class="text-xs text-gray-500 uppercase bg-gray-100 dark:bg-gray-700 sticky top-0 z-10">
+										<tr>
+											<th class="px-4 py-3 font-semibold">Fecha</th>
+											<th class="px-4 py-3 font-semibold">Bien</th>
+										</tr>
+									</thead>
+									<tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+										<tr v-for="mov in historialMovimientos" :key="mov.id"
+											class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+
+											<td
+												class="px-4 py-3 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+												{{ formatDate(mov.fecha) }}
+											</td>
+											<td class="px-4 py-3">
+												<div class="font-medium text-gray-800 dark:text-gray-200 text-xs truncate max-w-[150px]"
+													:title="mov.bien_descripcion">
+													{{ mov.bien_descripcion }}
+												</div>
+												<div class="text-[10px] font-mono text-gray-400">
+													{{ mov.bien_codigo }}
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
 							</div>
 						</div>
 
@@ -633,7 +678,6 @@ const newResguardanteError = ref(null)
 const showEditResguardanteModal = ref(false)
 const editResguardanteError = ref(null)
 const showDeleteResguardanteModal = ref(false)
-const showReportModal = ref(false)
 const showDetailsModal = ref(false)
 const deletingResguardante = ref(null)
 const deleteResguardanteError = ref(null)
@@ -697,6 +741,9 @@ const pageAsignados = ref(1);
 // Modal de Confirmación de Liberación
 const showReleaseConfirmModal = ref(false);
 const releaseMessage = ref('');
+
+const historialMovimientos = ref([]);
+const isLoadingHistorial = ref(false);
 
 const totalPages = computed(() => {
 	return Math.ceil(totalItems.value / itemsPerPage) || 1
@@ -1015,12 +1062,23 @@ const handleConfirmDeleteResguardante = async () => {
 }
 
 const viewResguardanteDetails = (resguardante) => {
-	selectedResguardante.value = resguardante
-	console.log(resguardante)
-	showDetailsModal.value = true
-	fetchBienesDelResguardante(resguardante.id);
-}
+    selectedResguardante.value = resguardante;
+    showDetailsModal.value = true;
+    
+    // 1. Cargar bienes (Sigue usando el ID del resguardante, esto es correcto)
+    fetchBienesDelResguardante(resguardante.id);
 
+    // 2. Cargar Historial (CORREGIDO: Usar ID de Usuario)
+    // Verificamos si el resguardante tiene un usuario asociado
+    if (resguardante.res_id_usuario) {
+        fetchHistorialMovimientos(resguardante.res_id_usuario);
+    } else {
+        // Si no tiene usuario, limpiamos la lista o mostramos mensaje
+        console.warn('Este resguardante no tiene usuario asociado para consultar historial.');
+        historialMovimientos.value = [];
+        isLoadingHistorial.value = false;
+    }
+}
 /**
  * Abre el modal para crear un usuario para un resguardante.
  */
@@ -1094,9 +1152,9 @@ const handleAssignConfirm = async (selectedGoods) => {
 	if (!selectedResguardante.value || selectedGoods.length === 0) return;
 
 	const payload = {
-		accion: 'create', 
+		accion: 'create',
 		id_resguardante: selectedResguardante.value.id,
-		bienes_ids: selectedGoods.map(b => b.id) 
+		bienes_ids: selectedGoods.map(b => b.id)
 	};
 
 	isLoading.value = true;
@@ -1128,23 +1186,23 @@ const handleAssignConfirm = async (selectedGoods) => {
 };
 
 const imprimirValeActualizado = async (resguardanteId) => {
-    try {
-        console.log("Generando vale consolidado...");
-        const response = await authenticatedFetch(`/resguardantes/${resguardanteId}/bienes-activos`);
-        
-        if (!response.ok) throw new Error("Error al obtener el listado actualizado de bienes");
+	try {
+		console.log("Generando vale consolidado...");
+		const response = await authenticatedFetch(`/resguardantes/${resguardanteId}/bienes-activos`);
 
-        const responseData = await response.json();
-        const todosLosBienes = responseData.data || [];
+		if (!response.ok) throw new Error("Error al obtener el listado actualizado de bienes");
 
-        if (todosLosBienes.length > 0) {
-            generarPDFResguardo(selectedResguardante.value, todosLosBienes, 'RESGUARDO');
-        }
+		const responseData = await response.json();
+		const todosLosBienes = responseData.data || [];
 
-    } catch (e) {
-        console.error("Error al generar el PDF actualizado:", e);
-        alert("Los bienes se asignaron, pero hubo un error generando el PDF.");
-    }
+		if (todosLosBienes.length > 0) {
+			generarPDFResguardo(selectedResguardante.value, todosLosBienes, 'RESGUARDO');
+		}
+
+	} catch (e) {
+		console.error("Error al generar el PDF actualizado:", e);
+		alert("Los bienes se asignaron, pero hubo un error generando el PDF.");
+	}
 };
 
 // --- 5. LÓGICA DE LIBERACIÓN ---
@@ -1153,7 +1211,7 @@ const openReleaseConfirmation = () => {
 	if (count === 0) return;
 
 	releaseMessage.value = `Estás a punto de liberar <strong>${count} bienes</strong> del resguardo.<br><br>
-                            <span class="text-sm text-gray-500">Nota: Esta acción generará un nuevo vale de resguardo actualizado (Próximamente).</span>`;
+                            <span class="text-sm text-gray-500">Nota: Esta acción generará un nuevo vale de resguardo actualizado.</span>`;
 	showReleaseConfirmModal.value = true;
 };
 
@@ -1164,9 +1222,9 @@ const handleConfirmRelease = async () => {
 		const bienesIds = Array.from(selectedReleaseMap.value.keys());
 
 		const response = await authenticatedFetch('/resguardos', {
-			method: 'POST', 
+			method: 'POST',
 			body: JSON.stringify({
-				accion: 'release', 
+				accion: 'release',
 				bienes_ids: bienesIds
 			})
 		});
@@ -1253,6 +1311,32 @@ const selectAllPageAsignados = computed({
 	}
 });
 
+const fetchHistorialMovimientos = async (userId) => {
+	if (!userId) return;
 
+	isLoadingHistorial.value = true;
+	historialMovimientos.value = []; // Limpiar anterior
+
+	try {
+		const response = await authenticatedFetch(`/resguardantes/${userId}/historial`);
+		if (response.ok) {
+			historialMovimientos.value = await response.json();
+		}
+	} catch (e) {
+		console.error("Error cargando historial:", e);
+	} finally {
+		isLoadingHistorial.value = false;
+	}
+};
+
+// 4. HELPER PARA FORMATO DE FECHA (Si no tienes uno global)
+const formatDate = (dateString) => {
+	if (!dateString) return '-';
+	const date = new Date(dateString);
+	return new Intl.DateTimeFormat('es-MX', {
+		day: '2-digit', month: '2-digit', year: '2-digit',
+		hour: '2-digit', minute: '2-digit'
+	}).format(date);
+}
 
 </script>
